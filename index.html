@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>立體主義物理重組工作台 (Cubism Collager)</title>
+    <title>立體主義「物理重組」工作台 (Cubism Collager)</title>
     <style>
         :root {
             --primary: #2c3e50;
             --accent: #e74c3c;
+            --cubism-yellow: #f1c40f;
+            --cubism-blue: #2980b9;
             --bg: #f5f6fa;
         }
         body {
@@ -37,14 +39,14 @@
             min-width: 320px;
         }
 
-        /* 步驟一：上載與框選 */
+        /* 步驟一與二：上載、框選與幾何濾鏡 */
         .upload-section { display: flex; flex-direction: column; gap: 15px; }
         .img-container {
             position: relative;
             border: 2px dashed #ccc;
             border-radius: 8px;
             overflow: hidden;
-            background: #000;
+            background: #1e272e;
             min-height: 250px;
             display: flex;
             align-items: center;
@@ -52,20 +54,37 @@
         }
         canvas.crop-canvas { max-width: 100%; height: auto; cursor: crosshair; }
         
-        /* 步驟二：拼貼畫布 */
+        .filter-options {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .filter-options label { font-weight: bold; font-size: 0.95em; }
+        .filter-options select, .filter-options input {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        /* 步驟三：拼貼畫布 */
         .canvas-section { display: flex; flex-direction: column; align-items: center; }
         #stage {
             border: 3px solid var(--primary);
-            background: #fff;
+            background: #fafafa;
             box-shadow: 0 8px 15px rgba(0,0,0,0.15);
             cursor: move;
             touch-action: none;
+            border-radius: 4px;
         }
         
         .controls {
             margin-top: 15px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
         }
@@ -74,7 +93,7 @@
             background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 16px;
+            padding: 10px 14px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
@@ -83,29 +102,30 @@
         button:hover { background: #34495e; }
         button.accent { background: var(--accent); }
         button.accent:hover { background: #c0392b; }
+        button.cubism-btn { background: var(--cubism-blue); }
+        button.cubism-btn:hover { background: #1a5276; }
 
         .instructions {
             background: #e8f4f8;
             border-left: 4px solid #3498db;
             padding: 10px;
-            margin-bottom: 15px;
-            font-size: 0.9em;
+            font-size: 0.88em;
+            line-height: 1.4;
         }
     </style>
 </head>
 <body>
 
     <h1>🎨 立體派「物理重組」工作台</h1>
-    <p class="subtitle">拍攝不同角度 ➔ 自由裁切五官 ➔ 拼貼重組多視點作品！</p>
+    <p class="subtitle">致敬畢卡索《哭泣的女人》：多角度視點 ➔ 幾何塊面化 ➔ 平面物理重組！</p>
 
     <div class="container">
-        <!-- 左側：五官擷取區 -->
+        <!-- 左側：五官擷取與幾何轉換區 -->
         <div class="panel upload-section">
-            <h2>第一步：擷取五官貼紙</h2>
+            <h2>第一步：上載與框選五官</h2>
             <div class="instructions">
-                1. 上載<strong>正面</strong>或<strong>側面</strong>相片。<br>
-                2. 在相片上<strong>拖曳滑鼠/手指框選</strong>五官（如眼睛或鼻子）。<br>
-                3. 按下「新增為拼貼碎片」。
+                1. 上載自拍（正面或側面照）。<br>
+                2. 在相片上<strong>拖曳框選</strong>五官（如眼睛、鼻子或嘴巴）。
             </div>
             
             <input type="file" id="imageLoader" accept="image/*">
@@ -113,27 +133,40 @@
             <div class="img-container">
                 <canvas id="cropCanvas" class="crop-canvas"></canvas>
             </div>
+
+            <h2>第二步：幾何塊面化風格化</h2>
+            <div class="filter-options">
+                <label for="filterMode">🎭 五官風格選擇：</label>
+                <select id="filterMode">
+                    <option value="none">原圖五官 (無濾鏡)</option>
+                    <option value="weepingWoman" selected>《哭泣的女人》幾何塊面 + 高對比色彩</option>
+                    <option value="facetOnly">單色幾何切削塊面 (Geometric Facets)</option>
+                </select>
+
+                <label for="facetIntensity">✂️ 幾何簡化度 (塊面大小)：</label>
+                <input type="range" id="facetIntensity" min="5" max="30" value="12">
+            </div>
             
-            <button class="accent" id="btnExtract">✂️ 剪下框選五官並加入畫布</button>
+            <button class="accent" id="btnExtract">✂️ 剪下五官並加入畫布</button>
         </div>
 
         <!-- 右側：物理重組畫布 -->
         <div class="panel canvas-section">
-            <h2>第二步：二維平面物理重組</h2>
+            <h2>第三步：二維平面物理重組</h2>
             <canvas id="stage" width="500" height="600"></canvas>
             
             <div class="controls">
-                <button id="btnRotate">🔄 旋轉選中碎片</button>
+                <button id="btnRotate">🔄 旋轉 15°</button>
                 <button id="btnScaleUp">🔍 放大</button>
                 <button id="btnScaleDown">🔎 縮小</button>
-                <button id="btnDelete" style="background:#7f8c8d;">🗑️ 刪除碎片</button>
+                <button id="btnDelete" style="background:#7f8c8d;">🗑️ 刪除選中碎片</button>
                 <button class="accent" id="btnExport">💾 下載最終作品</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 變數宣告 ---
+        // --- 全局變數 ---
         const imageLoader = document.getElementById('imageLoader');
         const cropCanvas = document.getElementById('cropCanvas');
         const cropCtx = cropCanvas.getContext('2d');
@@ -144,19 +177,17 @@
         let isSelecting = false;
         let startX, startY, cropWidth, cropHeight;
 
-        // 拼貼畫布圖層管理
         let layers = [];
         let selectedLayer = null;
         let isDraggingStage = false;
         let dragOffsetX = 0, dragOffsetY = 0;
 
-        // --- 第一步：相機 / 檔案讀取與框選 ---
+        // 讀取相片
         imageLoader.addEventListener('change', (e) => {
             const reader = new FileReader();
             reader.onload = (event) => {
                 currentImg = new Image();
                 currentImg.onload = () => {
-                    // 自動縮放配合顯示
                     cropCanvas.width = currentImg.width;
                     cropCanvas.height = currentImg.height;
                     cropCtx.drawImage(currentImg, 0, 0);
@@ -166,7 +197,7 @@
             if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
         });
 
-        // 框选操作 (Mouse & Touch)
+        // 座標計算 (支援觸控與滑鼠)
         function getCanvasCoords(e, canvas) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -179,6 +210,7 @@
             };
         }
 
+        // 框選事件處理
         cropCanvas.addEventListener('mousedown', startCrop);
         cropCanvas.addEventListener('touchstart', startCrop);
         cropCanvas.addEventListener('mousemove', drawCrop);
@@ -202,14 +234,96 @@
             cropWidth = pos.x - startX;
             cropHeight = pos.y - startY;
 
-            // 重繪圖像與框選紅線
             cropCtx.drawImage(currentImg, 0, 0);
             cropCtx.strokeStyle = '#e74c3c';
             cropCtx.lineWidth = 4;
+            cropCtx.setLineDash([6, 6]);
             cropCtx.strokeRect(startX, startY, cropWidth, cropHeight);
+            cropCtx.setLineDash([]);
         }
 
         function endCrop() { isSelecting = false; }
+
+        // --- 核心演算法：《哭泣的女人》幾何塊面化處理 ---
+        function applyCubismFilter(sourceCtx, w, h) {
+            const filterMode = document.getElementById('filterMode').value;
+            const tileSize = parseInt(document.getElementById('facetIntensity').value, 10);
+
+            if (filterMode === 'none') return;
+
+            const imgData = sourceCtx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+
+            // 建立離線 Canvas 進行多邊形幾何繪製
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = w;
+            tempCanvas.height = h;
+            const tCtx = tempCanvas.getContext('2d');
+
+            // 畢卡索《哭泣的女人》經典色彩對照庫
+            const picassoPalette = [
+                [241, 196, 15],  // 檸檬黃
+                [41, 128, 185],  // 鈷藍
+                [231, 76, 60],   // 朱紅
+                [46, 204, 113],  // 綠色
+                [236, 240, 241], // 淚水灰白
+                [44, 62, 80]     // 深黑紫
+            ];
+
+            function getNearestColor(r, g, b) {
+                let minDist = Infinity;
+                let chosen = picassoPalette[0];
+                for (let c of picassoPalette) {
+                    let dist = Math.hypot(r - c[0], g - c[1], b - c[2]);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        chosen = c;
+                    }
+                }
+                return chosen;
+            }
+
+            // 三角形 / 多邊形幾何網格分割
+            for (let y = 0; y < h; y += tileSize) {
+                for (let x = 0; x < w; x += tileSize) {
+                    // 取當前區塊中心點像素顏色
+                    const cx = Math.min(x + Math.floor(tileSize/2), w - 1);
+                    const cy = Math.min(y + Math.floor(tileSize/2), h - 1);
+                    const idx = (cy * w + cx) * 4;
+                    
+                    let r = data[idx];
+                    let g = data[idx + 1];
+                    let b = data[idx + 2];
+
+                    if (filterMode === 'weepingWoman') {
+                        const mappedColor = getNearestColor(r, g, b);
+                        r = mappedColor[0];
+                        g = mappedColor[1];
+                        b = mappedColor[2];
+                    }
+
+                    // 繪製非規則幾何晶體塊面
+                    tCtx.beginPath();
+                    tCtx.moveTo(x, y);
+                    tCtx.lineTo(x + tileSize + (Math.random()*4 - 2), y - (Math.random()*4));
+                    tCtx.lineTo(x + tileSize, y + tileSize);
+                    tCtx.lineTo(x - (Math.random()*4), y + tileSize);
+                    tCtx.closePath();
+
+                    tCtx.fillStyle = `rgb(${r},${g},${b})`;
+                    tCtx.fill();
+
+                    // 繪製立體派強烈的黑色邊界線
+                    tCtx.strokeStyle = '#111111';
+                    tCtx.lineWidth = 1.5;
+                    tCtx.stroke();
+                }
+            }
+
+            // 把加工後的幾何圖像寫回原本的上下文
+            sourceCtx.clearRect(0, 0, w, h);
+            sourceCtx.drawImage(tempCanvas, 0, 0);
+        }
 
         // 剪下五官並轉為碎片圖層
         document.getElementById('btnExtract').addEventListener('click', () => {
@@ -227,7 +341,12 @@
 
             offCanvas.width = w;
             offCanvas.height = h;
+
+            // 裁切原圖五官
             offCtx.drawImage(currentImg, x, y, w, h, 0, 0, w, h);
+
+            // 套用幾何塊面化濾鏡
+            applyCubismFilter(offCtx, w, h);
 
             const fragmentImg = new Image();
             fragmentImg.onload = () => {
@@ -247,34 +366,50 @@
             fragmentImg.src = offCanvas.toDataURL();
         });
 
-        // --- 第二步：畫布渲染與拖曳控制 ---
+        // --- 第三步：畫布渲染與物理重組操控 ---
         function renderStage() {
             stageCtx.clearRect(0, 0, stage.width, stage.height);
 
-            // 繪製背景畫布質感
-            stageCtx.fillStyle = '#fafafa';
+            // 背景底色
+            stageCtx.fillStyle = '#f8f9fa';
             stageCtx.fillRect(0, 0, stage.width, stage.height);
 
-            // 逐層繪製碎片
+            // 逐層繪製拼貼碎片
             layers.forEach(layer => {
                 stageCtx.save();
-                stageCtx.translate(layer.x + (layer.width * layer.scale)/2, layer.y + (layer.height * layer.scale)/2);
+                const centerX = layer.x + (layer.width * layer.scale)/2;
+                const centerY = layer.y + (layer.height * layer.scale)/2;
+                
+                stageCtx.translate(centerX, centerY);
                 stageCtx.rotate(layer.rotation * Math.PI / 180);
 
-                // 畫圖片
-                stageCtx.drawImage(layer.img, -(layer.width * layer.scale)/2, -(layer.height * layer.scale)/2, layer.width * layer.scale, layer.height * layer.scale);
+                // 畫圖片碎片
+                stageCtx.drawImage(
+                    layer.img, 
+                    -(layer.width * layer.scale)/2, 
+                    -(layer.height * layer.scale)/2, 
+                    layer.width * layer.scale, 
+                    layer.height * layer.scale
+                );
 
-                // 如果被選中，畫出外框標示
+                // 被選中時繪製藍色操控框
                 if (layer === selectedLayer) {
                     stageCtx.strokeStyle = '#3498db';
                     stageCtx.lineWidth = 2;
-                    stageCtx.strokeRect(-(layer.width * layer.scale)/2 - 2, -(layer.height * layer.scale)/2 - 2, layer.width * layer.scale + 4, layer.height * layer.scale + 4);
+                    stageCtx.setLineDash([4, 4]);
+                    stageCtx.strokeRect(
+                        -(layer.width * layer.scale)/2 - 3, 
+                        -(layer.height * layer.scale)/2 - 3, 
+                        layer.width * layer.scale + 6, 
+                        layer.height * layer.scale + 6
+                    );
+                    stageCtx.setLineDash([]);
                 }
                 stageCtx.restore();
             });
         }
 
-        // 點擊選擇與拖曳碎片
+        // 拖曳選擇邏輯
         stage.addEventListener('mousedown', startDragStage);
         stage.addEventListener('touchstart', startDragStage);
         stage.addEventListener('mousemove', dragStage);
@@ -284,7 +419,6 @@
 
         function startDragStage(e) {
             const pos = getCanvasCoords(e, stage);
-            // 由最上層開始點擊判定
             for (let i = layers.length - 1; i >= 0; i--) {
                 const l = layers[i];
                 const w = l.width * l.scale;
@@ -295,7 +429,7 @@
                     dragOffsetX = pos.x - l.x;
                     dragOffsetY = pos.y - l.y;
                     
-                    // 將選中的圖層置頂
+                    // 置頂被點選的碎片
                     layers.splice(i, 1);
                     layers.push(l);
                     
@@ -315,7 +449,7 @@
             renderStage();
         }
 
-        // 工具按鈕控制
+        // 按鈕功能控制
         document.getElementById('btnRotate').addEventListener('click', () => {
             if (selectedLayer) { selectedLayer.rotation += 15; renderStage(); }
         });
@@ -334,9 +468,9 @@
         });
         document.getElementById('btnExport').addEventListener('click', () => {
             selectedLayer = null;
-            renderStage(); // 清除選擇框
+            renderStage();
             const link = document.createElement('a');
-            link.download = 'my-cubism-art.png';
+            link.download = 'my-cubist-reconstruction.png';
             link.href = stage.toDataURL();
             link.click();
         });
