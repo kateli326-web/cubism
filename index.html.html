@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立體主義物理重組工作台 (Cubism Collager)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --bg: #f5f6fa;
+        }
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg);
+            color: var(--primary);
+        }
+        h1 { text-align: center; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #7f8c8d; margin-top: 0; }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 320px;
+        }
+
+        /* 步驟一：上載與框選 */
+        .upload-section { display: flex; flex-direction: column; gap: 15px; }
+        .img-container {
+            position: relative;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas.crop-canvas { max-width: 100%; height: auto; cursor: crosshair; }
+        
+        /* 步驟二：拼貼畫布 */
+        .canvas-section { display: flex; flex-direction: column; align-items: center; }
+        #stage {
+            border: 3px solid var(--primary);
+            background: #fff;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+            cursor: move;
+            touch-action: none;
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button, input[type="file"]::file-selector-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover { background: #34495e; }
+        button.accent { background: var(--accent); }
+        button.accent:hover { background: #c0392b; }
+
+        .instructions {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎨 立體派「物理重組」工作台</h1>
+    <p class="subtitle">拍攝不同角度 ➔ 自由裁切五官 ➔ 拼貼重組多視點作品！</p>
+
+    <div class="container">
+        <!-- 左側：五官擷取區 -->
+        <div class="panel upload-section">
+            <h2>第一步：擷取五官貼紙</h2>
+            <div class="instructions">
+                1. 上載<strong>正面</strong>或<strong>側面</strong>相片。<br>
+                2. 在相片上<strong>拖曳滑鼠/手指框選</strong>五官（如眼睛或鼻子）。<br>
+                3. 按下「新增為拼貼碎片」。
+            </div>
+            
+            <input type="file" id="imageLoader" accept="image/*">
+            
+            <div class="img-container">
+                <canvas id="cropCanvas" class="crop-canvas"></canvas>
+            </div>
+            
+            <button class="accent" id="btnExtract">✂️ 剪下框選五官並加入畫布</button>
+        </div>
+
+        <!-- 右側：物理重組畫布 -->
+        <div class="panel canvas-section">
+            <h2>第二步：二維平面物理重組</h2>
+            <canvas id="stage" width="500" height="600"></canvas>
+            
+            <div class="controls">
+                <button id="btnRotate">🔄 旋轉選中碎片</button>
+                <button id="btnScaleUp">🔍 放大</button>
+                <button id="btnScaleDown">🔎 縮小</button>
+                <button id="btnDelete" style="background:#7f8c8d;">🗑️ 刪除碎片</button>
+                <button class="accent" id="btnExport">💾 下載最終作品</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 變數宣告 ---
+        const imageLoader = document.getElementById('imageLoader');
+        const cropCanvas = document.getElementById('cropCanvas');
+        const cropCtx = cropCanvas.getContext('2d');
+        const stage = document.getElementById('stage');
+        const stageCtx = stage.getContext('2d');
+
+        let currentImg = null;
+        let isSelecting = false;
+        let startX, startY, cropWidth, cropHeight;
+
+        // 拼貼畫布圖層管理
+        let layers = [];
+        let selectedLayer = null;
+        let isDraggingStage = false;
+        let dragOffsetX = 0, dragOffsetY = 0;
+
+        // --- 第一步：相機 / 檔案讀取與框選 ---
+        imageLoader.addEventListener('change', (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                currentImg = new Image();
+                currentImg.onload = () => {
+                    // 自動縮放配合顯示
+                    cropCanvas.width = currentImg.width;
+                    cropCanvas.height = currentImg.height;
+                    cropCtx.drawImage(currentImg, 0, 0);
+                };
+                currentImg.src = event.target.result;
+            };
+            if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+        });
+
+        // 框选操作 (Mouse & Touch)
+        function getCanvasCoords(e, canvas) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        cropCanvas.addEventListener('mousedown', startCrop);
+        cropCanvas.addEventListener('touchstart', startCrop);
+        cropCanvas.addEventListener('mousemove', drawCrop);
+        cropCanvas.addEventListener('touchmove', drawCrop);
+        window.addEventListener('mouseup', endCrop);
+        window.addEventListener('touchend', endCrop);
+
+        function startCrop(e) {
+            if (!currentImg) return;
+            isSelecting = true;
+            const pos = getCanvasCoords(e, cropCanvas);
+            startX = pos.x;
+            startY = pos.y;
+            cropWidth = 0;
+            cropHeight = 0;
+        }
+
+        function drawCrop(e) {
+            if (!isSelecting) return;
+            const pos = getCanvasCoords(e, cropCanvas);
+            cropWidth = pos.x - startX;
+            cropHeight = pos.y - startY;
+
+            // 重繪圖像與框選紅線
+            cropCtx.drawImage(currentImg, 0, 0);
+            cropCtx.strokeStyle = '#e74c3c';
+            cropCtx.lineWidth = 4;
+            cropCtx.strokeRect(startX, startY, cropWidth, cropHeight);
+        }
+
+        function endCrop() { isSelecting = false; }
+
+        // 剪下五官並轉為碎片圖層
+        document.getElementById('btnExtract').addEventListener('click', () => {
+            if (!currentImg || Math.abs(cropWidth) < 10) {
+                alert('請先上載相片並在畫面上框選五官！');
+                return;
+            }
+
+            const offCanvas = document.createElement('canvas');
+            const offCtx = offCanvas.getContext('2d');
+            const w = Math.abs(cropWidth);
+            const h = Math.abs(cropHeight);
+            const x = cropWidth < 0 ? startX + cropWidth : startX;
+            const y = cropHeight < 0 ? startY + cropHeight : startY;
+
+            offCanvas.width = w;
+            offCanvas.height = h;
+            offCtx.drawImage(currentImg, x, y, w, h, 0, 0, w, h);
+
+            const fragmentImg = new Image();
+            fragmentImg.onload = () => {
+                const newLayer = {
+                    img: fragmentImg,
+                    x: stage.width / 2 - w / 2,
+                    y: stage.height / 2 - h / 2,
+                    width: w,
+                    height: h,
+                    rotation: 0,
+                    scale: 1
+                };
+                layers.push(newLayer);
+                selectedLayer = newLayer;
+                renderStage();
+            };
+            fragmentImg.src = offCanvas.toDataURL();
+        });
+
+        // --- 第二步：畫布渲染與拖曳控制 ---
+        function renderStage() {
+            stageCtx.clearRect(0, 0, stage.width, stage.height);
+
+            // 繪製背景畫布質感
+            stageCtx.fillStyle = '#fafafa';
+            stageCtx.fillRect(0, 0, stage.width, stage.height);
+
+            // 逐層繪製碎片
+            layers.forEach(layer => {
+                stageCtx.save();
+                stageCtx.translate(layer.x + (layer.width * layer.scale)/2, layer.y + (layer.height * layer.scale)/2);
+                stageCtx.rotate(layer.rotation * Math.PI / 180);
+
+                // 畫圖片
+                stageCtx.drawImage(layer.img, -(layer.width * layer.scale)/2, -(layer.height * layer.scale)/2, layer.width * layer.scale, layer.height * layer.scale);
+
+                // 如果被選中，畫出外框標示
+                if (layer === selectedLayer) {
+                    stageCtx.strokeStyle = '#3498db';
+                    stageCtx.lineWidth = 2;
+                    stageCtx.strokeRect(-(layer.width * layer.scale)/2 - 2, -(layer.height * layer.scale)/2 - 2, layer.width * layer.scale + 4, layer.height * layer.scale + 4);
+                }
+                stageCtx.restore();
+            });
+        }
+
+        // 點擊選擇與拖曳碎片
+        stage.addEventListener('mousedown', startDragStage);
+        stage.addEventListener('touchstart', startDragStage);
+        stage.addEventListener('mousemove', dragStage);
+        stage.addEventListener('touchmove', dragStage);
+        window.addEventListener('mouseup', () => isDraggingStage = false);
+        window.addEventListener('touchend', () => isDraggingStage = false);
+
+        function startDragStage(e) {
+            const pos = getCanvasCoords(e, stage);
+            // 由最上層開始點擊判定
+            for (let i = layers.length - 1; i >= 0; i--) {
+                const l = layers[i];
+                const w = l.width * l.scale;
+                const h = l.height * l.scale;
+                if (pos.x >= l.x && pos.x <= l.x + w && pos.y >= l.y && pos.y <= l.y + h) {
+                    selectedLayer = l;
+                    isDraggingStage = true;
+                    dragOffsetX = pos.x - l.x;
+                    dragOffsetY = pos.y - l.y;
+                    
+                    // 將選中的圖層置頂
+                    layers.splice(i, 1);
+                    layers.push(l);
+                    
+                    renderStage();
+                    return;
+                }
+            }
+            selectedLayer = null;
+            renderStage();
+        }
+
+        function dragStage(e) {
+            if (!isDraggingStage || !selectedLayer) return;
+            const pos = getCanvasCoords(e, stage);
+            selectedLayer.x = pos.x - dragOffsetX;
+            selectedLayer.y = pos.y - dragOffsetY;
+            renderStage();
+        }
+
+        // 工具按鈕控制
+        document.getElementById('btnRotate').addEventListener('click', () => {
+            if (selectedLayer) { selectedLayer.rotation += 15; renderStage(); }
+        });
+        document.getElementById('btnScaleUp').addEventListener('click', () => {
+            if (selectedLayer) { selectedLayer.scale *= 1.1; renderStage(); }
+        });
+        document.getElementById('btnScaleDown').addEventListener('click', () => {
+            if (selectedLayer) { selectedLayer.scale *= 0.9; renderStage(); }
+        });
+        document.getElementById('btnDelete').addEventListener('click', () => {
+            if (selectedLayer) {
+                layers = layers.filter(l => l !== selectedLayer);
+                selectedLayer = null;
+                renderStage();
+            }
+        });
+        document.getElementById('btnExport').addEventListener('click', () => {
+            selectedLayer = null;
+            renderStage(); // 清除選擇框
+            const link = document.createElement('a');
+            link.download = 'my-cubism-art.png';
+            link.href = stage.toDataURL();
+            link.click();
+        });
+
+        // 初始化空白畫布
+        renderStage();
+    </script>
+</body>
+</html>
