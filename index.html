@@ -3,479 +3,536 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>立體主義「物理重組」工作台 (Cubism Collager)</title>
+    <title>立體派多視點自畫像工作室 (Cubist Portrait Studio)</title>
     <style>
         :root {
-            --primary: #2c3e50;
+            --primary: #1e272e;
             --accent: #e74c3c;
             --cubism-yellow: #f1c40f;
             --cubism-blue: #2980b9;
-            --bg: #f5f6fa;
+            --bg: #ecefe6;
+            --panel-bg: #ffffff;
         }
+        * { box-sizing: border-box; }
         body {
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             background: var(--bg);
-            color: var(--primary);
+            color: #2c3e50;
         }
-        h1 { text-align: center; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #7f8c8d; margin-top: 0; }
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.8rem; }
+        p.subtitle { margin: 0; color: #7f8c8d; font-size: 0.95rem; }
         
-        .container {
-            display: flex;
-            flex-wrap: wrap;
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
         }
-        
-        .panel {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            flex: 1;
-            min-width: 320px;
+
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
         }
 
-        /* 步驟一與二：上載、框選與幾何濾鏡 */
-        .upload-section { display: flex; flex-direction: column; gap: 15px; }
-        .img-container {
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .step-badge {
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+        }
+
+        /* 視點選擇按鈕組 */
+        .angle-selector {
+            display: flex;
+            gap: 8px;
+        }
+        .angle-btn {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #bdc3c7;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .angle-btn.active {
+            border-color: var(--accent);
+            background: #fdf2e9;
+            color: var(--accent);
+        }
+
+        .media-container {
             position: relative;
-            border: 2px dashed #ccc;
+            width: 100%;
+            height: 320px;
+            background: #000;
             border-radius: 8px;
             overflow: hidden;
-            background: #1e272e;
-            min-height: 250px;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
         }
-        canvas.crop-canvas { max-width: 100%; height: auto; cursor: crosshair; }
-        
-        .filter-options {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 12px;
-            border-radius: 4px;
+        video, canvas.crop-canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .filter-group {
+            background: #fff8e7;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        .filter-options label { font-weight: bold; font-size: 0.95em; }
-        .filter-options select, .filter-options input {
-            padding: 6px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
 
-        /* 步驟三：拼貼畫布 */
-        .canvas-section { display: flex; flex-direction: column; align-items: center; }
-        #stage {
+        /* 右側畫布區域 */
+        #stage-container {
+            position: relative;
+            width: 100%;
+            height: 480px;
             border: 3px solid var(--primary);
-            background: #fafafa;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
-            cursor: move;
-            touch-action: none;
-            border-radius: 4px;
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
         }
-        
-        .controls {
-            margin-top: 15px;
+        #stage { width: 100%; height: 100%; cursor: move; touch-action: none; }
+
+        .btn-group {
             display: flex;
-            gap: 8px;
             flex-wrap: wrap;
+            gap: 8px;
             justify-content: center;
         }
-        
-        button, input[type="file"]::file-selector-button {
+
+        button {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.9rem;
             transition: 0.2s;
         }
-        button:hover { background: #34495e; }
+        button:hover { opacity: 0.9; }
         button.accent { background: var(--accent); }
-        button.accent:hover { background: #c0392b; }
-        button.cubism-btn { background: var(--cubism-blue); }
-        button.cubism-btn:hover { background: #1a5276; }
+        button.secondary { background: #7f8c8d; }
 
-        .instructions {
-            background: #e8f4f8;
-            border-left: 4px solid #3498db;
-            padding: 10px;
-            font-size: 0.88em;
-            line-height: 1.4;
+        .reflection-card {
+            background: #eef5f9;
+            border-left: 4px solid var(--cubism-blue);
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .reflection-card textarea {
+            width: 100%;
+            height: 60px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 6px;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
 
-    <h1>🎨 立體派「物理重組」工作台</h1>
-    <p class="subtitle">致敬畢卡索《哭泣的女人》：多角度視點 ➔ 幾何塊面化 ➔ 平面物理重組！</p>
+    <header>
+        <h1>🎨 立體派多視點自畫像工作室</h1>
+        <p class="subtitle">拍攝多角度視點 ➔ 幾何切割與畢加索濾鏡 ➔ 二維平面物理重組</p>
+    </header>
 
-    <div class="container">
-        <!-- 左側：五官擷取與幾何轉換區 -->
-        <div class="panel upload-section">
-            <h2>第一步：上載與框選五官</h2>
-            <div class="instructions">
-                1. 上載自拍（正面或側面照）。<br>
-                2. 在相片上<strong>拖曳框選</strong>五官（如眼睛、鼻子或嘴巴）。
+    <div class="main-layout">
+        <!-- 左欄：拍攝、風格化與五官切割 -->
+        <div class="panel">
+            <h2><span class="step-badge">第一步</span>多角度影像擷取</h2>
+            
+            <div class="angle-selector">
+                <div class="angle-btn active" onclick="setAngle('正面 Front')">👤 正面 (Front)</div>
+                <div class="angle-btn" onclick="setAngle('側臉 Profile')">🗣️ 側臉 90° (Profile)</div>
+                <div class="angle-btn" onclick="setAngle('仰/俯角 Tilt')">📐 仰角/俯角 (Tilt)</div>
             </div>
-            
-            <input type="file" id="imageLoader" accept="image/*">
-            
-            <div class="img-container">
+
+            <div class="media-container">
+                <video id="webcam" autoplay playsinline style="display:none;"></video>
                 <canvas id="cropCanvas" class="crop-canvas"></canvas>
             </div>
 
-            <h2>第二步：幾何塊面化風格化</h2>
-            <div class="filter-options">
-                <label for="filterMode">🎭 五官風格選擇：</label>
-                <select id="filterMode">
-                    <option value="none">原圖五官 (無濾鏡)</option>
-                    <option value="weepingWoman" selected>《哭泣的女人》幾何塊面 + 高對比色彩</option>
-                    <option value="facetOnly">單色幾何切削塊面 (Geometric Facets)</option>
-                </select>
-
-                <label for="facetIntensity">✂️ 幾何簡化度 (塊面大小)：</label>
-                <input type="range" id="facetIntensity" min="5" max="30" value="12">
+            <div class="btn-group">
+                <button id="btnCamera" onclick="startCamera()">📷 開啟相機</button>
+                <button id="btnSnap" onclick="takeSnapshot()" style="display:none;" class="accent">📸 拍照</button>
+                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFileUpload(event)">
+                <button onclick="document.getElementById('fileInput').click()" class="secondary">📁 上載相片</button>
             </div>
-            
-            <button class="accent" id="btnExtract">✂️ 剪下五官並加入畫布</button>
+
+            <h2><span class="step-badge">第二步</span>立體派風格與多邊形切割</h2>
+            <div class="filter-group">
+                <label><strong>🎨 畢加索風格濾鏡：</strong></label>
+                <select id="filterMode" onchange="processImage()">
+                    <option value="line">🖋️ 畢加索黑輪廓線 (Picasso Line Drawing)</option>
+                    <option value="weeping" selected>🌈 《哭泣的女人》酸性高對比色塊</option>
+                    <option value="analytic">🏺 分析立體派單色切面 (Monochromatic Facets)</option>
+                    <option value="none">📷 保持原圖五官</option>
+                </select>
+                <p style="font-size:0.8rem; margin:3px 0 0 0; color:#666;">💡 用滑鼠/手指在影像上<strong>點擊多個點</strong>畫出幾何多邊形，點擊「剪下五官」。</p>
+            </div>
+
+            <div class="btn-group">
+                <button onclick="clearPolygon()" class="secondary">🔄 重置切割線</button>
+                <button onclick="extractPolygonFeature()" class="accent">✂️ 剪下幾何五官並加入畫布</button>
+            </div>
         </div>
 
-        <!-- 右側：物理重組畫布 -->
-        <div class="panel canvas-section">
-            <h2>第三步：二維平面物理重組</h2>
-            <canvas id="stage" width="500" height="600"></canvas>
+        <!-- 右欄：物理重組與自畫像完成品 -->
+        <div class="panel">
+            <h2><span class="step-badge">第三步</span>二維平面物理重組</h2>
             
-            <div class="controls">
-                <button id="btnRotate">🔄 旋轉 15°</button>
-                <button id="btnScaleUp">🔍 放大</button>
-                <button id="btnScaleDown">🔎 縮小</button>
-                <button id="btnDelete" style="background:#7f8c8d;">🗑️ 刪除選中碎片</button>
-                <button class="accent" id="btnExport">💾 下載最終作品</button>
+            <div id="stage-container">
+                <canvas id="stage" width="550" height="480"></canvas>
             </div>
+
+            <div class="btn-group">
+                <button onclick="rotateLayer(15)">🔄 旋轉 15°</button>
+                <button onclick="flipLayer()">🪞 水平翻轉</button>
+                <button onclick="scaleLayer(1.1)">🔍 放大</button>
+                <button onclick="scaleLayer(0.9)">🔎 縮小</button>
+                <button onclick="deleteLayer()" class="secondary">🗑️ 刪除</button>
+                <button onclick="toggleBackground()" style="background:#27ae60;">🎨 切換立體派放射背景</button>
+            </div>
+
+            <div class="reflection-card">
+                <strong>📝 創作者自述 (Artist Statement)：</strong>
+                <textarea id="artistStatement" placeholder="例：我結合了正面的眼睛和側面的嘴巴，運用黃綠對比色表達焦慮情緒..."></textarea>
+            </div>
+
+            <button onclick="exportArtCard()" class="accent" style="width:100%; padding:12px; font-size:1rem;">💾 匯出《立體派自畫像》展覽卡片</button>
         </div>
     </div>
 
     <script>
-        // --- 全局變數 ---
-        const imageLoader = document.getElementById('imageLoader');
+        // 全局變數
+        let currentAngle = '正面 Front';
+        let rawImage = null;
+        let polyPoints = [];
+        let layers = [];
+        let selectedLayer = null;
+        let isBgActive = false;
+
         const cropCanvas = document.getElementById('cropCanvas');
         const cropCtx = cropCanvas.getContext('2d');
         const stage = document.getElementById('stage');
         const stageCtx = stage.getContext('2d');
+        const video = document.getElementById('webcam');
 
-        let currentImg = null;
-        let isSelecting = false;
-        let startX, startY, cropWidth, cropHeight;
+        // 切換角度標籤
+        function setAngle(angle) {
+            currentAngle = angle;
+            document.querySelectorAll('.angle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.includes(angle.split(' ')[0]));
+            });
+        }
 
-        let layers = [];
-        let selectedLayer = null;
-        let isDraggingStage = false;
-        let dragOffsetX = 0, dragOffsetY = 0;
+        // 開啟相機
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                cropCanvas.style.display = 'none';
+                document.getElementById('btnSnap').style.display = 'inline-block';
+            } catch (err) {
+                alert('無法存取相機，請使用上載相片功能。');
+            }
+        }
 
-        // 讀取相片
-        imageLoader.addEventListener('change', (e) => {
+        // 拍照
+        function takeSnapshot() {
+            cropCanvas.width = video.videoWidth || 400;
+            cropCanvas.height = video.videoHeight || 300;
+            cropCtx.drawImage(video, 0, 0, cropCanvas.width, cropCanvas.height);
+            
+            // 關閉相機串流
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            video.style.display = 'none';
+            cropCanvas.style.display = 'block';
+            document.getElementById('btnSnap').style.display = 'none';
+
+            rawImage = new Image();
+            rawImage.src = cropCanvas.toDataURL();
+            rawImage.onload = () => processImage();
+        }
+
+        // 上載照片
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = (event) => {
-                currentImg = new Image();
-                currentImg.onload = () => {
-                    cropCanvas.width = currentImg.width;
-                    cropCanvas.height = currentImg.height;
-                    cropCtx.drawImage(currentImg, 0, 0);
+            reader.onload = (evt) => {
+                rawImage = new Image();
+                rawImage.onload = () => {
+                    cropCanvas.width = rawImage.width;
+                    cropCanvas.height = rawImage.height;
+                    video.style.display = 'none';
+                    cropCanvas.style.display = 'block';
+                    processImage();
                 };
-                currentImg.src = event.target.result;
+                rawImage.src = evt.target.result;
             };
-            if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+            reader.readAsDataURL(file);
+        }
+
+        // 風格濾鏡處理
+        function processImage() {
+            if (!rawImage) return;
+            cropCtx.drawImage(rawImage, 0, 0, cropCanvas.width, cropCanvas.height);
+            const mode = document.getElementById('filterMode').value;
+            if (mode === 'none') return;
+
+            const imgData = cropCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
+            const d = imgData.data;
+
+            if (mode === 'weeping') {
+                for (let i = 0; i < d.length; i += 4) {
+                    d[i] = d[i] > 128 ? 241 : 41;       // 檸檬黃 vs 鈷藍
+                    d[i+1] = d[i+1] > 128 ? 196 : 128; 
+                    d[i+2] = d[i+2] > 128 ? 15 : 185;
+                }
+            } else if (mode === 'analytic') {
+                for (let i = 0; i < d.length; i += 4) {
+                    let avg = (d[i] + d[i+1] + d[i+2]) / 3;
+                    d[i] = avg * 0.8;      // 赭石色調
+                    d[i+1] = avg * 0.7;
+                    d[i+2] = avg * 0.5;
+                }
+            } else if (mode === 'line') {
+                for (let i = 0; i < d.length; i += 4) {
+                    let v = (d[i] + d[i+1] + d[i+2]) / 3 > 110 ? 255 : 20;
+                    d[i] = d[i+1] = d[i+2] = v;
+                }
+            }
+            cropCtx.putImageData(imgData, 0, 0);
+            drawPolygonOverlay();
+        }
+
+        // 點擊繪製多邊形
+        cropCanvas.addEventListener('click', (e) => {
+            if (!rawImage) return;
+            const rect = cropCanvas.getBoundingClientRect();
+            const scaleX = cropCanvas.width / rect.width;
+            const scaleY = cropCanvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            polyPoints.push({x, y});
+            drawPolygonOverlay();
         });
 
-        // 座標計算 (支援觸控與滑鼠)
-        function getCanvasCoords(e, canvas) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            return {
-                x: (clientX - rect.left) * scaleX,
-                y: (clientY - rect.top) * scaleY
-            };
-        }
-
-        // 框選事件處理
-        cropCanvas.addEventListener('mousedown', startCrop);
-        cropCanvas.addEventListener('touchstart', startCrop);
-        cropCanvas.addEventListener('mousemove', drawCrop);
-        cropCanvas.addEventListener('touchmove', drawCrop);
-        window.addEventListener('mouseup', endCrop);
-        window.addEventListener('touchend', endCrop);
-
-        function startCrop(e) {
-            if (!currentImg) return;
-            isSelecting = true;
-            const pos = getCanvasCoords(e, cropCanvas);
-            startX = pos.x;
-            startY = pos.y;
-            cropWidth = 0;
-            cropHeight = 0;
-        }
-
-        function drawCrop(e) {
-            if (!isSelecting) return;
-            const pos = getCanvasCoords(e, cropCanvas);
-            cropWidth = pos.x - startX;
-            cropHeight = pos.y - startY;
-
-            cropCtx.drawImage(currentImg, 0, 0);
+        function drawPolygonOverlay() {
+            if (polyPoints.length === 0) return;
+            cropCtx.save();
             cropCtx.strokeStyle = '#e74c3c';
-            cropCtx.lineWidth = 4;
-            cropCtx.setLineDash([6, 6]);
-            cropCtx.strokeRect(startX, startY, cropWidth, cropHeight);
-            cropCtx.setLineDash([]);
+            cropCtx.lineWidth = 3;
+            cropCtx.fillStyle = 'rgba(231, 76, 60, 0.2)';
+
+            cropCtx.beginPath();
+            cropCtx.moveTo(polyPoints[0].x, polyPoints[0].y);
+            for (let i = 1; i < polyPoints.length; i++) {
+                cropCtx.lineTo(polyPoints[i].x, polyPoints[i].y);
+            }
+            if (polyPoints.length > 2) cropCtx.closePath();
+            cropCtx.stroke();
+            cropCtx.fill();
+            cropCtx.restore();
         }
 
-        function endCrop() { isSelecting = false; }
+        function clearPolygon() {
+            polyPoints = [];
+            processImage();
+        }
 
-        // --- 核心演算法：《哭泣的女人》幾何塊面化處理 ---
-        function applyCubismFilter(sourceCtx, w, h) {
-            const filterMode = document.getElementById('filterMode').value;
-            const tileSize = parseInt(document.getElementById('facetIntensity').value, 10);
+        // 剪下多邊形五官
+        function extractPolygonFeature() {
+            if (polyPoints.length < 3) {
+                alert('請在影像上記錄至少 3 個點以圍繞出幾何形狀！');
+                return;
+            }
 
-            if (filterMode === 'none') return;
+            const minX = Math.min(...polyPoints.map(p => p.x));
+            const maxX = Math.max(...polyPoints.map(p => p.x));
+            const minY = Math.min(...polyPoints.map(p => p.y));
+            const maxY = Math.max(...polyPoints.map(p => p.y));
+            const w = maxX - minX;
+            const h = maxY - minY;
 
-            const imgData = sourceCtx.getImageData(0, 0, w, h);
-            const data = imgData.data;
-
-            // 建立離線 Canvas 進行多邊形幾何繪製
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = w;
             tempCanvas.height = h;
             const tCtx = tempCanvas.getContext('2d');
 
-            // 畢卡索《哭泣的女人》經典色彩對照庫
-            const picassoPalette = [
-                [241, 196, 15],  // 檸檬黃
-                [41, 128, 185],  // 鈷藍
-                [231, 76, 60],   // 朱紅
-                [46, 204, 113],  // 綠色
-                [236, 240, 241], // 淚水灰白
-                [44, 62, 80]     // 深黑紫
-            ];
-
-            function getNearestColor(r, g, b) {
-                let minDist = Infinity;
-                let chosen = picassoPalette[0];
-                for (let c of picassoPalette) {
-                    let dist = Math.hypot(r - c[0], g - c[1], b - c[2]);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        chosen = c;
-                    }
-                }
-                return chosen;
+            tCtx.beginPath();
+            tCtx.moveTo(polyPoints[0].x - minX, polyPoints[0].y - minY);
+            for (let i = 1; i < polyPoints.length; i++) {
+                tCtx.lineTo(polyPoints[i].x - minX, polyPoints[i].y - minY);
             }
+            tCtx.closePath();
+            tCtx.clip();
 
-            // 三角形 / 多邊形幾何網格分割
-            for (let y = 0; y < h; y += tileSize) {
-                for (let x = 0; x < w; x += tileSize) {
-                    // 取當前區塊中心點像素顏色
-                    const cx = Math.min(x + Math.floor(tileSize/2), w - 1);
-                    const cy = Math.min(y + Math.floor(tileSize/2), h - 1);
-                    const idx = (cy * w + cx) * 4;
-                    
-                    let r = data[idx];
-                    let g = data[idx + 1];
-                    let b = data[idx + 2];
+            tCtx.drawImage(cropCanvas, minX, minY, w, h, 0, 0, w, h);
 
-                    if (filterMode === 'weepingWoman') {
-                        const mappedColor = getNearestColor(r, g, b);
-                        r = mappedColor[0];
-                        g = mappedColor[1];
-                        b = mappedColor[2];
-                    }
+            // 加上立體派粗邊框
+            tCtx.strokeStyle = '#111';
+            tCtx.lineWidth = 4;
+            tCtx.stroke();
 
-                    // 繪製非規則幾何晶體塊面
-                    tCtx.beginPath();
-                    tCtx.moveTo(x, y);
-                    tCtx.lineTo(x + tileSize + (Math.random()*4 - 2), y - (Math.random()*4));
-                    tCtx.lineTo(x + tileSize, y + tileSize);
-                    tCtx.lineTo(x - (Math.random()*4), y + tileSize);
-                    tCtx.closePath();
-
-                    tCtx.fillStyle = `rgb(${r},${g},${b})`;
-                    tCtx.fill();
-
-                    // 繪製立體派強烈的黑色邊界線
-                    tCtx.strokeStyle = '#111111';
-                    tCtx.lineWidth = 1.5;
-                    tCtx.stroke();
-                }
-            }
-
-            // 把加工後的幾何圖像寫回原本的上下文
-            sourceCtx.clearRect(0, 0, w, h);
-            sourceCtx.drawImage(tempCanvas, 0, 0);
-        }
-
-        // 剪下五官並轉為碎片圖層
-        document.getElementById('btnExtract').addEventListener('click', () => {
-            if (!currentImg || Math.abs(cropWidth) < 10) {
-                alert('請先上載相片並在畫面上框選五官！');
-                return;
-            }
-
-            const offCanvas = document.createElement('canvas');
-            const offCtx = offCanvas.getContext('2d');
-            const w = Math.abs(cropWidth);
-            const h = Math.abs(cropHeight);
-            const x = cropWidth < 0 ? startX + cropWidth : startX;
-            const y = cropHeight < 0 ? startY + cropHeight : startY;
-
-            offCanvas.width = w;
-            offCanvas.height = h;
-
-            // 裁切原圖五官
-            offCtx.drawImage(currentImg, x, y, w, h, 0, 0, w, h);
-
-            // 套用幾何塊面化濾鏡
-            applyCubismFilter(offCtx, w, h);
-
-            const fragmentImg = new Image();
-            fragmentImg.onload = () => {
-                const newLayer = {
-                    img: fragmentImg,
-                    x: stage.width / 2 - w / 2,
-                    y: stage.height / 2 - h / 2,
-                    width: w,
-                    height: h,
-                    rotation: 0,
-                    scale: 1
+            const img = new Image();
+            img.onload = () => {
+                const layer = {
+                    img, x: stage.width/2 - w/2, y: stage.height/2 - h/2,
+                    w, h, rotation: 0, scale: 1, flipped: false, angleLabel: currentAngle
                 };
-                layers.push(newLayer);
-                selectedLayer = newLayer;
+                layers.push(layer);
+                selectedLayer = layer;
+                clearPolygon();
                 renderStage();
             };
-            fragmentImg.src = offCanvas.toDataURL();
-        });
+            img.src = tempCanvas.toDataURL();
+        }
 
-        // --- 第三步：畫布渲染與物理重組操控 ---
+        // 畫布渲染
         function renderStage() {
             stageCtx.clearRect(0, 0, stage.width, stage.height);
 
-            // 背景底色
-            stageCtx.fillStyle = '#f8f9fa';
-            stageCtx.fillRect(0, 0, stage.width, stage.height);
+            // 畫布背景
+            if (isBgActive) {
+                stageCtx.fillStyle = '#f39c12';
+                stageCtx.fillRect(0, 0, stage.width, stage.height);
+                stageCtx.strokeStyle = '#d35400';
+                stageCtx.lineWidth = 3;
+                for (let i = 0; i < stage.width; i += 40) {
+                    stageCtx.beginPath();
+                    stageCtx.moveTo(i, 0);
+                    stageCtx.lineTo(stage.width - i, stage.height);
+                    stageCtx.stroke();
+                }
+            } else {
+                stageCtx.fillStyle = '#ffffff';
+                stageCtx.fillRect(0, 0, stage.width, stage.height);
+            }
 
-            // 逐層繪製拼貼碎片
-            layers.forEach(layer => {
+            layers.forEach(l => {
                 stageCtx.save();
-                const centerX = layer.x + (layer.width * layer.scale)/2;
-                const centerY = layer.y + (layer.height * layer.scale)/2;
-                
-                stageCtx.translate(centerX, centerY);
-                stageCtx.rotate(layer.rotation * Math.PI / 180);
+                const cx = l.x + (l.w * l.scale)/2;
+                const cy = l.y + (l.h * l.scale)/2;
+                stageCtx.translate(cx, cy);
+                stageCtx.rotate(l.rotation * Math.PI / 180);
+                if (l.flipped) stageCtx.scale(-1, 1);
 
-                // 畫圖片碎片
-                stageCtx.drawImage(
-                    layer.img, 
-                    -(layer.width * layer.scale)/2, 
-                    -(layer.height * layer.scale)/2, 
-                    layer.width * layer.scale, 
-                    layer.height * layer.scale
-                );
+                stageCtx.drawImage(l.img, -(l.w * l.scale)/2, -(l.h * l.scale)/2, l.w * l.scale, l.h * l.scale);
 
-                // 被選中時繪製藍色操控框
-                if (layer === selectedLayer) {
-                    stageCtx.strokeStyle = '#3498db';
+                if (l === selectedLayer) {
+                    stageCtx.strokeStyle = '#e74c3c';
                     stageCtx.lineWidth = 2;
-                    stageCtx.setLineDash([4, 4]);
-                    stageCtx.strokeRect(
-                        -(layer.width * layer.scale)/2 - 3, 
-                        -(layer.height * layer.scale)/2 - 3, 
-                        layer.width * layer.scale + 6, 
-                        layer.height * layer.scale + 6
-                    );
-                    stageCtx.setLineDash([]);
+                    stageCtx.setLineDash([6, 6]);
+                    stageCtx.strokeRect(-(l.w * l.scale)/2 - 4, -(l.h * l.scale)/2 - 4, l.w * l.scale + 8, l.h * l.scale + 8);
                 }
                 stageCtx.restore();
             });
         }
 
-        // 拖曳選擇邏輯
-        stage.addEventListener('mousedown', startDragStage);
-        stage.addEventListener('touchstart', startDragStage);
-        stage.addEventListener('mousemove', dragStage);
-        stage.addEventListener('touchmove', dragStage);
-        window.addEventListener('mouseup', () => isDraggingStage = false);
-        window.addEventListener('touchend', () => isDraggingStage = false);
+        // 圖層控制
+        function rotateLayer(deg) { if (selectedLayer) { selectedLayer.rotation += deg; renderStage(); } }
+        function flipLayer() { if (selectedLayer) { selectedLayer.flipped = !selectedLayer.flipped; renderStage(); } }
+        function scaleLayer(f) { if (selectedLayer) { selectedLayer.scale *= f; renderStage(); } }
+        function deleteLayer() { if (selectedLayer) { layers = layers.filter(l => l !== selectedLayer); selectedLayer = null; renderStage(); } }
+        function toggleBackground() { isBgActive = !isBgActive; renderStage(); }
 
-        function startDragStage(e) {
-            const pos = getCanvasCoords(e, stage);
+        // 拖曳選擇圖層
+        let isDragging = false, dragX = 0, dragY = 0;
+        stage.addEventListener('mousedown', (e) => {
+            const rect = stage.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
             for (let i = layers.length - 1; i >= 0; i--) {
                 const l = layers[i];
-                const w = l.width * l.scale;
-                const h = l.height * l.scale;
-                if (pos.x >= l.x && pos.x <= l.x + w && pos.y >= l.y && pos.y <= l.y + h) {
+                if (x >= l.x && x <= l.x + l.w*l.scale && y >= l.y && y <= l.y + l.h*l.scale) {
                     selectedLayer = l;
-                    isDraggingStage = true;
-                    dragOffsetX = pos.x - l.x;
-                    dragOffsetY = pos.y - l.y;
-                    
-                    // 置頂被點選的碎片
-                    layers.splice(i, 1);
-                    layers.push(l);
-                    
+                    isDragging = true;
+                    dragX = x - l.x;
+                    dragY = y - l.y;
                     renderStage();
                     return;
                 }
             }
             selectedLayer = null;
             renderStage();
-        }
+        });
 
-        function dragStage(e) {
-            if (!isDraggingStage || !selectedLayer) return;
-            const pos = getCanvasCoords(e, stage);
-            selectedLayer.x = pos.x - dragOffsetX;
-            selectedLayer.y = pos.y - dragOffsetY;
+        stage.addEventListener('mousemove', (e) => {
+            if (!isDragging || !selectedLayer) return;
+            const rect = stage.getBoundingClientRect();
+            selectedLayer.x = (e.clientX - rect.left) - dragX;
+            selectedLayer.y = (e.clientY - rect.top) - dragY;
             renderStage();
-        }
+        });
 
-        // 按鈕功能控制
-        document.getElementById('btnRotate').addEventListener('click', () => {
-            if (selectedLayer) { selectedLayer.rotation += 15; renderStage(); }
-        });
-        document.getElementById('btnScaleUp').addEventListener('click', () => {
-            if (selectedLayer) { selectedLayer.scale *= 1.1; renderStage(); }
-        });
-        document.getElementById('btnScaleDown').addEventListener('click', () => {
-            if (selectedLayer) { selectedLayer.scale *= 0.9; renderStage(); }
-        });
-        document.getElementById('btnDelete').addEventListener('click', () => {
-            if (selectedLayer) {
-                layers = layers.filter(l => l !== selectedLayer);
-                selectedLayer = null;
-                renderStage();
-            }
-        });
-        document.getElementById('btnExport').addEventListener('click', () => {
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // 匯出展覽卡片
+        function exportArtCard() {
             selectedLayer = null;
             renderStage();
-            const link = document.createElement('a');
-            link.download = 'my-cubist-reconstruction.png';
-            link.href = stage.toDataURL();
-            link.click();
-        });
 
-        // 初始化空白畫布
+            const cardCanvas = document.createElement('canvas');
+            cardCanvas.width = 600;
+            cardCanvas.height = 700;
+            const cCtx = cardCanvas.getContext('2d');
+
+            cCtx.fillStyle = '#f8f9fa';
+            cCtx.fillRect(0, 0, 600, 700);
+
+            // 繪製畫布內容
+            cCtx.drawImage(stage, 25, 25, 550, 480);
+
+            // 繪製文字與評估資訊
+            cCtx.fillStyle = '#2c3e50';
+            cCtx.font = 'bold 20px sans-serif';
+            cCtx.fillText('《立體派多視點自畫像》', 25, 545);
+
+            cCtx.font = '14px sans-serif';
+            const text = document.getElementById('artistStatement').value || '創作者未填寫自述。';
+            cCtx.fillText('【創作者自述】：' + text, 25, 580);
+
+            const link = document.createElement('a');
+            link.download = 'cubist-portrait-exhibition.png';
+            link.href = cardCanvas.toDataURL();
+            link.click();
+        }
+
         renderStage();
     </script>
 </body>
