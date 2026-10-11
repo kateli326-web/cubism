@@ -13,15 +13,21 @@
             overflow: hidden;
             background-color: #ffffff;
         }
-        /* 將 iframe 對話窗滿版展開至全螢幕 */
-        iframe, .coze-chat-window, div[class*="coze-"] {
+        /* 將右下角彈出的對話視窗強制拉滿至全螢幕 */
+        .coze-chat-window, 
+        div[class*="coze-chat"], 
+        div[class*="component-"] {
             width: 100vw !important;
             height: 100vh !important;
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
             border: none !important;
             border-radius: 0 !important;
+            max-width: none !important;
+            max-height: none !important;
             z-index: 999999 !important;
         }
     </style>
@@ -29,16 +35,24 @@
 <body>
     <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
     <script>
+      const patToken = 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT';
+
       new CozeWebSDK.WebChatClient({
         config: {
-          bot_id: '7683717251153510405',
-          isIframe: true
+          bot_id: '7683717251153510405'
         },
         componentProps: {
-          title: 'AI 畢加索',
+          title: 'AI 畢加索'
         },
-        ui: {
-          asWeb: true
+        auth: {
+          type: 'token',
+          token: patToken,
+          onRefreshToken: function () {
+            return patToken;
+          },
+          onRefreshTokens: function () {
+            return patToken;
+          }
         }
       });
     </script>
