@@ -13,7 +13,7 @@
             overflow: hidden;
             background-color: #ffffff;
         }
-        /* 將右下角對話視窗強制拉滿至全螢幕 */
+        /* 將聊天視窗強行滿版展開至全螢幕 */
         .coze-chat-window, 
         div[class*="coze-chat"], 
         div[class*="component-"] {
@@ -35,25 +35,14 @@
 <body>
     <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
     <script>
-      const patToken = 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT';
-
       new CozeWebSDK.WebChatClient({
         config: {
-          bot_id: '7683717251153510405'
+          bot_id: '7683717251153510405',
         },
         componentProps: {
-          title: 'AI 畢加索'
+          title: 'AI 畢加索',
         },
-        auth: {
-          type: 'token',
-          token: patToken,
-          onRefreshToken: function () {
-            return patToken;
-          },
-          onRefreshTokens: function () {
-            return patToken;
-          }
-        }
+        el: document.body
       });
     </script>
 </body>
