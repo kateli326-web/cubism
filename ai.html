@@ -13,8 +13,8 @@
             overflow: hidden;
             background-color: #ffffff;
         }
-        /* 將聊天視窗滿版展開至全螢幕 */
-        .coze-chat-window, div[class*="coze-chat"] {
+        /* 強制將右下角對話框滿版展開至全螢幕 */
+        .coze-chat-window, div[class*="coze-"] {
             width: 100vw !important;
             height: 100vh !important;
             position: fixed !important;
@@ -29,22 +29,12 @@
 <body>
     <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
     <script>
-      // 請將下方單引號裡面的內容，換成您剛才複製的新 Token
-      const patToken = 'pat_ZL7oIWWkztgiPmlkesqejQIBVEEARmOBzIDog48OCR77nftLHGqHgTymG2BIfQWn';
-
       new CozeWebSDK.WebChatClient({
         config: {
           bot_id: '7683717251153510405',
         },
         componentProps: {
           title: 'AI 畢加索',
-        },
-        auth: {
-          type: 'token',
-          token: patToken,
-          onRefreshToken: function () {
-            return patToken;
-          }
         }
       });
     </script>
