@@ -13,8 +13,8 @@
             overflow: hidden;
             background-color: #ffffff;
         }
-        /* 強制將右下角對話框滿版展開至全螢幕 */
-        .coze-chat-window, div[class*="coze-"] {
+        /* 將 iframe 對話窗滿版展開至全螢幕 */
+        iframe, .coze-chat-window, div[class*="coze-"] {
             width: 100vw !important;
             height: 100vh !important;
             position: fixed !important;
@@ -32,9 +32,13 @@
       new CozeWebSDK.WebChatClient({
         config: {
           bot_id: '7683717251153510405',
+          isIframe: true
         },
         componentProps: {
           title: 'AI 畢加索',
+        },
+        ui: {
+          asWeb: true
         }
       });
     </script>
