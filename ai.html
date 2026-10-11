@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 畢加索藝術探索</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f7f7f8;
+        }
+        #coze-chat-container {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="coze-chat-container"></div>
+
+    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+    <script>
+      new CozeWebSDK.WebChatClient({
+        config: {
+          bot_id: '7683717251153510405',
+        },
+        componentProps: {
+          title: 'AI 畢加索',
+        },
+        auth: {
+          type: 'token',
+          token: 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT',
+          onRefreshTokens: function () {
+            return 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT'
+          }
+        },
+        el: document.getElementById('coze-chat-container'),
+        ui: {
+          asWeb: true
+        }
+      });
+    </script>
+</body>
+</html>
