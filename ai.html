@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 畢加索藝術探索</title>
     <style>
-        body, html {
+        html, body {
             margin: 0;
             padding: 0;
             width: 100vw;
@@ -13,8 +13,8 @@
             overflow: hidden;
             background-color: #ffffff;
         }
-        /* 將右下角對話框強制拉滿至全螢幕 */
-        iframe, .coze-chat-window, div[class*="coze-"] {
+        /* 將右下角對話視窗強制展開至滿版全螢幕 */
+        .coze-chat-window, div[class*="coze-chat"] {
             width: 100vw !important;
             height: 100vh !important;
             position: fixed !important;
@@ -22,8 +22,6 @@
             left: 0 !important;
             border: none !important;
             border-radius: 0 !important;
-            max-width: none !important;
-            max-height: none !important;
             z-index: 999999 !important;
         }
     </style>
@@ -31,10 +29,9 @@
 <body>
     <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
     <script>
-      // 替換下方引號內的Token為您剛生成的全新 Token
-      const token = 'pat_6o52Vq04augZCSCooQ1PyCvhoCFmf4EtXFJMqWXUo5gbWW1SP6hrYiJ3thXi2oMp';
+      const patToken = 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT';
 
-      const client = new CozeWebSDK.WebChatClient({
+      new CozeWebSDK.WebChatClient({
         config: {
           bot_id: '7683717251153510405',
         },
@@ -43,22 +40,11 @@
         },
         auth: {
           type: 'token',
-          token: token,
+          token: patToken,
           onRefreshToken: function () {
-            return token;
-          },
-          onRefreshTokens: function () {
-            return token;
+            return patToken;
           }
         }
-      });
-
-      // 自動觸發開啟對話框
-      window.addEventListener('load', () => {
-        setTimeout(() => {
-          const btn = document.querySelector('div[class*="component"]') || document.querySelector('div[role="button"]');
-          if (btn) btn.click();
-        }, 800);
       });
     </script>
 </body>
