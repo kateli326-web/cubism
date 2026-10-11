@@ -24,6 +24,8 @@
 
     <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
     <script>
+      const token = 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT';
+
       new CozeWebSDK.WebChatClient({
         config: {
           bot_id: '7683717251153510405',
@@ -33,9 +35,12 @@
         },
         auth: {
           type: 'token',
-          token: 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT',
+          token: token,
+          onRefreshToken: function () {
+            return token;
+          },
           onRefreshTokens: function () {
-            return 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT'
+            return token;
           }
         },
         el: document.getElementById('coze-chat-container'),
