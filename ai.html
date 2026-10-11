@@ -13,8 +13,8 @@
             overflow: hidden;
             background-color: #ffffff;
         }
-        /* 將聊天視窗滿版展開 */
-        .coze-chat-window, div[class*="coze-"] {
+        /* 將聊天視窗滿版展開至全螢幕 */
+        .coze-chat-window, div[class*="coze-chat"] {
             width: 100vw !important;
             height: 100vh !important;
             position: fixed !important;
@@ -29,7 +29,8 @@
 <body>
     <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
     <script>
-      const patToken = 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT';
+      // 請將下方單引號裡面的內容，換成您剛才複製的新 Token
+      const patToken = 'pat_ZL7oIWWkztgiPmlkesqejQIBVEEARmOBzIDog48OCR77nftLHGqHgTymG2BIfQWn';
 
       new CozeWebSDK.WebChatClient({
         config: {
