@@ -11,17 +11,15 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background-color: #f7f7f8;
+            background-color: #ffffff;
         }
-        /* 強制將 Coze 的浮動視窗展開至全螢幕 */
-        .coze-chat-window, div[class*="coze-chat"] {
+        /* 將右下角對話框強制拉滿至全螢幕 */
+        iframe, .coze-chat-window, div[class*="coze-"] {
             width: 100vw !important;
             height: 100vh !important;
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
             border: none !important;
             border-radius: 0 !important;
             max-width: none !important;
@@ -33,9 +31,10 @@
 <body>
     <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
     <script>
-      const token = 'pat_5N2f6iaLe16LDUuYaKohC5scXfQPDnt348afprS82Xcx6pGzJbrE2fXOGtaabcT';
+      // 替換下方引號內的Token為您剛生成的全新 Token
+      const token = 'pat_6o52Vq04augZCSCooQ1PyCvhoCFmf4EtXFJMqWXUo5gbWW1SP6hrYiJ3thXi2oMp';
 
-      const cozeClient = new CozeWebSDK.WebChatClient({
+      const client = new CozeWebSDK.WebChatClient({
         config: {
           bot_id: '7683717251153510405',
         },
@@ -52,6 +51,14 @@
             return token;
           }
         }
+      });
+
+      // 自動觸發開啟對話框
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const btn = document.querySelector('div[class*="component"]') || document.querySelector('div[role="button"]');
+          if (btn) btn.click();
+        }, 800);
       });
     </script>
 </body>
