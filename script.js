@@ -57,7 +57,7 @@ function drawCanvas() {
       const renderImg = (item.isLineArt && item.processedImg) ? item.processedImg : item.img;
       ctx.drawImage(renderImg, item.x, item.y, item.width, item.height);
 
-      // 外加畢加索風格粗黑邊框
+      // 外加畢加索風格粗黑外框
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 5;
       ctx.strokeRect(item.x, item.y, item.width, item.height);
@@ -86,36 +86,58 @@ function drawCanvas() {
   });
 }
 
-// 一鍵轉換：清晰乾淨的白底黑線 Line Drawing
+// 提取純淨五官輪廓線 (如同圖 10 的 Line Drawing)
 function applyBlackAndWhite() {
   if (selectedIndex !== -1 && elements[selectedIndex].type === 'image') {
     const item = elements[selectedIndex];
     
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = item.img.width;
-    tempCanvas.height = item.img.height;
+    const w = item.img.width;
+    const h = item.img.height;
+    tempCanvas.width = w;
+    tempCanvas.height = h;
 
     tempCtx.drawImage(item.img, 0, 0);
-    const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    const imgData = tempCtx.getImageData(0, 0, w, h);
     const data = imgData.data;
 
-    // 清晰黑白二值化（過濾皮膚陰影，只留深色五官輪廓）
-    const threshold = 110; // 線條臨界值
-
+    // 1. 轉灰階
+    const gray = new Float32Array(w * h);
     for (let i = 0; i < data.length; i += 4) {
-      // 計算亮度
-      const brightness = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      
-      // 只有眼睛、眉毛、嘴巴與深色輪廓會變成純黑(0)，其餘皮膚與背景全部變成純白(255)
-      const val = brightness < threshold ? 0 : 255;
-      
-      data[i] = val;     // Red
-      data[i + 1] = val; // Green
-      data[i + 2] = val; // Blue
+      gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
     }
 
-    tempCtx.putImageData(imgData, 0, 0);
+    // 2. 邊緣抽取演算法 (Outline Detection - 取消陰影填充)
+    const output = tempCtx.createImageData(w, h);
+    const outData = output.data;
+
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = y * w + x;
+
+        // 計算局部變化梯度（只抓五官輪廓變化）
+        const diffX = Math.abs(gray[idx + 1] - gray[idx - 1]);
+        const diffY = Math.abs(gray[idx + w] - gray[idx - w]);
+        const edge = diffX + diffY;
+
+        const pixelIdx = idx * 4;
+        
+        // 邊緣強度閾值：大於門檻的才形成黑線，其他全部塗白
+        if (edge > 25) { 
+          outData[pixelIdx] = 0;     // R (純黑線條)
+          outData[pixelIdx + 1] = 0; // G
+          outData[pixelIdx + 2] = 0; // B
+        } else {
+          outData[pixelIdx] = 255;     // R (純白背景)
+          outData[pixelIdx + 1] = 255; // G
+          outData[pixelIdx + 2] = 255; // B
+        }
+        outData[pixelIdx + 3] = 255;   // 透明度 (不透明)
+      }
+    }
+
+    tempCtx.putImageData(output, 0, 0);
 
     const processedImg = new Image();
     processedImg.onload = function () {
