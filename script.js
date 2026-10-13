@@ -86,7 +86,7 @@ function drawCanvas() {
   });
 }
 
-// 提取純淨五官輪廓線 (如同圖 10 的 Line Drawing)
+// 專業級去噪提線演算法 (生成純淨零雜訊的 Line Drawing)
 function applyBlackAndWhite() {
   if (selectedIndex !== -1 && elements[selectedIndex].type === 'image') {
     const item = elements[selectedIndex];
@@ -108,7 +108,24 @@ function applyBlackAndWhite() {
       gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
     }
 
-    // 2. 邊緣抽取演算法 (Outline Detection - 取消陰影填充)
+    // 2. 均值模糊 (Box Blur) 濾除皮膚雜訊與微小噪點
+    const blurred = new Float32Array(w * h);
+    const radius = 2; // 模糊半徑，過濾雜訊
+    for (let y = radius; y < h - radius; y++) {
+      for (let x = radius; x < w - radius; x++) {
+        let sum = 0;
+        let count = 0;
+        for (let dy = -radius; dy <= radius; dy++) {
+          for (let dx = -radius; dx <= radius; dx++) {
+            sum += gray[(y + dy) * w + (x + dx)];
+            count++;
+          }
+        }
+        blurred[y * w + x] = sum / count;
+      }
+    }
+
+    // 3. 提線與二值化：過濾弱雜訊，只保留強輪廓（眼睛、嘴巴、鼻樑、臉型）
     const output = tempCtx.createImageData(w, h);
     const outData = output.data;
 
@@ -116,24 +133,24 @@ function applyBlackAndWhite() {
       for (let x = 1; x < w - 1; x++) {
         const idx = y * w + x;
 
-        // 計算局部變化梯度（只抓五官輪廓變化）
-        const diffX = Math.abs(gray[idx + 1] - gray[idx - 1]);
-        const diffY = Math.abs(gray[idx + w] - gray[idx - w]);
+        // 計算平滑後的梯度強度
+        const diffX = Math.abs(blurred[idx + 1] - blurred[idx - 1]);
+        const diffY = Math.abs(blurred[idx + w] - blurred[idx - w]);
         const edge = diffX + diffY;
 
         const pixelIdx = idx * 4;
         
-        // 邊緣強度閾值：大於門檻的才形成黑線，其他全部塗白
-        if (edge > 25) { 
-          outData[pixelIdx] = 0;     // R (純黑線條)
-          outData[pixelIdx + 1] = 0; // G
-          outData[pixelIdx + 2] = 0; // B
+        // 邊緣閾值設定為 35：低於 35 的皮膚影調與雜訊全部塗純白，高於 35 的五官畫純黑
+        if (edge > 35) { 
+          outData[pixelIdx] = 0;     // Pure Black
+          outData[pixelIdx + 1] = 0;
+          outData[pixelIdx + 2] = 0;
         } else {
-          outData[pixelIdx] = 255;     // R (純白背景)
-          outData[pixelIdx + 1] = 255; // G
-          outData[pixelIdx + 2] = 255; // B
+          outData[pixelIdx] = 255;   // Pure White
+          outData[pixelIdx + 1] = 255;
+          outData[pixelIdx + 2] = 255;
         }
-        outData[pixelIdx + 3] = 255;   // 透明度 (不透明)
+        outData[pixelIdx + 3] = 255; // 100% 不透明
       }
     }
 
@@ -194,20 +211,4 @@ function handleMouseDown(e) {
   drawCanvas();
 }
 
-function handleTouchStart(e) {
-  if (e.touches.length === 1) {
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = touch.clientX - rect.left;
-    const mouseY = touch.clientY - rect.top;
-
-    for (let i = elements.length - 1; i >= 0; i--) {
-      const item = elements[i];
-      if (item.type === 'image' && mouseX >= item.x && mouseX <= item.x + item.width && mouseY >= item.y && mouseY <= item.y + item.height) {
-        selectedIndex = i;
-        break;
-      }
-    }
-    drawCanvas();
-  }
-}
+function handleTouchStart(e
