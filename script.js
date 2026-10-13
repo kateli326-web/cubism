@@ -2,7 +2,6 @@ let canvas, ctx;
 let elements = [];
 let selectedIndex = -1;
 
-// 頁面加載完成後初始化
 window.onload = function() {
   canvas = document.getElementById('c');
   if (canvas) {
@@ -20,7 +19,7 @@ window.onload = function() {
   }
 };
 
-// 處理照片上傳
+// 1. 照片順暢載入
 function handleImageUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -53,7 +52,6 @@ function handleImageUpload(e) {
   e.target.value = '';
 }
 
-// 繪製畫布
 function drawCanvas() {
   if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -93,7 +91,7 @@ function drawCanvas() {
   });
 }
 
-// 黑白線稿轉換
+// 2. 核心：模糊平滑降噪 + 乾淨 Line Drawing 提線
 function applyBlackAndWhite() {
   if (selectedIndex !== -1 && elements[selectedIndex].type === 'image') {
     const item = elements[selectedIndex];
@@ -109,28 +107,48 @@ function applyBlackAndWhite() {
     const imgData = tempCtx.getImageData(0, 0, w, h);
     const data = imgData.data;
 
-    const gray = new Uint8ClampedArray(w * h);
+    // A. 轉灰階
+    const gray = new Float32Array(w * h);
     for (let i = 0; i < data.length; i += 4) {
       gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
     }
 
+    // B. Box Blur 均值平滑 (過濾皮膚細紋與雜訊)
+    const blurred = new Float32Array(w * h);
+    const r = 2; // 模糊半徑
+    for (let y = r; y < h - r; y++) {
+      for (let x = r; x < w - r; x++) {
+        let sum = 0;
+        let count = 0;
+        for (let dy = -r; dy <= r; dy++) {
+          for (let dx = -r; dx <= r; dx++) {
+            sum += gray[(y + dy) * w + (x + dx)];
+            count++;
+          }
+        }
+        blurred[y * w + x] = sum / count;
+      }
+    }
+
+    // C. 高門檻邊緣計算 (純白背景，只留五官強線條)
     const output = tempCtx.createImageData(w, h);
     const outData = output.data;
+    const threshold = 38; // 敏感度門檻 (越高越乾淨)
 
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
         const idx = y * w + x;
-        const diffX = Math.abs(gray[idx + 1] - gray[idx - 1]);
-        const diffY = Math.abs(gray[idx + w] - gray[idx - w]);
+        const diffX = Math.abs(blurred[idx + 1] - blurred[idx - 1]);
+        const diffY = Math.abs(blurred[idx + w] - blurred[idx - w]);
         const edge = diffX + diffY;
 
         const pixelIdx = idx * 4;
-        if (edge > 20) {
-          outData[pixelIdx] = 0;
+        if (edge > threshold) {
+          outData[pixelIdx] = 0;     // 純黑線條
           outData[pixelIdx + 1] = 0;
           outData[pixelIdx + 2] = 0;
         } else {
-          outData[pixelIdx] = 255;
+          outData[pixelIdx] = 255;   // 純白背景
           outData[pixelIdx + 1] = 255;
           outData[pixelIdx + 2] = 255;
         }
