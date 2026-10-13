@@ -19,7 +19,7 @@
       margin-bottom: 15px;
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
       align-items: center;
     }
@@ -38,6 +38,17 @@
     }
     button.danger { background-color: #dc3545; }
     button.secondary { background-color: #28a745; }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff;
+      padding: 5px 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-size: 14px;
+      font-weight: bold;
+    }
     #canvas-container {
       display: flex;
       justify-content: center;
@@ -56,9 +67,16 @@
 
   <div id="toolbar">
     <input type="file" id="imageLoader" accept="image/*" style="display:none;" />
-    <label for="imageLoader" class="upload-btn">1. 上傳/拍攝照片 (正面/側面)</label>
+    <label for="imageLoader" class="upload-btn">1. 上傳/拍攝照片</label>
     
     <button class="secondary" onclick="applyBlackAndWhite()">2. 一鍵轉為高對比黑白線稿</button>
+    
+    <!-- 增加去噪滑動條，方便微調 -->
+    <div class="control-group">
+      <label for="threshold">線稿去噪過濾:</label>
+      <input type="range" id="threshold" min="10" max="80" value="45" onchange="applyBlackAndWhite()">
+    </div>
+
     <button onclick="addCutLine()">3. 新增幾何切割線</button>
     <button class="danger" onclick="deleteSelected()">刪除選取元件</button>
   </div>
@@ -67,7 +85,6 @@
     <canvas id="c" width="800" height="600"></canvas>
   </div>
 
-  <!-- 加入 ?v=3 破除瀏覽器快取 -->
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=10"></script>
 </body>
 </html>
