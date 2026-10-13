@@ -12,7 +12,7 @@ window.addEventListener('DOMContentLoaded', function () {
     fileInput.addEventListener('change', handleImageUpload);
   }
 
-  // 支援畫布點擊選擇與拖拽
+  // 支援畫布點擊選擇
   canvas.addEventListener('mousedown', handleMouseDown);
   canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
 });
@@ -26,18 +26,18 @@ function handleImageUpload(e) {
   reader.onload = function (event) {
     const img = new Image();
     img.onload = function () {
-      // 計算適合畫布的比例
-      let initWidth = 250;
+      let initWidth = 260;
       let initHeight = (img.height / img.width) * initWidth;
 
       const newElement = {
         type: 'image',
         img: img,
+        processedImg: null, // 儲存轉換後的線稿 Image
         x: 50 + elements.length * 20,
         y: 50 + elements.length * 20,
         width: initWidth,
         height: initHeight,
-        isGrayscale: false
+        isLineArt: false
       };
 
       elements.push(newElement);
@@ -58,17 +58,11 @@ function drawCanvas() {
     ctx.save();
 
     if (item.type === 'image') {
-      // 繪製照片
-      if (item.isGrayscale) {
-        // 高對比黑白處理
-        ctx.filter = 'grayscale(100%) contrast(200%)';
-      } else {
-        ctx.filter = 'none';
-      }
-      ctx.drawImage(item.img, item.x, item.y, item.width, item.height);
-      ctx.filter = 'none'; // 重置濾鏡
+      // 繪製照片或線稿
+      const renderImg = (item.isLineArt && item.processedImg) ? item.processedImg : item.img;
+      ctx.drawImage(renderImg, item.x, item.y, item.width, item.height);
 
-      // 畢加索風格：自動加上粗黑邊框
+      // 畢加索風格：粗黑邊框
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 5;
       ctx.strokeRect(item.x, item.y, item.width, item.height);
@@ -99,11 +93,71 @@ function drawCanvas() {
   });
 }
 
-// 2. 一鍵轉為高對比黑白線稿
+// 2. 一鍵轉為真正的「白底黑線稿 (Line Drawing)」
 function applyBlackAndWhite() {
   if (selectedIndex !== -1 && elements[selectedIndex].type === 'image') {
-    elements[selectedIndex].isGrayscale = true;
-    drawCanvas();
+    const item = elements[selectedIndex];
+    
+    // 建立臨時 Offscreen Canvas 進行像素處理
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = item.img.width;
+    tempCanvas.height = item.img.height;
+
+    tempCtx.drawImage(item.img, 0, 0);
+    const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    const data = imgData.data;
+    const width = tempCanvas.width;
+    const height = tempCanvas.height;
+
+    // 先轉灰階
+    const gray = new Uint8ClampedArray(width * height);
+    for (let i = 0; i < data.length; i += 4) {
+      gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    }
+
+    // 索貝爾 (Sobel) 邊緣檢測演算法提取五官線條
+    const output = tempCtx.createImageData(width, height);
+    const outData = output.data;
+
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        const idx = y * width + x;
+
+        // X/Y 軸梯度
+        const gx =
+          -1 * gray[(y - 1) * width + (x - 1)] + 1 * gray[(y - 1) * width + (x + 1)] +
+          -2 * gray[y * width + (x - 1)]       + 2 * gray[y * width + (x + 1)] +
+          -1 * gray[(y + 1) * width + (x - 1)] + 1 * gray[(y + 1) * width + (x + 1)];
+
+        const gy =
+          -1 * gray[(y - 1) * width + (x - 1)] - 2 * gray[(y - 1) * width + x] - 1 * gray[(y - 1) * width + (x + 1)] +
+           1 * gray[(y + 1) * width + (x - 1)] + 2 * gray[(y + 1) * width + x] + 1 * gray[(y + 1) * width + (x + 1)];
+
+        const magnitude = Math.sqrt(gx * gx + gy * gy);
+        
+        // 門檻設定：提取線條並轉為白底黑線
+        const pixelIdx = idx * 4;
+        const isEdge = magnitude > 35; // 邊緣敏感度
+
+        const colorVal = isEdge ? 0 : 255; // 邊緣為純黑(0)，背景為純白(255)
+        outData[pixelIdx] = colorVal;     // R
+        outData[pixelIdx + 1] = colorVal; // G
+        outData[pixelIdx + 2] = colorVal; // B
+        outData[pixelIdx + 3] = 255;      // Alpha
+      }
+    }
+
+    tempCtx.putImageData(output, 0, 0);
+
+    // 將處理後的線稿保存為新 Image 物件
+    const processedImg = new Image();
+    processedImg.onload = function () {
+      item.processedImg = processedImg;
+      item.isLineArt = true;
+      drawCanvas();
+    };
+    processedImg.src = tempCanvas.toDataURL();
   } else {
     alert('請先點選畫布上的照片！');
   }
