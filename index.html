@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>立體派《哭泣的女人》自畫像重組工具</title>
-  
-  <!-- 載入 Fabric.js 繪圖庫 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-  
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,7 +23,6 @@
       flex-wrap: wrap;
       align-items: center;
     }
-    /* 讓按鈕與 Label 樣式一致 */
     button, .upload-btn {
       display: inline-block;
       padding: 10px 16px;
@@ -41,12 +36,8 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
       user-select: none;
     }
-    button.danger {
-      background-color: #dc3545;
-    }
-    button.secondary {
-      background-color: #28a745;
-    }
+    button.danger { background-color: #dc3545; }
+    button.secondary { background-color: #28a745; }
     #canvas-container {
       display: flex;
       justify-content: center;
@@ -63,9 +54,7 @@
 
   <h2>《哭泣的女人》多視角五官拼貼工具</h2>
 
-  <!-- 控制工具按鈕區 -->
   <div id="toolbar">
-    <!-- 原生隱藏 Input，搭配標籤直連，避開瀏覽器阻擋 -->
     <input type="file" id="imageLoader" accept="image/*" style="display:none;" />
     <label for="imageLoader" class="upload-btn">1. 上傳/拍攝照片 (正面/側面)</label>
     
@@ -74,12 +63,10 @@
     <button class="danger" onclick="deleteSelected()">刪除選取元件</button>
   </div>
 
-  <!-- 中央 Canvas 畫布區 -->
   <div id="canvas-container">
     <canvas id="c" width="800" height="600"></canvas>
   </div>
 
-  <!-- 載入我們的 JavaScript 邏輯檔 -->
   <script src="script.js"></script>
 </body>
 </html>
