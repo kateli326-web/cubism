@@ -2,20 +2,25 @@ let canvas, ctx;
 let elements = [];
 let selectedIndex = -1;
 
-window.addEventListener('DOMContentLoaded', function () {
+// 頁面加載完成後初始化
+window.onload = function() {
   canvas = document.getElementById('c');
-  ctx = canvas.getContext('2d');
+  if (canvas) {
+    ctx = canvas.getContext('2d');
+  }
 
   const fileInput = document.getElementById('imageLoader');
   if (fileInput) {
     fileInput.addEventListener('change', handleImageUpload);
   }
 
-  canvas.addEventListener('mousedown', handleMouseDown);
-  canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-});
+  if (canvas) {
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+  }
+};
 
-// 1. 照片順暢上傳並渲染
+// 處理照片上傳
 function handleImageUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -48,7 +53,9 @@ function handleImageUpload(e) {
   e.target.value = '';
 }
 
+// 繪製畫布
 function drawCanvas() {
+  if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   elements.forEach((item, index) => {
@@ -58,7 +65,6 @@ function drawCanvas() {
       const renderImg = (item.isLineArt && item.processedImg) ? item.processedImg : item.img;
       ctx.drawImage(renderImg, item.x, item.y, item.width, item.height);
 
-      // 外加粗黑輪廓外框
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 5;
       ctx.strokeRect(item.x, item.y, item.width, item.height);
@@ -87,7 +93,7 @@ function drawCanvas() {
   });
 }
 
-// 2. 轉換黑白五官線稿
+// 黑白線稿轉換
 function applyBlackAndWhite() {
   if (selectedIndex !== -1 && elements[selectedIndex].type === 'image') {
     const item = elements[selectedIndex];
@@ -103,7 +109,6 @@ function applyBlackAndWhite() {
     const imgData = tempCtx.getImageData(0, 0, w, h);
     const data = imgData.data;
 
-    // 轉灰階並提取輪廓
     const gray = new Uint8ClampedArray(w * h);
     for (let i = 0; i < data.length; i += 4) {
       gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
@@ -171,6 +176,7 @@ function deleteSelected() {
 }
 
 function handleMouseDown(e) {
+  if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
@@ -191,6 +197,7 @@ function handleMouseDown(e) {
 }
 
 function handleTouchStart(e) {
+  if (!canvas) return;
   if (e.touches.length === 1) {
     const touch = e.touches[0];
     const rect = canvas.getBoundingClientRect();
