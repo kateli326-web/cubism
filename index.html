@@ -16,7 +16,6 @@
     h1 { color: #1a1a1a; margin-bottom: 5px; font-size: 24px; }
     p.subtitle { color: #666; margin-top: 0; margin-bottom: 15px; font-size: 14px; }
 
-    /* 步驟導航條 */
     .step-nav {
       display: flex;
       justify-content: center;
@@ -158,32 +157,32 @@
     <div class="upload-grid">
       <div class="upload-card">
         <h4>1. 正面照片</h4>
-        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'front')">
+        <input type="file" accept="image/*" onchange="uploadImage(this, 'front')">
         <img id="preview_front">
       </div>
       <div class="upload-card">
         <h4>2. 右側面照片</h4>
-        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'right')">
+        <input type="file" accept="image/*" onchange="uploadImage(this, 'right')">
         <img id="preview_right">
       </div>
       <div class="upload-card">
         <h4>3. 左側面照片</h4>
-        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'left')">
+        <input type="file" accept="image/*" onchange="uploadImage(this, 'left')">
         <img id="preview_left">
       </div>
       <div class="upload-card">
         <h4>4. 仰視照片</h4>
-        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'up')">
+        <input type="file" accept="image/*" onchange="uploadImage(this, 'up')">
         <img id="preview_up">
       </div>
       <div class="upload-card">
         <h4>5. 俯視照片</h4>
-        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'down')">
+        <input type="file" accept="image/*" onchange="uploadImage(this, 'down')">
         <img id="preview_down">
       </div>
       <div class="upload-card">
         <h4>6. 三七面照片</h4>
-        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'threequarter')">
+        <input type="file" accept="image/*" onchange="uploadImage(this, 'threequarter')">
         <img id="preview_threequarter">
       </div>
     </div>
@@ -194,3 +193,43 @@
   <!-- 步驟 2 面板 -->
   <div id="stage2" class="stage-panel">
     <div class="toolbar-group">
+      <label><b>選擇照片角度:</b></label>
+      <select id="angleSelect" onchange="changeActiveSourceAngle()">
+        <option value="front">1. 正面</option>
+        <option value="right">2. 右側面</option>
+        <option value="left">3. 左側面</option>
+        <option value="up">4. 仰視</option>
+        <option value="down">5. 俯視</option>
+        <option value="threequarter">6. 三七面</option>
+      </select>
+
+      <label><b>選擇幾何圖形:</b></label>
+      <select id="shapeSelect" onchange="updateCropShape()">
+        <option value="diamond">1. 菱形</option>
+        <option value="triangle">2. 三角形</option>
+        <option value="trapezoid">3. 梯形</option>
+        <option value="polygon">4. 不規則五角形</option>
+        <option value="circle">5. 圓形/橢圓</option>
+        <option value="parallelogram">6. 平行四邊形</option>
+        <option value="shield">7. 盾形</option>
+        <option value="hexagon">8. 六角形</option>
+      </select>
+
+      <button class="btn-warning" onclick="cutCurrentFacet()">✂️ 切割選取區域五官</button>
+    </div>
+
+    <div class="toolbar-group">
+      <button onclick="transformActiveBox('scale', 1.1)">放大選框</button>
+      <button onclick="transformActiveBox('scale', 0.9)">縮小選框</button>
+      <button onclick="transformActiveBox('rotate', 15)">順時針旋轉</button>
+      <button onclick="transformActiveBox('rotate', -15)">逆時針旋轉</button>
+    </div>
+
+    <div style="display: flex; justify-content: center;">
+      <canvas id="cropCanvas" width="750" height="500"></canvas>
+    </div>
+
+    <div style="margin-top: 15px; text-align: left;">
+      <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官即時預覽：</h4>
+      <div id="stage2FacetsPreview" class="facets-library">
+        <span style="color:#888;">按下
