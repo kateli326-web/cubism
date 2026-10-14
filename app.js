@@ -1,4 +1,4 @@
-// 全域變數
+// 全域狀態存儲
 var angleImages = {
   front: null, right: null, left: null,
   up: null, down: null, threequarter: null
@@ -24,8 +24,8 @@ var selectedCollageItemIndex = -1;
 var isDraggingBox = false;
 var isDraggingCollageItem = false;
 var startX = 0, startY = 0;
+var currentStage = 1;
 
-// 上傳圖片並【即時顯示預覽縮圖】
 function uploadImageDirect(event, angleKey) {
   try {
     var input = event.target;
@@ -36,15 +36,11 @@ function uploadImageDirect(event, angleKey) {
     var img = new Image();
     img.onload = function() {
       angleImages[angleKey] = img;
-      
-      // 顯示步驟一縮圖
       var prev = document.getElementById('preview_' + angleKey);
       if (prev) {
         prev.src = blobUrl;
         prev.style.display = 'block';
       }
-      
-      // 如果當前在步驟二，即時刷新畫布
       if (currentStage === 2) {
         drawCropCanvas();
       }
@@ -79,7 +75,6 @@ function initCanvases() {
   }
 }
 
-var currentStage = 1;
 function switchStage(stageNum) {
   currentStage = stageNum;
   initCanvases();
@@ -191,6 +186,7 @@ function transformActiveBox(type, val) {
   drawCropCanvas();
 }
 
+// 核心：切割選取區域五官並【即時顯示預覽縮圖】
 function cutCurrentFacet() {
   var img = angleImages[activeAngleKey];
   if (!img) {
