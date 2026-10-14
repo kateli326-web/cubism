@@ -157,32 +157,32 @@
     <div class="upload-grid">
       <div class="upload-card">
         <h4>1. 正面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImage(this, 'front')">
+        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'front')">
         <img id="preview_front">
       </div>
       <div class="upload-card">
         <h4>2. 右側面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImage(this, 'right')">
+        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'right')">
         <img id="preview_right">
       </div>
       <div class="upload-card">
         <h4>3. 左側面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImage(this, 'left')">
+        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'left')">
         <img id="preview_left">
       </div>
       <div class="upload-card">
         <h4>4. 仰視照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImage(this, 'up')">
+        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'up')">
         <img id="preview_up">
       </div>
       <div class="upload-card">
         <h4>5. 俯視照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImage(this, 'down')">
+        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'down')">
         <img id="preview_down">
       </div>
       <div class="upload-card">
         <h4>6. 三七面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImage(this, 'threequarter')">
+        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'threequarter')">
         <img id="preview_threequarter">
       </div>
     </div>
@@ -231,5 +231,4 @@
 
     <div style="margin-top: 15px; text-align: left;">
       <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官即時預覽：</h4>
-      <div id="stage2FacetsPreview" class="facets-library">
-        <span style="color:#888;">按下
+      <div id="stage2Fac
