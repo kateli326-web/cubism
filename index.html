@@ -163,16 +163,23 @@
   <!-- 步驟 2 面板：全臉 Line Drawing 轉換 -->
   <div id="stage2" class="stage-panel">
     <h3>步驟二：一鍵將 6 個角度全臉轉換為手繪 Line Drawing 線稿：</h3>
-    <p>挑選色彩風格並點擊按鈕，即刻提取清晰乾淨的筆觸線條！</p>
+    <p>挑選色彩風格與線條模式，即刻提取清晰乾淨的筆觸與眼球五官輪廓！</p>
     
     <div class="toolbar-group">
-      <label><b>選擇線稿筆觸色彩：</b></label>
+      <label><b>選擇線稿風格模式：</b></label>
+      <select id="lineModeSelect">
+        <option value="picasso">畢卡索特徵強化模式 (眼睛/眼球/瞳孔特清晰)</option>
+        <option value="photo">寫生相片真實線條模式</option>
+      </select>
+
+      <label><b>筆觸色彩：</b></label>
       <select id="lineColorSelect">
+        <option value="black">黑鋼筆 (Black Ink)</option>
         <option value="blue">經典藍色 (Blue Sketch)</option>
         <option value="green">藝術綠色 (Green Sketch)</option>
         <option value="red">熱情紅色 (Red Sketch)</option>
-        <option value="black">黑鋼筆 (Black Ink)</option>
       </select>
+
       <button class="btn-primary" style="font-size: 16px; padding: 10px 20px;" onclick="convertFullFaceLineDrawing()">✨ 轉換全臉 Line Drawing 線稿</button>
     </div>
 
@@ -180,8 +187,8 @@
       <div class="upload-card"><h4>1. 正面線稿</h4><img id="line_preview_front"></div>
       <div class="upload-card"><h4>2. 右側面線稿</h4><img id="line_preview_right"></div>
       <div class="upload-card"><h4>3. 左側面線稿</h4><img id="line_preview_left"></div>
-      <div class="upload-card"><h4>4. 仰線稿</h4><img id="line_preview_up"></div>
-      <div class="upload-card"><h4>5. 俯線稿</h4><img id="line_preview_down"></div>
+      <div class="upload-card"><h4>4. 仰視線稿</h4><img id="line_preview_up"></div>
+      <div class="upload-card"><h4>5. 俯視線稿</h4><img id="line_preview_down"></div>
       <div class="upload-card"><h4>6. 三七面線稿</h4><img id="line_preview_threequarter"></div>
     </div>
     <br>
@@ -270,6 +277,6 @@
     </div>
   </div>
 
- <script src="app.js?v=2026_DOG_LINEART_ULTRA_CLEAN"></script>
+  <script src="app.js?v=2026_CLEAR_EYE_PICASSO_ENGINE"></script>
 </body>
 </html>
