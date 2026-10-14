@@ -33,7 +33,6 @@
       background-color: #e0e0e0;
       color: #555;
       cursor: pointer;
-      transition: all 0.3s;
     }
     .step-btn.active {
       background-color: #007bff;
@@ -41,29 +40,38 @@
       box-shadow: 0 4px 8px rgba(0,123,255,0.3);
     }
 
-    /* 階段面板控制 */
     .stage-panel { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 1100px; margin: 0 auto; }
     .stage-panel.active { display: block; }
 
-    /* 步驟 1：6角度照片上傳格 */
     .upload-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 15px;
       margin-top: 15px;
     }
     .upload-card {
-      border: 2px dashed #ccc;
+      border: 2px dashed #007bff;
       border-radius: 8px;
-      padding: 10px;
-      background: #fafafa;
+      padding: 12px;
+      background: #f8f9fa;
       text-align: center;
     }
-    .upload-card h4 { margin: 5px 0 10px 0; color: #333; }
-    .upload-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; display: none; margin-top: 5px; }
-    .upload-card input[type="file"] { display: block; margin: 5px auto; width: 100%; font-size: 12px; }
+    .upload-card h4 { margin: 0 0 8px 0; color: #007bff; }
+    .upload-card input[type="file"] {
+      width: 100%;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .upload-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      display: none;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+    }
 
-    /* 控制按鈕列 */
     .toolbar-group {
       display: flex;
       justify-content: center;
@@ -89,7 +97,6 @@
 
     canvas { border: 2px solid #222; background: #fff; border-radius: 4px; }
 
-    /* 素材庫與預覽區 */
     .facets-library {
       display: flex;
       gap: 12px;
@@ -102,20 +109,14 @@
       align-items: center;
       margin-top: 15px;
     }
-    .library-item-container {
-      position: relative;
-      display: inline-block;
-    }
+    .library-item-container { position: relative; display: inline-block; }
     .library-item {
       height: 85px;
       border: 2px solid #333;
       border-radius: 6px;
       cursor: pointer;
       background: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      transition: transform 0.2s;
     }
-    .library-item:hover { border-color: #007bff; transform: scale(1.08); }
     .delete-item-btn {
       position: absolute;
       top: -8px;
@@ -132,10 +133,8 @@
       font-weight: bold;
       border: none;
       padding: 0;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
-    /* 畫布切換標籤 */
     .portrait-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
     .tab-btn { background: #e9ecef; border: 1px solid #ccc; padding: 6px 16px; border-radius: 15px; cursor: pointer; }
     .tab-btn.active { background: #343a40; color: white; border-color: #343a40; }
@@ -146,7 +145,6 @@
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
   <p class="subtitle">上傳 6 個角度照片 ➔ 手動幾何切割 ➔ 一鍵轉換 Line Drawing ➔ 拼合 3 張多視角自畫像</p>
 
-  <!-- 頂部步驟導航 -->
   <div class="step-nav">
     <button class="step-btn active" onclick="switchStage(1)">步驟 1: 上傳 6 角度照片</button>
     <button class="step-btn" onclick="switchStage(2)">步驟 2: 幾何手動切割五官</button>
@@ -156,36 +154,36 @@
 
   <!-- 步驟 1 面板 -->
   <div id="stage1" class="stage-panel active">
-    <h3>請上傳學生 6 個不同角度的照片素材：</h3>
+    <h3>請點擊下方「選擇檔案」按鈕上傳 6 個角度的照片：</h3>
     <div class="upload-grid">
       <div class="upload-card">
         <h4>1. 正面照片</h4>
-        <input type="file" id="img_front" accept="image/*">
+        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'front')">
         <img id="preview_front">
       </div>
       <div class="upload-card">
         <h4>2. 右側面照片</h4>
-        <input type="file" id="img_right" accept="image/*">
+        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'right')">
         <img id="preview_right">
       </div>
       <div class="upload-card">
         <h4>3. 左側面照片</h4>
-        <input type="file" id="img_left" accept="image/*">
+        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'left')">
         <img id="preview_left">
       </div>
       <div class="upload-card">
         <h4>4. 仰視照片</h4>
-        <input type="file" id="img_up" accept="image/*">
+        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'up')">
         <img id="preview_up">
       </div>
       <div class="upload-card">
         <h4>5. 俯視照片</h4>
-        <input type="file" id="img_down" accept="image/*">
+        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'down')">
         <img id="preview_down">
       </div>
       <div class="upload-card">
         <h4>6. 三七面照片</h4>
-        <input type="file" id="img_threequarter" accept="image/*">
+        <input type="file" accept="image/*" onchange="handleDirectUpload(event, 'threequarter')">
         <img id="preview_threequarter">
       </div>
     </div>
@@ -196,107 +194,3 @@
   <!-- 步驟 2 面板 -->
   <div id="stage2" class="stage-panel">
     <div class="toolbar-group">
-      <label><b>選擇要切割的照片角度:</b></label>
-      <select id="angleSelect" onchange="changeActiveSourceAngle()">
-        <option value="front">1. 正面</option>
-        <option value="right">2. 右側面</option>
-        <option value="left">3. 左側面</option>
-        <option value="up">4. 仰視</option>
-        <option value="down">5. 俯視</option>
-        <option value="threequarter">6. 三七面</option>
-      </select>
-
-      <label><b>選擇 8 種幾何圖形:</b></label>
-      <select id="shapeSelect" onchange="updateCropShape()">
-        <option value="diamond">1. 菱形</option>
-        <option value="triangle">2. 三角形</option>
-        <option value="trapezoid">3. 梯形</option>
-        <option value="polygon">4. 不規則五角形</option>
-        <option value="circle">5. 圓形/橢圓</option>
-        <option value="parallelogram">6. 平行四邊形</option>
-        <option value="shield">7. 盾形</option>
-        <option value="hexagon">8. 六角形</option>
-      </select>
-
-      <button class="btn-warning" onclick="cutCurrentFacet()">✂️ 切割選取區域五官</button>
-    </div>
-
-    <div class="toolbar-group">
-      <button onclick="transformActiveBox('scale', 1.1)">放大選框</button>
-      <button onclick="transformActiveBox('scale', 0.9)">縮小選框</button>
-      <button onclick="transformActiveBox('rotate', 15)">順時針旋轉</button>
-      <button onclick="transformActiveBox('rotate', -15)">逆時針旋轉</button>
-    </div>
-
-    <div style="display: flex; justify-content: center;">
-      <canvas id="cropCanvas" width="750" height="500"></canvas>
-    </div>
-
-    <div style="margin-top: 15px; text-align: left;">
-      <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官即時預覽：</h4>
-      <div id="stage2FacetsPreview" class="facets-library">
-        <span style="color:#888;">按下「✂️ 切割選取區域五官」後，切下的五官會即時顯示在這裡！</span>
-      </div>
-    </div>
-
-    <br>
-    <button class="btn-success" onclick="switchStage(3)">切割完成 ➔ 進入步驟三轉換 Line Drawing</button>
-  </div>
-
-  <!-- 步驟 3 面板 -->
-  <div id="stage3" class="stage-panel">
-    <h3>已切割的各角度幾何五官素材庫：</h3>
-    <p>點擊下方按鈕，一鍵將所有手動切割出來的五官轉換為畢卡索鋼筆線稿風格 (Line Drawing)！</p>
-    
-    <div id="rawFacetsLibrary" class="facets-library">
-      <span style="color:#888;">尚未切割任何五官，請返回步驟二。</span>
-    </div>
-
-    <br>
-    <button class="btn-primary" style="font-size: 16px; padding: 12px 24px;" onclick="convertAllToLineDrawing()">✨ 一鍵變換成 LINE DRAWING 線稿</button>
-    <br><br>
-
-    <h3>Line Drawing 化後的五官預覽：</h3>
-    <div id="lineFacetsLibrary" class="facets-library">
-      <span style="color:#888;">轉換後線稿素材將顯示於此。</span>
-    </div>
-
-    <br>
-    <button class="btn-success" onclick="switchStage(4)">進行拼貼 ➔ 進入步驟四自畫像組合</button>
-  </div>
-
-  <!-- 步驟 4 面板 -->
-  <div id="stage4" class="stage-panel">
-    <h3>模仿畢卡索《哭泣的女人》立體主義自畫像拼貼畫布：</h3>
-    
-    <div class="portrait-tabs">
-      <button class="tab-btn active" onclick="switchPortraitTab(0)">自畫像 A</button>
-      <button class="tab-btn" onclick="switchPortraitTab(1)">自畫像 B</button>
-      <button class="tab-btn" onclick="switchPortraitTab(2)">自畫像 C</button>
-    </div>
-
-    <div class="toolbar-group">
-      <button onclick="transformActiveCanvasItem('scale', 1.1)">放大五官</button>
-      <button onclick="transformActiveCanvasItem('scale', 0.9)">縮小五官</button>
-      <button onclick="transformActiveCanvasItem('rotate', 15)">順旋轉</button>
-      <button onclick="transformActiveCanvasItem('rotate', -15)">逆旋轉</button>
-      <button class="btn-danger" onclick="deleteActiveCanvasItem()">刪除選中五官</button>
-      <button class="btn-dark" onclick="exportCollage()">📥 下載當前自畫像</button>
-    </div>
-
-    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-      <div style="text-align: left;">
-        <h4>點擊素材加入畫布：</h4>
-        <div id="collageFacetsLibrary" class="facets-library" style="flex-direction: column; width: 180px; max-height: 500px; overflow-y: auto;">
-        </div>
-      </div>
-      
-      <div>
-        <canvas id="collageCanvas" width="700" height="550"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js?v=20261014_fixed"></script>
-</body>
-</html>
