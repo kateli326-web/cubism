@@ -61,17 +61,7 @@
     }
     .upload-card h4 { margin: 5px 0 10px 0; color: #333; }
     .upload-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; display: none; margin-top: 5px; }
-    .upload-card input { display: none; }
-    .upload-btn-label {
-      display: inline-block;
-      padding: 6px 12px;
-      background-color: #007bff;
-      color: white;
-      font-size: 13px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+    .upload-card input[type="file"] { display: block; margin: 5px auto; width: 100%; font-size: 12px; }
 
     /* 控制按鈕列 */
     .toolbar-group {
@@ -170,38 +160,32 @@
     <div class="upload-grid">
       <div class="upload-card">
         <h4>1. 正面照片</h4>
-        <label for="img_front" class="upload-btn-label">上傳相片</label>
-        <input type="file" id="img_front" accept="image/*" onchange="loadAngleImage(event, 'front')">
+        <input type="file" id="img_front" accept="image/*">
         <img id="preview_front">
       </div>
       <div class="upload-card">
         <h4>2. 右側面照片</h4>
-        <label for="img_right" class="upload-btn-label">上傳相片</label>
-        <input type="file" id="img_right" accept="image/*" onchange="loadAngleImage(event, 'right')">
+        <input type="file" id="img_right" accept="image/*">
         <img id="preview_right">
       </div>
       <div class="upload-card">
         <h4>3. 左側面照片</h4>
-        <label for="img_left" class="upload-btn-label">上傳相片</label>
-        <input type="file" id="img_left" accept="image/*" onchange="loadAngleImage(event, 'left')">
+        <input type="file" id="img_left" accept="image/*">
         <img id="preview_left">
       </div>
       <div class="upload-card">
         <h4>4. 仰視照片</h4>
-        <label for="img_up" class="upload-btn-label">上傳相片</label>
-        <input type="file" id="img_up" accept="image/*" onchange="loadAngleImage(event, 'up')">
+        <input type="file" id="img_up" accept="image/*">
         <img id="preview_up">
       </div>
       <div class="upload-card">
         <h4>5. 俯視照片</h4>
-        <label for="img_down" class="upload-btn-label">上傳相片</label>
-        <input type="file" id="img_down" accept="image/*" onchange="loadAngleImage(event, 'down')">
+        <input type="file" id="img_down" accept="image/*">
         <img id="preview_down">
       </div>
       <div class="upload-card">
         <h4>6. 三七面照片</h4>
-        <label for="img_threequarter" class="upload-btn-label">上傳相片</label>
-        <input type="file" id="img_threequarter" accept="image/*" onchange="loadAngleImage(event, 'threequarter')">
+        <input type="file" id="img_threequarter" accept="image/*">
         <img id="preview_threequarter">
       </div>
     </div>
@@ -248,7 +232,6 @@
       <canvas id="cropCanvas" width="750" height="500"></canvas>
     </div>
 
-    <!-- 即時切割預覽區域 -->
     <div style="margin-top: 15px; text-align: left;">
       <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官即時預覽：</h4>
       <div id="stage2FacetsPreview" class="facets-library">
@@ -296,4 +279,24 @@
       <button onclick="transformActiveCanvasItem('scale', 1.1)">放大五官</button>
       <button onclick="transformActiveCanvasItem('scale', 0.9)">縮小五官</button>
       <button onclick="transformActiveCanvasItem('rotate', 15)">順旋轉</button>
-      <button onclick="transformActiveCanvasItem('rotate', -15)">逆旋
+      <button onclick="transformActiveCanvasItem('rotate', -15)">逆旋轉</button>
+      <button class="btn-danger" onclick="deleteActiveCanvasItem()">刪除選中五官</button>
+      <button class="btn-dark" onclick="exportCollage()">📥 下載當前自畫像</button>
+    </div>
+
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+      <div style="text-align: left;">
+        <h4>點擊素材加入畫布：</h4>
+        <div id="collageFacetsLibrary" class="facets-library" style="flex-direction: column; width: 180px; max-height: 500px; overflow-y: auto;">
+        </div>
+      </div>
+      
+      <div>
+        <canvas id="collageCanvas" width="700" height="550"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=20261014"></script>
+</body>
+</html>
