@@ -56,20 +56,8 @@
       text-align: center;
     }
     .upload-card h4 { margin: 0 0 8px 0; color: #007bff; }
-    .upload-card input[type="file"] {
-      width: 100%;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .upload-card img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 6px;
-      display: none;
-      margin-top: 8px;
-      border: 1px solid #ccc;
-    }
+    .upload-card input[type="file"] { width: 100%; font-size: 12px; cursor: pointer; }
+    .upload-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; display: none; margin-top: 8px; border: 1px solid #ccc; }
 
     .toolbar-group {
       display: flex;
@@ -109,29 +97,11 @@
       margin-top: 15px;
     }
     .library-item-container { position: relative; display: inline-block; }
-    .library-item {
-      height: 85px;
-      border: 2px solid #333;
-      border-radius: 6px;
-      cursor: pointer;
-      background: white;
-    }
+    .library-item { height: 85px; border: 2px solid #333; border-radius: 6px; cursor: pointer; background: white; }
     .delete-item-btn {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: #dc3545;
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 12px;
-      line-height: 20px;
-      text-align: center;
-      cursor: pointer;
-      font-weight: bold;
-      border: none;
-      padding: 0;
+      position: absolute; top: -8px; right: -8px; background: #dc3545; color: white;
+      border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px;
+      text-align: center; cursor: pointer; font-weight: bold; border: none; padding: 0;
     }
 
     .portrait-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
@@ -142,18 +112,18 @@
 <body>
 
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
-  <p class="subtitle">上傳 6 個角度照片 ➔ 手動幾何切割 ➔ 一鍵轉換 Line Drawing ➔ 拼合 3 張多視角自畫像</p>
+  <p class="subtitle">上傳 6 角度照片 ➔ 全臉轉 Line Drawing 線稿 ➔ 幾何切割五官 ➔ 拼合立體派自畫像</p>
 
   <div class="step-nav">
-    <button class="step-btn active" onclick="switchStage(1)">步驟 1: 上傳 6 角度照片</button>
-    <button class="step-btn" onclick="switchStage(2)">步驟 2: 幾何手動切割五官</button>
-    <button class="step-btn" onclick="switchStage(3)">步驟 3: 轉換 Line Drawing</button>
-    <button class="step-btn" onclick="switchStage(4)">步驟 4: 拼合立體主義自畫像</button>
+    <button class="step-btn active" onclick="switchStage(1)">步驟 1: 上傳照片</button>
+    <button class="step-btn" onclick="switchStage(2)">步驟 2: 全臉 Line Drawing</button>
+    <button class="step-btn" onclick="switchStage(3)">步驟 3: 幾何切割五官</button>
+    <button class="step-btn" onclick="switchStage(4)">步驟 4: 拼合自畫像</button>
   </div>
 
   <!-- 步驟 1 面板 -->
   <div id="stage1" class="stage-panel active">
-    <h3>請點擊下方「選擇檔案」按鈕上傳 6 個角度的照片：</h3>
+    <h3>步驟一：請上傳 6 個不同角度的照片：</h3>
     <div class="upload-grid">
       <div class="upload-card">
         <h4>1. 正面照片</h4>
@@ -187,11 +157,39 @@
       </div>
     </div>
     <br>
-    <button class="btn-success" onclick="switchStage(2)">已上傳完畢 ➔ 進入步驟二切割五官</button>
+    <button class="btn-success" onclick="switchStage(2)">已上傳完畢 ➔ 進入步驟二生成全臉線稿</button>
   </div>
 
-  <!-- 步驟 2 面板 -->
+  <!-- 步驟 2 面板：全臉 Line Drawing 轉換 -->
   <div id="stage2" class="stage-panel">
+    <h3>步驟二：一鍵將 6 個角度全臉轉換為手繪 Line Drawing 線稿：</h3>
+    <p>挑選色彩風格並點擊按鈕，即刻提取清晰乾淨的筆觸線條！</p>
+    
+    <div class="toolbar-group">
+      <label><b>選擇線稿筆觸色彩：</b></label>
+      <select id="lineColorSelect">
+        <option value="blue">經典藍色 (Blue Sketch)</option>
+        <option value="green">藝術綠色 (Green Sketch)</option>
+        <option value="red">熱情紅色 (Red Sketch)</option>
+        <option value="black">黑鋼筆 (Black Ink)</option>
+      </select>
+      <button class="btn-primary" style="font-size: 16px; padding: 10px 20px;" onclick="convertFullFaceLineDrawing()">✨ 轉換全臉 Line Drawing 線稿</button>
+    </div>
+
+    <div class="upload-grid" id="lineDrawingGrid">
+      <div class="upload-card"><h4>1. 正面線稿</h4><img id="line_preview_front"></div>
+      <div class="upload-card"><h4>2. 右側面線稿</h4><img id="line_preview_right"></div>
+      <div class="upload-card"><h4>3. 左側面線稿</h4><img id="line_preview_left"></div>
+      <div class="upload-card"><h4>4. 仰線稿</h4><img id="line_preview_up"></div>
+      <div class="upload-card"><h4>5. 俯線稿</h4><img id="line_preview_down"></div>
+      <div class="upload-card"><h4>6. 三七面線稿</h4><img id="line_preview_threequarter"></div>
+    </div>
+    <br>
+    <button class="btn-success" onclick="switchStage(3)">線稿生成完成 ➔ 進入步驟三切割五官</button>
+  </div>
+
+  <!-- 步驟 3 面板：幾何手動切割五官線稿 -->
+  <div id="stage3" class="stage-panel">
     <div class="toolbar-group">
       <label><b>選擇照片角度:</b></label>
       <select id="angleSelect" onchange="changeActiveSourceAngle()">
@@ -215,7 +213,7 @@
         <option value="hexagon">8. 六角形</option>
       </select>
 
-      <button class="btn-warning" onclick="cutCurrentFacet()">✂️ 切割選取區域五官</button>
+      <button class="btn-warning" onclick="cutCurrentFacet()">✂️ 切割選取區域五官線稿</button>
     </div>
 
     <div class="toolbar-group">
@@ -230,36 +228,14 @@
     </div>
 
     <div style="margin-top: 15px; text-align: left;">
-      <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官即時預覽：</h4>
-      <div id="stage2FacetsPreview" class="facets-library">
-        <span style="color:#888;">按下「✂️ 切割選取區域五官」後，切下的五官會即時顯示在這裡！</span>
+      <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官線稿素材庫：</h4>
+      <div id="stage3FacetsPreview" class="facets-library">
+        <span style="color:#888;">按下「✂️ 切割選取區域五官線稿」後，切下的線稿五官會顯示在這裡！</span>
       </div>
     </div>
 
     <br>
-    <button class="btn-success" onclick="switchStage(3)">切割完成 ➔ 進入步驟三轉換 Line Drawing</button>
-  </div>
-
-  <!-- 步驟 3 面板 -->
-  <div id="stage3" class="stage-panel">
-    <h3>已切割的各角度幾何五官素材庫：</h3>
-    <p>點擊下方按鈕，一鍵將所有手動切割出來的五官轉換為畢卡索鋼筆線稿風格 (Line Drawing)！</p>
-    
-    <div id="rawFacetsLibrary" class="facets-library">
-      <span style="color:#888;">尚未切割任何五官，請返回步驟二。</span>
-    </div>
-
-    <br>
-    <button class="btn-primary" style="font-size: 16px; padding: 12px 24px;" onclick="convertAllToLineDrawing()">✨ 一鍵變換成 LINE DRAWING 線稿</button>
-    <br><br>
-
-    <h3>Line Drawing 化後的五官預覽：</h3>
-    <div id="lineFacetsLibrary" class="facets-library">
-      <span style="color:#888;">轉換後線稿素材將顯示於此。</span>
-    </div>
-
-    <br>
-    <button class="btn-success" onclick="switchStage(4)">進行拼貼 ➔ 進入步驟四自畫像組合</button>
+    <button class="btn-success" onclick="switchStage(4)">切割完成 ➔ 進入步驟四自畫像組合</button>
   </div>
 
   <!-- 步驟 4 面板 -->
@@ -283,7 +259,7 @@
 
     <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
       <div style="text-align: left;">
-        <h4>點擊素材加入畫布：</h4>
+        <h4>點擊線稿素材加入畫布：</h4>
         <div id="collageFacetsLibrary" class="facets-library" style="flex-direction: column; width: 180px; max-height: 500px; overflow-y: auto;">
         </div>
       </div>
@@ -294,6 +270,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2026_PICASSO_LINE_ART_FINAL"></script>
+  <script src="app.js?v=2026_FULL_FACE_LINE_DRAWING_OK"></script>
 </body>
 </html>
