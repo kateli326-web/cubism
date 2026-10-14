@@ -2,6 +2,11 @@ let canvas, ctx;
 let elements = [];
 let selectedIndex = -1;
 
+// 拖曳狀態控制
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+
 window.onload = function() {
   canvas = document.getElementById('c');
   if (canvas) {
@@ -14,11 +19,19 @@ window.onload = function() {
   }
 
   if (canvas) {
+    // 綁定滑鼠事件 (電腦端)
     canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseup', handleMouseUp);
+
+    // 綁定觸控事件 (iPad / 行動裝置)
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd);
   }
 };
 
+// 1. 照片上傳與避開重疊放位
 function handleImageUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -30,12 +43,15 @@ function handleImageUpload(e) {
       let initWidth = 260;
       let initHeight = (img.height / img.width) * initWidth;
 
+      // 錯開放置，避免圖片重疊在一起
+      const offset = elements.length * 30;
+
       const newElement = {
         type: 'image',
         img: img,
         processedImg: null,
-        x: 50 + elements.length * 20,
-        y: 50 + elements.length * 20,
+        x: 40 + (offset % 200),
+        y: 40 + (offset % 200),
         width: initWidth,
         height: initHeight,
         isLineArt: false
@@ -51,6 +67,7 @@ function handleImageUpload(e) {
   e.target.value = '';
 }
 
+// 2. 主畫布渲染繪製
 function drawCanvas() {
   if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -63,175 +80,126 @@ function drawCanvas() {
       ctx.drawImage(renderImg, item.x, item.y, item.width, item.height);
 
       ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 4;
       ctx.strokeRect(item.x, item.y, item.width, item.height);
 
-      if (index === selectedIndex) {
-        ctx.strokeStyle = '#007bff';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(item.x - 4, item.y - 4, item.width + 8, item.height + 8);
-      }
+    } else if (item.type === 'facet') {
+      // 繪製幾何切割出的五官切片
+      ctx.drawImage(item.canvas, item.x, item.y, item.width, item.height);
+
     } else if (item.type === 'line') {
       ctx.beginPath();
       ctx.moveTo(item.x1, item.y1);
       ctx.lineTo(item.x2, item.y2);
       ctx.strokeStyle = item.color || '#000000';
-      ctx.lineWidth = item.lineWidth || 5;
+      ctx.lineWidth = item.lineWidth || 6;
       ctx.stroke();
+    }
 
-      if (index === selectedIndex) {
-        ctx.strokeStyle = '#007bff';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(Math.min(item.x1, item.x2) - 5, Math.min(item.y1, item.y2) - 5, Math.abs(item.x2 - item.x1) + 10, Math.abs(item.y2 - item.y1) + 10);
-      }
+    // 被選中的元素外加藍色邊框提示
+    if (index === selectedIndex) {
+      ctx.strokeStyle = '#007bff';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.strokeRect(item.x - 4, item.y - 4, item.width + 8, item.height + 8);
+      ctx.setLineDash([]);
     }
 
     ctx.restore();
   });
 }
 
-// 核心：自適應五官增強提線演算法 (Adaptive Outline Extraction)
-function applyBlackAndWhite() {
-  if (selectedIndex !== -1 && elements[selectedIndex].type === 'image') {
-    const item = elements[selectedIndex];
-    
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    const w = item.img.naturalWidth || item.img.width;
-    const h = item.img.naturalHeight || item.img.height;
-    tempCanvas.width = w;
-    tempCanvas.height = h;
-
-    tempCtx.drawImage(item.img, 0, 0, w, h);
-    const imgData = tempCtx.getImageData(0, 0, w, h);
-    const data = imgData.data;
-
-    // 1. 轉灰階
-    const gray = new Float32Array(w * h);
-    for (let i = 0; i < data.length; i += 4) {
-      gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-    }
-
-    // 2. 輕度平滑去燥 (保留五官小細節)
-    const blurred = new Float32Array(w * h);
-    for (let y = 1; y < h - 1; y++) {
-      for (let x = 1; x < w - 1; x++) {
-        const idx = y * w + x;
-        blurred[idx] = (
-          gray[idx - w - 1] + gray[idx - w] + gray[idx - w + 1] +
-          gray[idx - 1]     + gray[idx]     + gray[idx + 1] +
-          gray[idx + w - 1] + gray[idx + w] + gray[idx + w + 1]
-        ) / 9;
+// 3. 方案 B：切割幾何五官切片
+function extractGeometricFacets() {
+  let targetIndex = selectedIndex;
+  if (targetIndex === -1 || elements[targetIndex]?.type !== 'image') {
+    for (let i = elements.length - 1; i >= 0; i--) {
+      if (elements[i].type === 'image') {
+        targetIndex = i;
+        break;
       }
     }
-
-    // 3. 梯度微分計算
-    const output = tempCtx.createImageData(w, h);
-    const outData = output.data;
-    
-    // 門檻調整為 18：既能抓出眼睛、鼻子、嘴巴線條，又能保持背景乾淨
-    const threshold = 18; 
-
-    for (let y = 1; y < h - 1; y++) {
-      for (let x = 1; x < w - 1; x++) {
-        const idx = y * w + x;
-
-        const gx = -blurred[idx - w - 1] + blurred[idx - w + 1]
-                   -2 * blurred[idx - 1] + 2 * blurred[idx + 1]
-                   -blurred[idx + w - 1] + blurred[idx + w + 1];
-
-        const gy = -blurred[idx - w - 1] - 2 * blurred[idx - w] - blurred[idx - w + 1]
-                   +blurred[idx + w - 1] + 2 * blurred[idx + w] + blurred[idx + w + 1];
-
-        const grad = Math.sqrt(gx * gx + gy * gy);
-        const pixelIdx = idx * 4;
-
-        if (grad > threshold) {
-          outData[pixelIdx] = 0;     // 純黑五官線條
-          outData[pixelIdx + 1] = 0;
-          outData[pixelIdx + 2] = 0;
-        } else {
-          outData[pixelIdx] = 255;   // 純白皮膚/背景
-          outData[pixelIdx + 1] = 255;
-          outData[pixelIdx + 2] = 255;
-        }
-        outData[pixelIdx + 3] = 255;
-      }
-    }
-
-    tempCtx.putImageData(output, 0, 0);
-
-    const processedImg = new Image();
-    processedImg.onload = function () {
-      item.processedImg = processedImg;
-      item.isLineArt = true;
-      drawCanvas();
-    };
-    processedImg.src = tempCanvas.toDataURL();
-  } else {
-    alert('請先點選畫布上的照片！');
   }
-}
 
-function addCutLine() {
-  const newLine = {
-    type: 'line',
-    x1: 100,
-    y1: 100,
-    x2: 400,
-    y2: 500,
-    lineWidth: 6,
-    color: '#000000'
-  };
-  elements.push(newLine);
+  if (targetIndex === -1) {
+    alert('請先上傳一張照片！');
+    return;
+  }
+
+  const baseItem = elements[targetIndex];
+  const srcImg = baseItem.processedImg || baseItem.img;
+  const w = srcImg.naturalWidth || srcImg.width;
+  const h = srcImg.naturalHeight || srcImg.height;
+
+  // 定義 4 個幾何切割框的位置比例 (左眼, 右眼, 鼻子, 嘴巴)
+  const facetsConfig = [
+    {
+      name: 'left_eye',
+      clipPath: [[0.12, 0.18], [0.46, 0.14], [0.44, 0.42], [0.14, 0.44]],
+      offsetX: baseItem.x + baseItem.width + 20, offsetY: baseItem.y
+    },
+    {
+      name: 'right_eye',
+      clipPath: [[0.52, 0.16], [0.88, 0.20], [0.84, 0.45], [0.50, 0.42]],
+      offsetX: baseItem.x + baseItem.width + 160, offsetY: baseItem.y
+    },
+    {
+      name: 'nose',
+      clipPath: [[0.36, 0.32], [0.64, 0.32], [0.58, 0.72], [0.34, 0.70]],
+      offsetX: baseItem.x + baseItem.width + 50, offsetY: baseItem.y + 120
+    },
+    {
+      name: 'mouth',
+      clipPath: [[0.18, 0.60], [0.82, 0.58], [0.88, 0.90], [0.12, 0.92]],
+      offsetX: baseItem.x + baseItem.width + 30, offsetY: baseItem.y + 260
+    }
+  ];
+
+  facetsConfig.forEach(cfg => {
+    const fCanvas = document.createElement('canvas');
+    const fCtx = fCanvas.getContext('2d');
+    fCanvas.width = w;
+    fCanvas.height = h;
+
+    // 建立多邊形切割路徑
+    fCtx.beginPath();
+    const pts = cfg.clipPath;
+    fCtx.moveTo(pts[0][0] * w, pts[0][1] * h);
+    for (let i = 1; i < pts.length; i++) {
+      fCtx.lineTo(pts[i][0] * w, pts[i][1] * h);
+    }
+    fCtx.closePath();
+
+    fCtx.save();
+    fCtx.clip();
+    fCtx.drawImage(srcImg, 0, 0, w, h);
+    fCtx.restore();
+
+    // 加上畢加索風格粗黑外框
+    fCtx.strokeStyle = '#000000';
+    fCtx.lineWidth = Math.max(8, Math.round(w * 0.025));
+    fCtx.stroke();
+
+    const renderWidth = Math.min(180, baseItem.width * 0.6);
+    const renderHeight = (h / w) * renderWidth;
+
+    elements.push({
+      type: 'facet',
+      canvas: fCanvas,
+      x: Math.min(canvas.width - 150, cfg.offsetX),
+      y: Math.min(canvas.height - 150, cfg.offsetY),
+      width: renderWidth,
+      height: renderHeight
+    });
+  });
+
   selectedIndex = elements.length - 1;
   drawCanvas();
 }
 
-function deleteSelected() {
-  if (selectedIndex !== -1) {
-    elements.splice(selectedIndex, 1);
-    selectedIndex = -1;
-    drawCanvas();
-  }
-}
-
-function handleMouseDown(e) {
-  if (!canvas) return;
-  const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-
-  let found = false;
-  for (let i = elements.length - 1; i >= 0; i--) {
-    const item = elements[i];
-    if (item.type === 'image') {
-      if (mouseX >= item.x && mouseX <= item.x + item.width && mouseY >= item.y && mouseY <= item.y + item.height) {
-        selectedIndex = i;
-        found = true;
-        break;
-      }
-    }
-  }
-  if (!found) selectedIndex = -1;
-  drawCanvas();
-}
-
-function handleTouchStart(e) {
-  if (!canvas) return;
-  if (e.touches.length === 1) {
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = touch.clientX - rect.left;
-    const mouseY = touch.clientY - rect.top;
-
+// 4. 高對比黑白二值化
+function applyBlackAndWhite() {
+  let targetIndex = selectedIndex;
+  if (targetIndex === -1 || elements[targetIndex]?.type !== 'image') {
     for (let i = elements.length - 1; i >= 0; i--) {
-      const item = elements[i];
-      if (item.type === 'image' && mouseX >= item.x && mouseX <= item.x + item.width && mouseY >= item.y && mouseY <= item.y + item.height) {
-        selectedIndex = i;
-        break;
-      }
-    }
-    drawCanvas();
-  }
-}
+      if (elements
