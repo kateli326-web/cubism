@@ -15,29 +15,137 @@
     }
     h1 { color: #1a1a1a; margin-bottom: 5px; font-size: 24px; }
     p.subtitle { color: #666; margin-top: 0; margin-bottom: 15px; font-size: 14px; }
-    .step-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .step-btn { padding: 10px 18px; font-size: 15px; font-weight: bold; border: none; border-radius: 20px; background-color: #e0e0e0; color: #555; cursor: pointer; }
-    .step-btn.active { background-color: #007bff; color: white; box-shadow: 0 4px 8px rgba(0,123,255,0.3); }
+
+    /* 步驟導航條 */
+    .step-nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .step-btn {
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 20px;
+      background-color: #e0e0e0;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .step-btn.active {
+      background-color: #007bff;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+    }
+
+    /* 階段面板控制 */
     .stage-panel { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 1100px; margin: 0 auto; }
     .stage-panel.active { display: block; }
-    .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
-    .upload-card { border: 2px dashed #ccc; border-radius: 8px; padding: 10px; background: #fafafa; text-align: center; }
+
+    /* 步驟 1：6角度照片上傳格 */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .upload-card {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      background: #fafafa;
+      text-align: center;
+    }
     .upload-card h4 { margin: 5px 0 10px 0; color: #333; }
     .upload-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; display: none; margin-top: 5px; }
     .upload-card input { display: none; }
-    .upload-btn-label { display: inline-block; padding: 6px 12px; background-color: #007bff; color: white; font-size: 13px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .toolbar-group { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-    button, select { padding: 8px 14px; font-size: 14px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .upload-btn-label {
+      display: inline-block;
+      padding: 6px 12px;
+      background-color: #007bff;
+      color: white;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* 控制按鈕列 */
+    .toolbar-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    button, select {
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
     .btn-primary { background: #007bff; color: white; }
     .btn-warning { background: #ffc107; color: #000; }
     .btn-success { background: #28a745; color: white; }
     .btn-danger { background: #dc3545; color: white; }
     .btn-dark { background: #343a40; color: white; }
+
     canvas { border: 2px solid #222; background: #fff; border-radius: 4px; }
-    .facets-library { display: flex; gap: 12px; overflow-x: auto; padding: 12px; background: #f8f9fa; border: 2px dashed #007bff; border-radius: 8px; min-height: 110px; align-items: center; margin-top: 15px; }
-    .library-item-container { position: relative; display: inline-block; }
-    .library-item { height: 85px; border: 2px solid #333; border-radius: 6px; cursor: pointer; background: white; }
-    .delete-item-btn { position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; border: none; cursor: pointer; font-weight: bold; }
+
+    /* 素材庫與預覽區 */
+    .facets-library {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 12px;
+      background: #f8f9fa;
+      border: 2px dashed #007bff;
+      border-radius: 8px;
+      min-height: 110px;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .library-item-container {
+      position: relative;
+      display: inline-block;
+    }
+    .library-item {
+      height: 85px;
+      border: 2px solid #333;
+      border-radius: 6px;
+      cursor: pointer;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      transition: transform 0.2s;
+    }
+    .library-item:hover { border-color: #007bff; transform: scale(1.08); }
+    .delete-item-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #dc3545;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      line-height: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+      padding: 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* 畫布切換標籤 */
     .portrait-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
     .tab-btn { background: #e9ecef; border: 1px solid #ccc; padding: 6px 16px; border-radius: 15px; cursor: pointer; }
     .tab-btn.active { background: #343a40; color: white; border-color: #343a40; }
@@ -48,6 +156,7 @@
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
   <p class="subtitle">上傳 6 個角度照片 ➔ 手動幾何切割 ➔ 一鍵轉換 Line Drawing ➔ 拼合 3 張多視角自畫像</p>
 
+  <!-- 頂部步驟導航 -->
   <div class="step-nav">
     <button class="step-btn active" onclick="switchStage(1)">步驟 1: 上傳 6 角度照片</button>
     <button class="step-btn" onclick="switchStage(2)">步驟 2: 幾何手動切割五官</button>
@@ -55,6 +164,7 @@
     <button class="step-btn" onclick="switchStage(4)">步驟 4: 拼合立體主義自畫像</button>
   </div>
 
+  <!-- 步驟 1 面板 -->
   <div id="stage1" class="stage-panel active">
     <h3>請上傳學生 6 個不同角度的照片素材：</h3>
     <div class="upload-grid">
@@ -99,9 +209,10 @@
     <button class="btn-success" onclick="switchStage(2)">已上傳完畢 ➔ 進入步驟二切割五官</button>
   </div>
 
+  <!-- 步驟 2 面板 -->
   <div id="stage2" class="stage-panel">
     <div class="toolbar-group">
-      <label><b>選擇照片角度:</b></label>
+      <label><b>選擇要切割的照片角度:</b></label>
       <select id="angleSelect" onchange="changeActiveSourceAngle()">
         <option value="front">1. 正面</option>
         <option value="right">2. 右側面</option>
@@ -111,7 +222,7 @@
         <option value="threequarter">6. 三七面</option>
       </select>
 
-      <label><b>選擇幾何圖形:</b></label>
+      <label><b>選擇 8 種幾何圖形:</b></label>
       <select id="shapeSelect" onchange="updateCropShape()">
         <option value="diamond">1. 菱形</option>
         <option value="triangle">2. 三角形</option>
@@ -137,6 +248,7 @@
       <canvas id="cropCanvas" width="750" height="500"></canvas>
     </div>
 
+    <!-- 即時切割預覽區域 -->
     <div style="margin-top: 15px; text-align: left;">
       <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官即時預覽：</h4>
       <div id="stage2FacetsPreview" class="facets-library">
@@ -148,24 +260,32 @@
     <button class="btn-success" onclick="switchStage(3)">切割完成 ➔ 進入步驟三轉換 Line Drawing</button>
   </div>
 
+  <!-- 步驟 3 面板 -->
   <div id="stage3" class="stage-panel">
     <h3>已切割的各角度幾何五官素材庫：</h3>
+    <p>點擊下方按鈕，一鍵將所有手動切割出來的五官轉換為畢卡索鋼筆線稿風格 (Line Drawing)！</p>
+    
     <div id="rawFacetsLibrary" class="facets-library">
       <span style="color:#888;">尚未切割任何五官，請返回步驟二。</span>
     </div>
+
     <br>
     <button class="btn-primary" style="font-size: 16px; padding: 12px 24px;" onclick="convertAllToLineDrawing()">✨ 一鍵變換成 LINE DRAWING 線稿</button>
     <br><br>
+
     <h3>Line Drawing 化後的五官預覽：</h3>
     <div id="lineFacetsLibrary" class="facets-library">
       <span style="color:#888;">轉換後線稿素材將顯示於此。</span>
     </div>
+
     <br>
     <button class="btn-success" onclick="switchStage(4)">進行拼貼 ➔ 進入步驟四自畫像組合</button>
   </div>
 
+  <!-- 步驟 4 面板 -->
   <div id="stage4" class="stage-panel">
     <h3>模仿畢卡索《哭泣的女人》立體主義自畫像拼貼畫布：</h3>
+    
     <div class="portrait-tabs">
       <button class="tab-btn active" onclick="switchPortraitTab(0)">自畫像 A</button>
       <button class="tab-btn" onclick="switchPortraitTab(1)">自畫像 B</button>
@@ -176,23 +296,4 @@
       <button onclick="transformActiveCanvasItem('scale', 1.1)">放大五官</button>
       <button onclick="transformActiveCanvasItem('scale', 0.9)">縮小五官</button>
       <button onclick="transformActiveCanvasItem('rotate', 15)">順旋轉</button>
-      <button onclick="transformActiveCanvasItem('rotate', -15)">逆旋轉</button>
-      <button class="btn-danger" onclick="deleteActiveCanvasItem()">刪除選中五官</button>
-      <button class="btn-dark" onclick="exportCollage()">📥 下載當前自畫像</button>
-    </div>
-
-    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-      <div style="text-align: left;">
-        <h4>點擊素材加入畫布：</h4>
-        <div id="collageFacetsLibrary" class="facets-library" style="flex-direction: column; width: 180px; max-height: 500px; overflow-y: auto;">
-        </div>
-      </div>
-      <div>
-        <canvas id="collageCanvas" width="700" height="550"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js?v=888888"></script>
-</body>
-</html>
+      <button onclick="transformActiveCanvasItem('rotate', -15)">逆旋
