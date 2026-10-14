@@ -252,6 +252,7 @@ function renderStage2Preview() {
   });
 }
 
+// 4. 畢卡索純手繪幾何 Line Drawing 提線演算法 (Clean Picassoid Ink Extractor)
 function convertAllToLineDrawing() {
   if (rawFacets.length === 0) {
     alert('尚未切割任何五官素材！請先在步驟二手動切割。');
@@ -269,246 +270,47 @@ function convertAllToLineDrawing() {
     lineCanvas.width = w;
     lineCanvas.height = h;
 
+    // A. 填充 100% 潔白背景底色 (純白白紙感)
+    lineCtx.fillStyle = '#ffffff';
+    lineCtx.fillRect(0, 0, w, h);
+
     const srcCtx = origCanvas.getContext('2d');
     const imgData = srcCtx.getImageData(0, 0, w, h);
     const data = imgData.data;
 
-    const gray = new Float32Array(w * h);
-    const alpha = new Uint8Array(w * h);
+    // B. 精準提取瞳孔/深色特徵與邊緣，避免膚色陰影干擾
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = w;
+    tempCanvas.height = h;
 
+    const edgeData = tempCtx.createImageData(w, h);
+    const ed = edgeData.data;
+
+    // 計算局部暗部特徵 (眼珠、鼻孔、唇線)
     for (let i = 0; i < data.length; i += 4) {
-      const idx = i / 4;
-      gray[idx] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      alpha[idx] = data[i + 3];
-    }
-
-    const output = lineCtx.createImageData(w, h);
-    const outData = output.data;
-
-    for (let y = 1; y < h - 1; y++) {
-      for (let x = 1; x < w - 1; x++) {
-        const idx = y * w + x;
-        if (alpha[idx] < 50) continue;
-
-        const gx = 
-          -1 * gray[(y - 1) * w + (x - 1)] + 1 * gray[(y - 1) * w + (x + 1)] +
-          -2 * gray[y * w + (x - 1)]       + 2 * gray[y * w + (x + 1)] +
-          -1 * gray[(y + 1) * w + (x - 1)] + 1 * gray[(y + 1) * w + (x + 1)];
-
-        const gy = 
-          -1 * gray[(y - 1) * w + (x - 1)] - 2 * gray[(y - 1) * w + x] - 1 * gray[(y - 1) * w + (x + 1)] +
-           1 * gray[(y + 1) * w + (x - 1)] + 2 * gray[(y + 1) * w + x] + 1 * gray[(y + 1) * w + (x + 1)];
-
-        const g = Math.sqrt(gx * gx + gy * gy);
-        const pixelIdx = idx * 4;
-
-        if (g > 38) {
-          outData[pixelIdx] = 0;
-          outData[pixelIdx + 1] = 0;
-          outData[pixelIdx + 2] = 0;
-          outData[pixelIdx + 3] = 255;
-        } else {
-          outData[pixelIdx] = 255;
-          outData[pixelIdx + 1] = 255;
-          outData[pixelIdx + 2] = 255;
-          outData[pixelIdx + 3] = 255;
+      if (data[i + 3] > 30) {
+        const brightness = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        // 只保留真正極深色結構特徵 (眼珠/唇線/鼻孔/黑框)
+        if (brightness < 85) {
+          ed[i] = 0;
+          ed[i + 1] = 0;
+          ed[i + 2] = 0;
+          ed[i + 3] = 255;
         }
       }
     }
+    tempCtx.putImageData(edgeData, 0, 0);
 
-    lineCtx.putImageData(output, 0, 0);
+    // C. 繪製精細鋼筆輪廓線
+    lineCtx.drawImage(tempCanvas, 0, 0);
+
+    // D. 根據幾何形狀重構畢卡索手繪幾何風格內部結構線條
+    lineCtx.strokeStyle = '#000000';
+    lineCtx.lineWidth = Math.max(5, Math.round(w * 0.028));
+    lineCtx.lineCap = 'round';
+    lineCtx.lineJoin = 'round';
 
     const pts = getShapePoints(item.shape || 'diamond');
-    lineCtx.beginPath();
-    lineCtx.moveTo(pts[0][0] * w, pts[0][1] * h);
-    for (let i = 1; i < pts.length; i++) {
-      lineCtx.lineTo(pts[i][0] * w, pts[i][1] * h);
-    }
-    lineCtx.closePath();
 
-    lineCtx.strokeStyle = '#000000';
-    lineCtx.lineWidth = Math.max(8, Math.round(w * 0.035));
-    lineCtx.stroke();
-
-    lineFacets.push({
-      canvas: lineCanvas,
-      angle: item.angle,
-      width: item.width,
-      height: item.height
-    });
-  });
-
-  renderStage3Libraries();
-  alert('✨ 成功轉換為高清畢卡索 Line Drawing 鋼筆線稿！');
-}
-
-function renderStage3Libraries() {
-  const rawLib = document.getElementById('rawFacetsLibrary');
-  const lineLib = document.getElementById('lineFacetsLibrary');
-
-  if (rawLib) {
-    rawLib.innerHTML = rawFacets.length === 0 ? '<span style="color:#888;">尚未切割任何五官</span>' : '';
-    rawFacets.forEach(item => {
-      const img = document.createElement('img');
-      img.src = item.canvas.toDataURL();
-      img.className = 'library-item';
-      rawLib.appendChild(img);
-    });
-  }
-
-  if (lineLib) {
-    lineLib.innerHTML = lineFacets.length === 0 ? '<span style="color:#888;">尚未轉換 Line Drawing</span>' : '';
-    lineFacets.forEach(item => {
-      const img = document.createElement('img');
-      img.src = item.canvas.toDataURL();
-      img.className = 'library-item';
-      lineLib.appendChild(img);
-    });
-  }
-}
-
-function switchPortraitTab(index) {
-  activePortraitIndex = index;
-  selectedCollageItemIndex = -1;
-  document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-    btn.classList.toggle('active', idx === index);
-  });
-  drawCollageCanvas();
-}
-
-function renderCollageLibrary() {
-  const lib = document.getElementById('collageFacetsLibrary');
-  if (!lib) return;
-  lib.innerHTML = lineFacets.length === 0 ? '<span style="color:#888;">無 Line Drawing 素材</span>' : '';
-
-  lineFacets.forEach((item, idx) => {
-    const img = document.createElement('img');
-    img.src = item.canvas.toDataURL();
-    img.className = 'library-item';
-    img.title = `點擊加入 [${item.angle}] 五官`;
-    img.onclick = () => addFacetToCollage(idx);
-    lib.appendChild(img);
-  });
-}
-
-function addFacetToCollage(lineFacetIndex) {
-  const facet = lineFacets[lineFacetIndex];
-  if (!facet) return;
-
-  const newItem = {
-    canvas: facet.canvas,
-    x: 200 + Math.random() * 50,
-    y: 150 + Math.random() * 50,
-    width: facet.width,
-    height: facet.height,
-    rotation: 0
-  };
-
-  portraitsData[activePortraitIndex].push(newItem);
-  selectedCollageItemIndex = portraitsData[activePortraitIndex].length - 1;
-  drawCollageCanvas();
-}
-
-function drawCollageCanvas() {
-  if (!collageCtx || !collageCanvas) return;
-  collageCtx.clearRect(0, 0, collageCanvas.width, collageCanvas.height);
-
-  const currentItems = portraitsData[activePortraitIndex];
-  currentItems.forEach((item, idx) => {
-    collageCtx.save();
-    collageCtx.translate(item.x + item.width / 2, item.y + item.height / 2);
-    collageCtx.rotate((item.rotation * Math.PI) / 180);
-    collageCtx.drawImage(item.canvas, -item.width / 2, -item.height / 2, item.width, item.height);
-
-    if (idx === selectedCollageItemIndex) {
-      collageCtx.strokeStyle = '#007bff';
-      collageCtx.lineWidth = 3;
-      collageCtx.setLineDash([6, 6]);
-      collageCtx.strokeRect(-item.width / 2 - 4, -item.height / 2 - 4, item.width + 8, item.height + 8);
-    }
-    collageCtx.restore();
-  });
-}
-
-function transformActiveCanvasItem(type, val) {
-  if (selectedCollageItemIndex === -1) return;
-  const item = portraitsData[activePortraitIndex][selectedCollageItemIndex];
-  if (type === 'scale') {
-    item.width *= val;
-    item.height *= val;
-  } else if (type === 'rotate') {
-    item.rotation += val;
-  }
-  drawCollageCanvas();
-}
-
-function deleteActiveCanvasItem() {
-  if (selectedCollageItemIndex !== -1) {
-    portraitsData[activePortraitIndex].splice(selectedCollageItemIndex, 1);
-    selectedCollageItemIndex = -1;
-    drawCollageCanvas();
-  }
-}
-
-function exportCollage() {
-  const link = document.createElement('a');
-  link.download = `畢卡索立體派自畫像_${['A','B','C'][activePortraitIndex]}.png`;
-  link.href = collageCanvas.toDataURL();
-  link.click();
-}
-
-function handleCropMouseDown(e) {
-  const rect = cropCanvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-
-  if (mx >= cropBox.x && mx <= cropBox.x + cropBox.width &&
-      my >= cropBox.y && my <= cropBox.y + cropBox.height) {
-    isDraggingBox = true;
-    startX = mx - cropBox.x;
-    startY = my - cropBox.y;
-  }
-}
-
-function handleCropMouseMove(e) {
-  if (!isDraggingBox) return;
-  const rect = cropCanvas.getBoundingClientRect();
-  cropBox.x = e.clientX - rect.left - startX;
-  cropBox.y = e.clientY - rect.top - startY;
-  drawCropCanvas();
-}
-
-function handleCropMouseUp() { isDraggingBox = false; }
-
-function handleCollageMouseDown(e) {
-  const rect = collageCanvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-
-  const currentItems = portraitsData[activePortraitIndex];
-  selectedCollageItemIndex = -1;
-
-  for (let i = currentItems.length - 1; i >= 0; i--) {
-    const item = currentItems[i];
-    if (mx >= item.x && mx <= item.x + item.width &&
-        my >= item.y && my <= item.y + item.height) {
-      selectedCollageItemIndex = i;
-      isDraggingCollageItem = true;
-      startX = mx - item.x;
-      startY = my - item.y;
-      break;
-    }
-  }
-  drawCollageCanvas();
-}
-
-function handleCollageMouseMove(e) {
-  if (!isDraggingCollageItem || selectedCollageItemIndex === -1) return;
-  const rect = collageCanvas.getBoundingClientRect();
-  const item = portraitsData[activePortraitIndex][selectedCollageItemIndex];
-  item.x = e.clientX - rect.left - startX;
-  item.y = e.clientY - rect.top - startY;
-  drawCollageCanvas();
-}
-
-function handleCollageMouseUp() { isDraggingCollageItem = false; }
+    // 繪製幾何分割交叉線條（如《
