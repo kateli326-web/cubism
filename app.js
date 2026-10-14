@@ -176,7 +176,7 @@ function transformActiveBox(type, val) {
   drawCropCanvas();
 }
 
-// 切割五官並【即時顯示】
+// 切割五官
 function cutCurrentFacet() {
   const img = angleImages[activeAngleKey];
   if (!img) {
@@ -221,15 +221,14 @@ function cutCurrentFacet() {
   rawFacets.push({
     canvas: fCanvas,
     angle: activeAngleKey,
+    shape: cropBox.shape,
     width: cropBox.width,
     height: cropBox.height
   });
 
-  // 即時刷新步驟二預覽區
   renderStage2Preview();
 }
 
-// 渲染步驟二即時預覽區
 function renderStage2Preview() {
   const previewDiv = document.getElementById('stage2FacetsPreview');
   if (!previewDiv) return;
@@ -247,12 +246,10 @@ function renderStage2Preview() {
     const img = document.createElement('img');
     img.src = item.canvas.toDataURL();
     img.className = 'library-item';
-    img.title = `切下的 [${item.angle}] 五官`;
 
     const delBtn = document.createElement('button');
     delBtn.className = 'delete-item-btn';
     delBtn.innerHTML = '✕';
-    delBtn.title = '刪除此切片';
     delBtn.onclick = (e) => {
       e.stopPropagation();
       rawFacets.splice(idx, 1);
@@ -265,7 +262,7 @@ function renderStage2Preview() {
   });
 }
 
-// 4. 步驟 3：一鍵轉換 Line Drawing
+// 4. 步驟 3：高清晰度畢卡索 Line Drawing 提線演算法 (Sobel Edge Detector + High Contrast Ink)
 function convertAllToLineDrawing() {
   if (rawFacets.length === 0) {
     alert('尚未切割任何五官素材！請先在步驟二手動切割。');
@@ -283,204 +280,25 @@ function convertAllToLineDrawing() {
     lineCanvas.width = w;
     lineCanvas.height = h;
 
-    const imgData = origCanvas.getContext('2d').getImageData(0, 0, w, h);
+    const srcCtx = origCanvas.getContext('2d');
+    const imgData = srcCtx.getImageData(0, 0, w, h);
     const data = imgData.data;
 
+    // A. 轉灰階
+    const gray = new Float32Array(w * h);
+    const alpha = new Uint8Array(w * h);
+
     for (let i = 0; i < data.length; i += 4) {
-      if (data[i + 3] > 0) {
-        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-        const v = avg < 130 ? 0 : 255;
-        data[i] = v; data[i + 1] = v; data[i + 2] = v;
-      }
+      const idx = i / 4;
+      gray[idx] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      alpha[idx] = data[i + 3];
     }
 
-    lineCtx.putImageData(imgData, 0, 0);
+    // B. Sobel 鋼筆輪廓線條提取
+    const output = lineCtx.createImageData(w, h);
+    const outData = output.data;
 
-    lineCtx.strokeStyle = '#000000';
-    lineCtx.lineWidth = Math.max(8, Math.round(w * 0.04));
-    lineCtx.strokeRect(0, 0, w, h);
-
-    lineFacets.push({
-      canvas: lineCanvas,
-      angle: item.angle,
-      width: item.width,
-      height: item.height
-    });
-  });
-
-  renderStage3Libraries();
-  alert('✨ 成功一鍵轉換為畢卡索 Line Drawing 鋼筆線稿風格！');
-}
-
-function renderStage3Libraries() {
-  const rawLib = document.getElementById('rawFacetsLibrary');
-  const lineLib = document.getElementById('lineFacetsLibrary');
-
-  if (rawLib) {
-    rawLib.innerHTML = rawFacets.length === 0 ? '<span style="color:#888;">尚未切割任何五官</span>' : '';
-    rawFacets.forEach(item => {
-      const img = document.createElement('img');
-      img.src = item.canvas.toDataURL();
-      img.className = 'library-item';
-      rawLib.appendChild(img);
-    });
-  }
-
-  if (lineLib) {
-    lineLib.innerHTML = lineFacets.length === 0 ? '<span style="color:#888;">尚未轉換 Line Drawing</span>' : '';
-    lineFacets.forEach(item => {
-      const img = document.createElement('img');
-      img.src = item.canvas.toDataURL();
-      img.className = 'library-item';
-      lineLib.appendChild(img);
-    });
-  }
-}
-
-// 5. 步驟 4：自畫像 A, B, C 拼貼
-function switchPortraitTab(index) {
-  activePortraitIndex = index;
-  selectedCollageItemIndex = -1;
-  document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-    btn.classList.toggle('active', idx === index);
-  });
-  drawCollageCanvas();
-}
-
-function renderCollageLibrary() {
-  const lib = document.getElementById('collageFacetsLibrary');
-  if (!lib) return;
-  lib.innerHTML = lineFacets.length === 0 ? '<span style="color:#888;">無 Line Drawing 素材</span>' : '';
-
-  lineFacets.forEach((item, idx) => {
-    const img = document.createElement('img');
-    img.src = item.canvas.toDataURL();
-    img.className = 'library-item';
-    img.title = `點擊加入 [${item.angle}] 五官`;
-    img.onclick = () => addFacetToCollage(idx);
-    lib.appendChild(img);
-  });
-}
-
-function addFacetToCollage(lineFacetIndex) {
-  const facet = lineFacets[lineFacetIndex];
-  if (!facet) return;
-
-  const newItem = {
-    canvas: facet.canvas,
-    x: 200 + Math.random() * 50,
-    y: 150 + Math.random() * 50,
-    width: facet.width,
-    height: facet.height,
-    rotation: 0
-  };
-
-  portraitsData[activePortraitIndex].push(newItem);
-  selectedCollageItemIndex = portraitsData[activePortraitIndex].length - 1;
-  drawCollageCanvas();
-}
-
-function drawCollageCanvas() {
-  if (!collageCtx || !collageCanvas) return;
-  collageCtx.clearRect(0, 0, collageCanvas.width, collageCanvas.height);
-
-  const currentItems = portraitsData[activePortraitIndex];
-  currentItems.forEach((item, idx) => {
-    collageCtx.save();
-    collageCtx.translate(item.x + item.width / 2, item.y + item.height / 2);
-    collageCtx.rotate((item.rotation * Math.PI) / 180);
-    collageCtx.drawImage(item.canvas, -item.width / 2, -item.height / 2, item.width, item.height);
-
-    if (idx === selectedCollageItemIndex) {
-      collageCtx.strokeStyle = '#007bff';
-      collageCtx.lineWidth = 3;
-      collageCtx.setLineDash([6, 6]);
-      collageCtx.strokeRect(-item.width / 2 - 4, -item.height / 2 - 4, item.width + 8, item.height + 8);
-    }
-    collageCtx.restore();
-  });
-}
-
-function transformActiveCanvasItem(type, val) {
-  if (selectedCollageItemIndex === -1) return;
-  const item = portraitsData[activePortraitIndex][selectedCollageItemIndex];
-  if (type === 'scale') {
-    item.width *= val;
-    item.height *= val;
-  } else if (type === 'rotate') {
-    item.rotation += val;
-  }
-  drawCollageCanvas();
-}
-
-function deleteActiveCanvasItem() {
-  if (selectedCollageItemIndex !== -1) {
-    portraitsData[activePortraitIndex].splice(selectedCollageItemIndex, 1);
-    selectedCollageItemIndex = -1;
-    drawCollageCanvas();
-  }
-}
-
-function exportCollage() {
-  const link = document.createElement('a');
-  link.download = `畢卡索立體派自畫像_${['A','B','C'][activePortraitIndex]}.png`;
-  link.href = collageCanvas.toDataURL();
-  link.click();
-}
-
-// 拖曳事件處理
-function handleCropMouseDown(e) {
-  const rect = cropCanvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-
-  if (mx >= cropBox.x && mx <= cropBox.x + cropBox.width &&
-      my >= cropBox.y && my <= cropBox.y + cropBox.height) {
-    isDraggingBox = true;
-    startX = mx - cropBox.x;
-    startY = my - cropBox.y;
-  }
-}
-
-function handleCropMouseMove(e) {
-  if (!isDraggingBox) return;
-  const rect = cropCanvas.getBoundingClientRect();
-  cropBox.x = e.clientX - rect.left - startX;
-  cropBox.y = e.clientY - rect.top - startY;
-  drawCropCanvas();
-}
-
-function handleCropMouseUp() { isDraggingBox = false; }
-
-function handleCollageMouseDown(e) {
-  const rect = collageCanvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-
-  const currentItems = portraitsData[activePortraitIndex];
-  selectedCollageItemIndex = -1;
-
-  for (let i = currentItems.length - 1; i >= 0; i--) {
-    const item = currentItems[i];
-    if (mx >= item.x && mx <= item.x + item.width &&
-        my >= item.y && my <= item.y + item.height) {
-      selectedCollageItemIndex = i;
-      isDraggingCollageItem = true;
-      startX = mx - item.x;
-      startY = my - item.y;
-      break;
-    }
-  }
-  drawCollageCanvas();
-}
-
-function handleCollageMouseMove(e) {
-  if (!isDraggingCollageItem || selectedCollageItemIndex === -1) return;
-  const rect = collageCanvas.getBoundingClientRect();
-  const item = portraitsData[activePortraitIndex][selectedCollageItemIndex];
-  item.x = e.clientX - rect.left - startX;
-  item.y = e.clientY - rect.top - startY;
-  drawCollageCanvas();
-}
-
-function handleCollageMouseUp() { isDraggingCollageItem = false; }
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = y * w + x;
+        if (alpha[idx] < 50) continue;
