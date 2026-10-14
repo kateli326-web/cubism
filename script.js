@@ -7,8 +7,8 @@ let isDragging = false;
 let startX = 0;
 let startY = 0;
 
-// 網頁加載完畢後初始化
-window.addEventListener('DOMContentLoaded', function() {
+// 初始化（使用 window.onload 保證所有 HTML 元素皆已完全載入）
+window.onload = function() {
   canvas = document.getElementById('c');
   if (canvas) {
     ctx = canvas.getContext('2d');
@@ -30,11 +30,11 @@ window.addEventListener('DOMContentLoaded', function() {
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleTouchEnd);
   }
-});
+};
 
-// 1. 照片上傳與防重疊
+// 1. 照片上傳（修復事件處理）
 function handleImageUpload(e) {
-  const file = e.target.files[0];
+  const file = e.target.files && e.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
@@ -44,7 +44,7 @@ function handleImageUpload(e) {
       let initWidth = 260;
       let initHeight = (img.height / img.width) * initWidth;
 
-      // 錯開位置，防止照片完全重疊
+      // 錯開位置，避免照片上傳後完全重疊
       const offset = elements.length * 35;
 
       const newElement = {
@@ -85,7 +85,7 @@ function drawCanvas() {
       ctx.strokeRect(item.x, item.y, item.width, item.height);
 
     } else if (item.type === 'facet') {
-      // 繪製切割好的幾何五官
+      // 繪製切割出來的幾何五官切片
       ctx.drawImage(item.canvas, item.x, item.y, item.width, item.height);
 
     } else if (item.type === 'line') {
@@ -97,7 +97,7 @@ function drawCanvas() {
       ctx.stroke();
     }
 
-    // 選中項目的藍色虛線框提示
+    // 選中項目的虛線框提示
     if (index === selectedIndex) {
       ctx.strokeStyle = '#007bff';
       ctx.lineWidth = 3;
@@ -132,12 +132,12 @@ function extractGeometricFacets() {
   const w = srcImg.naturalWidth || srcImg.width || 300;
   const h = srcImg.naturalHeight || srcImg.height || 300;
 
-  // 4 個幾何切割框配置
+  // 4 個幾何切割框配置（左眼、右眼、鼻子、嘴巴）
   const facetsConfig = [
-    { name: '左眼', clipPath: [[0.12, 0.18], [0.46, 0.14], [0.44, 0.42], [0.14, 0.44]], dx: 300, dy: 30 },
-    { name: '右眼', clipPath: [[0.52, 0.16], [0.88, 0.20], [0.84, 0.45], [0.50, 0.42]], dx: 460, dy: 30 },
-    { name: '鼻子', clipPath: [[0.36, 0.30], [0.64, 0.30], [0.58, 0.72], [0.34, 0.70]], dx: 380, dy: 160 },
-    { name: '嘴巴', clipPath: [[0.18, 0.60], [0.82, 0.58], [0.88, 0.90], [0.12, 0.92]], dx: 330, dy: 320 }
+    { name: '左眼', clipPath: [[0.12, 0.18], [0.46, 0.14], [0.44, 0.42], [0.14, 0.44]], dx: baseItem.x + baseItem.width + 20, dy: baseItem.y },
+    { name: '右眼', clipPath: [[0.52, 0.16], [0.88, 0.20], [0.84, 0.45], [0.50, 0.42]], dx: baseItem.x + baseItem.width + 160, dy: baseItem.y },
+    { name: '鼻子', clipPath: [[0.36, 0.30], [0.64, 0.30], [0.58, 0.72], [0.34, 0.70]], dx: baseItem.x + baseItem.width + 50, dy: baseItem.y + 120 },
+    { name: '嘴巴', clipPath: [[0.18, 0.60], [0.82, 0.58], [0.88, 0.90], [0.12, 0.92]], dx: baseItem.x + baseItem.width + 30, dy: baseItem.y + 260 }
   ];
 
   facetsConfig.forEach(cfg => {
@@ -146,7 +146,7 @@ function extractGeometricFacets() {
     fCanvas.width = w;
     fCanvas.height = h;
 
-    // 多邊形裁剪
+    // 幾何多邊形裁剪
     fCtx.beginPath();
     const pts = cfg.clipPath;
     fCtx.moveTo(pts[0][0] * w, pts[0][1] * h);
@@ -171,8 +171,8 @@ function extractGeometricFacets() {
     elements.push({
       type: 'facet',
       canvas: fCanvas,
-      x: cfg.dx,
-      y: cfg.dy,
+      x: Math.min(canvas.width - 150, Math.max(10, cfg.dx)),
+      y: Math.min(canvas.height - 150, Math.max(10, cfg.dy)),
       width: renderWidth,
       height: renderHeight
     });
@@ -254,7 +254,7 @@ function deleteSelected() {
 }
 
 // ----------------------------------------------------
-// 拖曳移動系統 (Drag and Drop System)
+// 滑動與觸控拖曳移動邏輯 (Drag and Drop)
 // ----------------------------------------------------
 
 function handleMouseDown(e) {
