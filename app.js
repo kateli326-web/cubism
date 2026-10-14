@@ -101,7 +101,7 @@ function switchStage(stageNum) {
 }
 
 // -------------------------------------------------------------
-// 【升級去噪引擎】全臉 Line Drawing 高清降噪邊緣提取
+// 【DoG 雙重高斯絕密去躁線稿引擎】徹底消滅背景與皮膚雜點
 // -------------------------------------------------------------
 function convertFullFaceLineDrawing() {
   var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'];
@@ -127,17 +127,15 @@ function convertFullFaceLineDrawing() {
   if (!hasImage) {
     alert('請先在步驟一上傳至少一張照片！');
   } else {
-    alert('✨ 已成功消除背景與雜訊！生成超清晰手繪全臉 Line Drawing！');
+    alert('✨ 已成功消除背景與皮膚雜點，導出純淨五官線稿！');
   }
 }
 
-// 雙平滑高對比清爽邊緣提取引擎
 function processPhotoToCleanLineArt(sourceImg, colorMode) {
   var canvas = document.createElement('canvas');
   var ctx = canvas.getContext('2d');
   
-  // 縮放至適中解析度，強化五官主要筆觸，濾除細微噪點
-  var maxDim = 800;
+  var maxDim = 700;
   var scale = Math.min(1, maxDim / Math.max(sourceImg.width, sourceImg.height));
   var w = Math.round(sourceImg.width * scale);
   var h = Math.round(sourceImg.height * scale);
@@ -149,43 +147,17 @@ function processPhotoToCleanLineArt(sourceImg, colorMode) {
   var imgData = ctx.getImageData(0, 0, w, h);
   var data = imgData.data;
 
-  // 1. 轉灰階與對比度增強
+  // 1. 轉灰階
   var gray = new Float32Array(w * h);
   for (var i = 0; i < data.length; i += 4) {
     gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
   }
 
-  // 2. 進行 3x3 盒狀平滑模糊（Blur Filter）：塗平膚色細節與背景微小雜訊
-  var smooth = new Float32Array(w * h);
-  for (var y = 1; y < h - 1; y++) {
-    for (var x = 1; x < w - 1; x++) {
-      var idx = y * w + x;
-      var sum = 0;
-      for (var dy = -1; dy <= 1; dy++) {
-        for (var dx = -1; dx <= 1; dx++) {
-          sum += gray[(y + dy) * w + (x + dx)];
-        }
-      }
-      smooth[idx] = sum / 9.0;
-    }
-  }
+  // 2. 雙層高斯平滑 (Difference of Gaussians 核心算法)
+  var g1 = gaussianBlur(gray, w, h, 1);
+  var g2 = gaussianBlur(gray, w, h, 3);
 
-  // 3. Sobel 邊緣檢測 + 雜訊閥值抑制
-  var edgeMag = new Float32Array(w * h);
-  var maxMag = 0;
-
-  for (var y = 1; y < h - 1; y++) {
-    for (var x = 1; x < w - 1; x++) {
-      var idx = y * w + x;
-      var gx = -smooth[idx - w - 1] + smooth[idx - w + 1] - 2 * smooth[idx - 1] + 2 * smooth[idx + 1] - smooth[idx + w - 1] + smooth[idx + w + 1];
-      var gy = -smooth[idx - w - 1] - 2 * smooth[idx - w] - smooth[idx - w + 1] + smooth[idx + w - 1] + 2 * smooth[idx + w] + smooth[idx + w + 1];
-      var mag = Math.sqrt(gx * gx + gy * gy);
-      edgeMag[idx] = mag;
-      if (mag > maxMag) maxMag = mag;
-    }
-  }
-
-  // 4. 繪製純淨白底與清晰彩色筆觸
+  // 3. 計算 DoG 差值並過濾微小光影噪點
   var outputCanvas = document.createElement('canvas');
   outputCanvas.width = w;
   outputCanvas.height = h;
@@ -200,30 +172,27 @@ function processPhotoToCleanLineArt(sourceImg, colorMode) {
   var rgbColor = [0, 90, 200]; // 經典藍
   if (colorMode === 'green') rgbColor = [0, 140, 60];
   if (colorMode === 'red') rgbColor = [210, 20, 40];
-  if (colorMode === 'black') rgbColor = [10, 10, 10];
+  if (colorMode === 'black') rgbColor = [15, 15, 15];
 
-  // 設定動態過濾閥值（Threshold）：徹底排除膚色與背景雜點
-  var threshold = Math.max(30, maxMag * 0.18);
+  var tau = 0.98; 
+  for (var i = 0; i < w * h; i++) {
+    var v1 = g1[i];
+    var v2 = g2[i];
+    var dog = v1 - tau * v2;
 
-  for (var y = 0; y < h; y++) {
-    for (var x = 0; x < w; x++) {
-      var idx = y * w + x;
-      var mag = edgeMag[idx];
-
-      // 只保留高對比的五官輪廓（眼睛、眉毛、鼻樑、嘴唇、臉型框）
-      if (mag > threshold) {
-        var pIdx = idx * 4;
-        od[pIdx] = rgbColor[0];
-        od[pIdx + 1] = rgbColor[1];
-        od[pIdx + 2] = rgbColor[2];
-        od[pIdx + 3] = 255; // 純色飽和線條，防止模糊小點
-      }
+    // 極致降噪閾值：低於閥值者一律還原成純白 #FFFFFF
+    if (dog < -2.5) {
+      var pIdx = i * 4;
+      od[pIdx] = rgbColor[0];
+      od[pIdx + 1] = rgbColor[1];
+      od[pIdx + 2] = rgbColor[2];
+      od[pIdx + 3] = 255;
     }
   }
 
   outCtx.putImageData(outData, 0, 0);
 
-  // 5. 輕微加粗筆觸，重現手繪彩繪筆質感
+  // 4. 補強加粗主要結構筆觸（眼睫毛、瞳孔、唇線、輪廓）
   var finalCanvas = document.createElement('canvas');
   finalCanvas.width = w;
   finalCanvas.height = h;
@@ -234,6 +203,49 @@ function processPhotoToCleanLineArt(sourceImg, colorMode) {
   finalCtx.drawImage(outputCanvas, 0, 0);
 
   return finalCanvas;
+}
+
+// 快速高斯模糊實作
+function gaussianBlur(src, w, h, radius) {
+  var dst = new Float32Array(w * h);
+  var kSize = radius * 2 + 1;
+  var kernel = [];
+  var sigma = radius;
+  var sum = 0;
+
+  for (var x = -radius; x <= radius; x++) {
+    var g = Math.exp(-(x * x) / (2 * sigma * sigma));
+    kernel.push(g);
+    sum += g;
+  }
+  for (var i = 0; i < kernel.length; i++) kernel[i] /= sum;
+
+  // 水平方向
+  var temp = new Float32Array(w * h);
+  for (var y = 0; y < h; y++) {
+    for (var x = 0; x < w; x++) {
+      var val = 0;
+      for (var k = -radius; k <= radius; k++) {
+        var px = Math.min(w - 1, Math.max(0, x + k));
+        val += src[y * w + px] * kernel[k + radius];
+      }
+      temp[y * w + x] = val;
+    }
+  }
+
+  // 垂直方向
+  for (var y = 0; y < h; y++) {
+    for (var x = 0; x < w; x++) {
+      var val = 0;
+      for (var k = -radius; k <= radius; k++) {
+        var py = Math.min(h - 1, Math.max(0, y + k));
+        val += temp[py * w + x] * kernel[k + radius];
+      }
+      dst[y * w + x] = val;
+    }
+  }
+
+  return dst;
 }
 
 function changeActiveSourceAngle() {
@@ -443,4 +455,114 @@ function addFacetToCollage(lineFacetIndex) {
     rotation: 0
   };
 
-  portraitsData
+  portraitsData[activePortraitIndex].push(newItem);
+  selectedCollageItemIndex = portraitsData[activePortraitIndex].length - 1;
+  drawCollageCanvas();
+}
+
+function drawCollageCanvas() {
+  initCanvases();
+  if (!collageCtx || !collageCanvas) return;
+  collageCtx.clearRect(0, 0, collageCanvas.width, collageCanvas.height);
+
+  var currentItems = portraitsData[activePortraitIndex];
+  currentItems.forEach(function(item, idx) {
+    collageCtx.save();
+    collageCtx.translate(item.x + item.width / 2, item.y + item.height / 2);
+    collageCtx.rotate((item.rotation * Math.PI) / 180);
+    collageCtx.drawImage(item.canvas, -item.width / 2, -item.height / 2, item.width, item.height);
+
+    if (idx === selectedCollageItemIndex) {
+      collageCtx.strokeStyle = '#007bff';
+      collageCtx.lineWidth = 3;
+      collageCtx.setLineDash([6, 6]);
+      collageCtx.strokeRect(-item.width / 2 - 4, -item.height / 2 - 4, item.width + 8, item.height + 8);
+    }
+    collageCtx.restore();
+  });
+}
+
+function transformActiveCanvasItem(type, val) {
+  if (selectedCollageItemIndex === -1) return;
+  var item = portraitsData[activePortraitIndex][selectedCollageItemIndex];
+  if (type === 'scale') {
+    item.width *= val;
+    item.height *= val;
+  } else if (type === 'rotate') {
+    item.rotation += val;
+  }
+  drawCollageCanvas();
+}
+
+function deleteActiveCanvasItem() {
+  if (selectedCollageItemIndex !== -1) {
+    portraitsData[activePortraitIndex].splice(selectedCollageItemIndex, 1);
+    selectedCollageItemIndex = -1;
+    drawCollageCanvas();
+  }
+}
+
+function exportCollage() {
+  var link = document.createElement('a');
+  link.download = '畢卡索立體派自畫像_' + ['A','B','C'][activePortraitIndex] + '.png';
+  link.href = collageCanvas.toDataURL();
+  link.click();
+}
+
+function handleCropMouseDown(e) {
+  if (!cropCanvas) return;
+  var rect = cropCanvas.getBoundingClientRect();
+  var mx = e.clientX - rect.left;
+  var my = e.clientY - rect.top;
+
+  if (mx >= cropBox.x && mx <= cropBox.x + cropBox.width &&
+      my >= cropBox.y && my <= cropBox.y + cropBox.height) {
+    isDraggingBox = true;
+    startX = mx - cropBox.x;
+    startY = my - cropBox.y;
+  }
+}
+
+function handleCropMouseMove(e) {
+  if (!isDraggingBox || !cropCanvas) return;
+  var rect = cropCanvas.getBoundingClientRect();
+  cropBox.x = e.clientX - rect.left - startX;
+  cropBox.y = e.clientY - rect.top - startY;
+  drawCropCanvas();
+}
+
+function handleCropMouseUp() { isDraggingBox = false; }
+
+function handleCollageMouseDown(e) {
+  if (!collageCanvas) return;
+  var rect = collageCanvas.getBoundingClientRect();
+  var mx = e.clientX - rect.left;
+  var my = e.clientY - rect.top;
+
+  var currentItems = portraitsData[activePortraitIndex];
+  selectedCollageItemIndex = -1;
+
+  for (var i = currentItems.length - 1; i >= 0; i--) {
+    var item = currentItems[i];
+    if (mx >= item.x && mx <= item.x + item.width &&
+        my >= item.y && my <= item.y + item.height) {
+      selectedCollageItemIndex = i;
+      isDraggingCollageItem = true;
+      startX = mx - item.x;
+      startY = my - item.y;
+      break;
+    }
+  }
+  drawCollageCanvas();
+}
+
+function handleCollageMouseMove(e) {
+  if (!isDraggingCollageItem || selectedCollageItemIndex === -1 || !collageCanvas) return;
+  var rect = collageCanvas.getBoundingClientRect();
+  var item = portraitsData[activePortraitIndex][selectedCollageItemIndex];
+  item.x = e.clientX - rect.left - startX;
+  item.y = e.clientY - rect.top - startY;
+  drawCollageCanvas();
+}
+
+function handleCollageMouseUp() { isDraggingCollageItem = false; }
