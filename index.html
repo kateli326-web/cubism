@@ -19,14 +19,14 @@
       margin-bottom: 15px;
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
       align-items: center;
     }
     button, .upload-btn {
       display: inline-block;
-      padding: 10px 16px;
-      font-size: 15px;
+      padding: 10px 15px;
+      font-size: 14px;
       font-weight: bold;
       background-color: #007bff;
       color: white;
@@ -36,19 +36,10 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
       user-select: none;
     }
-    button.danger { background-color: #dc3545; }
+    button.feature { background-color: #17a2b8; }
     button.secondary { background-color: #28a745; }
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #fff;
-      padding: 6px 12px;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      font-size: 14px;
-      font-weight: bold;
-    }
+    button.warning { background-color: #ffc107; color: #000; }
+    button.danger { background-color: #dc3545; }
     #canvas-container {
       display: flex;
       justify-content: center;
@@ -69,21 +60,17 @@
     <input type="file" id="imageLoader" accept="image/*" style="display:none;" />
     <label for="imageLoader" class="upload-btn">1. 上傳/拍攝照片</label>
     
-    <button class="secondary" onclick="applyBlackAndWhite()">2. 一鍵轉為高對比黑白線稿</button>
-    
-    <div class="control-group">
-      <label for="threshold">線稿去噪靈敏度:</label>
-      <input type="range" id="threshold" min="1" max="100" value="50" oninput="applyBlackAndWhite()">
-    </div>
-
-    <button onclick="addCutLine()">3. 新增幾何切割線</button>
-    <button class="danger" onclick="deleteSelected()">刪除選取元件</button>
+    <button class="secondary" onclick="applyBlackAndWhite()">2. 高對比黑白</button>
+    <button class="warning" onclick="extractGeometricFacets()">3. 一鍵切割幾何五官</button>
+    <button onclick="addCutLine()">4. 新增切割線</button>
+    <button class="danger" onclick="deleteSelected()">刪除元件</button>
   </div>
 
   <div id="canvas-container">
     <canvas id="c" width="800" height="600"></canvas>
   </div>
 
-  <script src="script.js?v=15"></script>
+  <!-- 版本號升級破除快取 -->
+  <script src="script.js?v=30"></script>
 </body>
 </html>
