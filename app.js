@@ -1,4 +1,4 @@
-// 全域狀態存儲
+// 全域變數
 var angleImages = {
   front: null, right: null, left: null,
   up: null, down: null, threequarter: null
@@ -25,27 +25,33 @@ var isDraggingBox = false;
 var isDraggingCollageItem = false;
 var startX = 0, startY = 0;
 
-// 【最核心修復】使用最原生的 Blob URL 讀取，100% 避免 FileReader 阻塞或 CORS 鎖死
+// 上傳圖片並【即時顯示預覽縮圖】
 function uploadImageDirect(event, angleKey) {
   try {
     var input = event.target;
     if (!input || !input.files || !input.files[0]) return;
     var file = input.files[0];
 
-    // 生成安全的本地快照網址
     var blobUrl = URL.createObjectURL(file);
     var img = new Image();
     img.onload = function() {
       angleImages[angleKey] = img;
+      
+      // 顯示步驟一縮圖
       var prev = document.getElementById('preview_' + angleKey);
       if (prev) {
         prev.src = blobUrl;
         prev.style.display = 'block';
       }
+      
+      // 如果當前在步驟二，即時刷新畫布
+      if (currentStage === 2) {
+        drawCropCanvas();
+      }
     };
     img.src = blobUrl;
   } catch (err) {
-    alert('圖片載入失敗，請重試：' + err.message);
+    alert('圖片載入失敗：' + err.message);
   }
 }
 
@@ -73,8 +79,11 @@ function initCanvases() {
   }
 }
 
+var currentStage = 1;
 function switchStage(stageNum) {
+  currentStage = stageNum;
   initCanvases();
+
   var btns = document.querySelectorAll('.step-btn');
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('active', i + 1 === stageNum);
