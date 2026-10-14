@@ -71,9 +71,8 @@
     
     <button class="secondary" onclick="applyBlackAndWhite()">2. 一鍵轉為高對比黑白線稿</button>
     
-    <!-- 改為 oninput：拖動時即時反應 -->
     <div class="control-group">
-      <label for="threshold">線稿過濾去噪:</label>
+      <label for="threshold">線稿去噪靈敏度:</label>
       <input type="range" id="threshold" min="1" max="100" value="50" oninput="applyBlackAndWhite()">
     </div>
 
@@ -85,6 +84,6 @@
     <canvas id="c" width="800" height="600"></canvas>
   </div>
 
-  <script src="script.js?v=13"></script>
+  <script src="script.js?v=15"></script>
 </body>
 </html>
