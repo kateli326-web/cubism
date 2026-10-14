@@ -19,7 +19,6 @@ window.onload = function() {
   }
 };
 
-// 1. 照片順暢載入
 function handleImageUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -91,7 +90,7 @@ function drawCanvas() {
   });
 }
 
-// 2. 核心：模糊平滑降噪 + 乾淨 Line Drawing 提線
+// 核心：自適應五官增強提線演算法 (Adaptive Outline Extraction)
 function applyBlackAndWhite() {
   if (selectedIndex !== -1 && elements[selectedIndex].type === 'image') {
     const item = elements[selectedIndex];
@@ -107,48 +106,52 @@ function applyBlackAndWhite() {
     const imgData = tempCtx.getImageData(0, 0, w, h);
     const data = imgData.data;
 
-    // A. 轉灰階
+    // 1. 轉灰階
     const gray = new Float32Array(w * h);
     for (let i = 0; i < data.length; i += 4) {
       gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
     }
 
-    // B. Box Blur 均值平滑 (過濾皮膚細紋與雜訊)
+    // 2. 輕度平滑去燥 (保留五官小細節)
     const blurred = new Float32Array(w * h);
-    const r = 2; // 模糊半徑
-    for (let y = r; y < h - r; y++) {
-      for (let x = r; x < w - r; x++) {
-        let sum = 0;
-        let count = 0;
-        for (let dy = -r; dy <= r; dy++) {
-          for (let dx = -r; dx <= r; dx++) {
-            sum += gray[(y + dy) * w + (x + dx)];
-            count++;
-          }
-        }
-        blurred[y * w + x] = sum / count;
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = y * w + x;
+        blurred[idx] = (
+          gray[idx - w - 1] + gray[idx - w] + gray[idx - w + 1] +
+          gray[idx - 1]     + gray[idx]     + gray[idx + 1] +
+          gray[idx + w - 1] + gray[idx + w] + gray[idx + w + 1]
+        ) / 9;
       }
     }
 
-    // C. 高門檻邊緣計算 (純白背景，只留五官強線條)
+    // 3. 梯度微分計算
     const output = tempCtx.createImageData(w, h);
     const outData = output.data;
-    const threshold = 38; // 敏感度門檻 (越高越乾淨)
+    
+    // 門檻調整為 18：既能抓出眼睛、鼻子、嘴巴線條，又能保持背景乾淨
+    const threshold = 18; 
 
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
         const idx = y * w + x;
-        const diffX = Math.abs(blurred[idx + 1] - blurred[idx - 1]);
-        const diffY = Math.abs(blurred[idx + w] - blurred[idx - w]);
-        const edge = diffX + diffY;
 
+        const gx = -blurred[idx - w - 1] + blurred[idx - w + 1]
+                   -2 * blurred[idx - 1] + 2 * blurred[idx + 1]
+                   -blurred[idx + w - 1] + blurred[idx + w + 1];
+
+        const gy = -blurred[idx - w - 1] - 2 * blurred[idx - w] - blurred[idx - w + 1]
+                   +blurred[idx + w - 1] + 2 * blurred[idx + w] + blurred[idx + w + 1];
+
+        const grad = Math.sqrt(gx * gx + gy * gy);
         const pixelIdx = idx * 4;
-        if (edge > threshold) {
-          outData[pixelIdx] = 0;     // 純黑線條
+
+        if (grad > threshold) {
+          outData[pixelIdx] = 0;     // 純黑五官線條
           outData[pixelIdx + 1] = 0;
           outData[pixelIdx + 2] = 0;
         } else {
-          outData[pixelIdx] = 255;   // 純白背景
+          outData[pixelIdx] = 255;   // 純白皮膚/背景
           outData[pixelIdx + 1] = 255;
           outData[pixelIdx + 2] = 255;
         }
