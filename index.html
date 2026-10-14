@@ -23,22 +23,30 @@
       flex-wrap: wrap;
       align-items: center;
     }
-    button, .upload-btn {
+    button, .upload-btn, select {
       display: inline-block;
-      padding: 10px 15px;
+      padding: 10px 14px;
       font-size: 14px;
       font-weight: bold;
-      background-color: #007bff;
-      color: white;
-      border: none;
       border-radius: 6px;
-      cursor: pointer;
+      border: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
       user-select: none;
     }
-    button.warning { background-color: #ffc107; color: #000; }
-    button.danger { background-color: #dc3545; }
-    button.secondary { background-color: #28a745; }
+    .upload-btn { background-color: #007bff; color: white; cursor: pointer; }
+    button.warning { background-color: #ffc107; color: #000; cursor: pointer; }
+    button.danger { background-color: #dc3545; color: white; cursor: pointer; }
+    button.secondary { background-color: #28a745; color: white; cursor: pointer; }
+    select { background-color: #ffffff; color: #333; border: 2px solid #ffc107; cursor: pointer; }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
     #canvas-container {
       display: flex;
       justify-content: center;
@@ -57,18 +65,28 @@
 
   <div id="toolbar">
     <input type="file" id="imageLoader" accept="image/*" style="display:none;" />
-    <label for="imageLoader" class="upload-btn">1. 上傳/拍攝照片</label>
-    
-    <button class="warning" onclick="extractGeometricFacets()">2. 一鍵切割幾何五官</button>
+    <label for="imageLoader" class="upload-btn">1. 上傳照片</label>
+
+    <div class="control-group">
+      <label for="shapeSelect"><b>選擇切割幾何形狀:</b></label>
+      <select id="shapeSelect" onchange="updateCropShape()">
+        <option value="diamond">菱形 (對應眼睛)</option>
+        <option value="triangle">三角形 (對應鼻子)</option>
+        <option value="trapezoid">梯形 (對應嘴巴)</option>
+        <option value="polygon">五角不規則幾何</option>
+      </select>
+    </div>
+
+    <button class="warning" onclick="cutCurrentFacet()">2. 切割選取五官</button>
     <button class="secondary" onclick="applyBlackAndWhite()">高對比黑白</button>
     <button onclick="addCutLine()">新增幾何切割線</button>
     <button class="danger" onclick="deleteSelected()">刪除選取元件</button>
   </div>
 
   <div id="canvas-container">
-    <canvas id="c" width="800" height="600"></canvas>
+    <canvas id="c" width="850" height="650"></canvas>
   </div>
 
-  <script src="script.js?v=9999"></script>
+  <script src="script.js?v=20001"></script>
 </body>
 </html>
