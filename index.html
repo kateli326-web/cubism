@@ -231,4 +231,69 @@
 
     <div style="margin-top: 15px; text-align: left;">
       <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官即時預覽：</h4>
-     <script src="app.js?v=2026_FINAL_OK"></script>
+      <div id="stage2FacetsPreview" class="facets-library">
+        <span style="color:#888;">按下「✂️ 切割選取區域五官」後，切下的五官會即時顯示在這裡！</span>
+      </div>
+    </div>
+
+    <br>
+    <button class="btn-success" onclick="switchStage(3)">切割完成 ➔ 進入步驟三轉換 Line Drawing</button>
+  </div>
+
+  <!-- 步驟 3 面板 -->
+  <div id="stage3" class="stage-panel">
+    <h3>已切割的各角度幾何五官素材庫：</h3>
+    <p>點擊下方按鈕，一鍵將所有手動切割出來的五官轉換為畢卡索鋼筆線稿風格 (Line Drawing)！</p>
+    
+    <div id="rawFacetsLibrary" class="facets-library">
+      <span style="color:#888;">尚未切割任何五官，請返回步驟二。</span>
+    </div>
+
+    <br>
+    <button class="btn-primary" style="font-size: 16px; padding: 12px 24px;" onclick="convertAllToLineDrawing()">✨ 一鍵變換成 LINE DRAWING 線稿</button>
+    <br><br>
+
+    <h3>Line Drawing 化後的五官預覽：</h3>
+    <div id="lineFacetsLibrary" class="facets-library">
+      <span style="color:#888;">轉換後線稿素材將顯示於此。</span>
+    </div>
+
+    <br>
+    <button class="btn-success" onclick="switchStage(4)">進行拼貼 ➔ 進入步驟四自畫像組合</button>
+  </div>
+
+  <!-- 步驟 4 面板 -->
+  <div id="stage4" class="stage-panel">
+    <h3>模仿畢卡索《哭泣的女人》立體主義自畫像拼貼畫布：</h3>
+    
+    <div class="portrait-tabs">
+      <button class="tab-btn active" onclick="switchPortraitTab(0)">自畫像 A</button>
+      <button class="tab-btn" onclick="switchPortraitTab(1)">自畫像 B</button>
+      <button class="tab-btn" onclick="switchPortraitTab(2)">自畫像 C</button>
+    </div>
+
+    <div class="toolbar-group">
+      <button onclick="transformActiveCanvasItem('scale', 1.1)">放大五官</button>
+      <button onclick="transformActiveCanvasItem('scale', 0.9)">縮小五官</button>
+      <button onclick="transformActiveCanvasItem('rotate', 15)">順旋轉</button>
+      <button onclick="transformActiveCanvasItem('rotate', -15)">逆旋轉</button>
+      <button class="btn-danger" onclick="deleteActiveCanvasItem()">刪除選中五官</button>
+      <button class="btn-dark" onclick="exportCollage()">📥 下載當前自畫像</button>
+    </div>
+
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+      <div style="text-align: left;">
+        <h4>點擊素材加入畫布：</h4>
+        <div id="collageFacetsLibrary" class="facets-library" style="flex-direction: column; width: 180px; max-height: 500px; overflow-y: auto;">
+        </div>
+      </div>
+      
+      <div>
+        <canvas id="collageCanvas" width="700" height="550"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=2026_STAGE2_PREVIEW_FIXED"></script>
+</body>
+</html>
