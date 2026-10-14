@@ -1,4 +1,4 @@
-// 全域變數
+// 全域狀態存儲
 var angleImages = {
   front: null, right: null, left: null,
   up: null, down: null, threequarter: null
@@ -25,25 +25,28 @@ var isDraggingBox = false;
 var isDraggingCollageItem = false;
 var startX = 0, startY = 0;
 
-// 【最核心】直連上傳函數：由 HTML input 直接傳入，不依賴任何頁面監聽器
-function uploadImage(inputElement, key) {
-  if (!inputElement || !inputElement.files || !inputElement.files[0]) return;
-  var file = inputElement.files[0];
+// 【最核心修復】使用最原生的 Blob URL 讀取，100% 避免 FileReader 阻塞或 CORS 鎖死
+function uploadImageDirect(event, angleKey) {
+  try {
+    var input = event.target;
+    if (!input || !input.files || !input.files[0]) return;
+    var file = input.files[0];
 
-  var reader = new FileReader();
-  reader.onload = function(evt) {
+    // 生成安全的本地快照網址
+    var blobUrl = URL.createObjectURL(file);
     var img = new Image();
     img.onload = function() {
-      angleImages[key] = img;
-      var prev = document.getElementById('preview_' + key);
+      angleImages[angleKey] = img;
+      var prev = document.getElementById('preview_' + angleKey);
       if (prev) {
-        prev.src = evt.target.result;
+        prev.src = blobUrl;
         prev.style.display = 'block';
       }
     };
-    img.src = evt.target.result;
-  };
-  reader.readAsDataURL(file);
+    img.src = blobUrl;
+  } catch (err) {
+    alert('圖片載入失敗，請重試：' + err.message);
+  }
 }
 
 function initCanvases() {
