@@ -22,7 +22,7 @@ let lineFacets = [];     // Line Drawing 切片
 // 步驟 4：三張獨立自畫像畫布 (A, B, C)
 let collageCanvas, collageCtx;
 let activePortraitIndex = 0;
-let portraitsData = [[], [], []]; // 存放自畫像 A, B, C 的元件
+let portraitsData = [[], [], []];
 let selectedCollageItemIndex = -1;
 
 // 拖曳狀態
@@ -37,14 +37,12 @@ window.onload = function() {
   collageCanvas = document.getElementById('collageCanvas');
   if (collageCanvas) collageCtx = collageCanvas.getContext('2d');
 
-  // 綁定 Stage 2 拖曳
   if (cropCanvas) {
     cropCanvas.addEventListener('mousedown', handleCropMouseDown);
     cropCanvas.addEventListener('mousemove', handleCropMouseMove);
     window.addEventListener('mouseup', handleCropMouseUp);
   }
 
-  // 綁定 Stage 4 拖曳
   if (collageCanvas) {
     collageCanvas.addEventListener('mousedown', handleCollageMouseDown);
     collageCanvas.addEventListener('mousemove', handleCollageMouseMove);
@@ -62,7 +60,10 @@ function switchStage(stageNum) {
     panel.classList.toggle('active', idx + 1 === stageNum);
   });
 
-  if (stageNum === 2) drawCropCanvas();
+  if (stageNum === 2) {
+    drawCropCanvas();
+    renderStage2Preview();
+  }
   if (stageNum === 3) renderStage3Libraries();
   if (stageNum === 4) {
     renderCollageLibrary();
@@ -70,7 +71,7 @@ function switchStage(stageNum) {
   }
 }
 
-// 2. 步驟 1：載入 6 個角度的照片
+// 2. 步驟 1：載入 6 個角度照片
 function loadAngleImage(e, angleKey) {
   const file = e.target.files[0];
   if (!file) return;
@@ -91,7 +92,7 @@ function loadAngleImage(e, angleKey) {
   reader.readAsDataURL(file);
 }
 
-// 3. 步驟 2：幾何手動切割 (8種幾何圖形)
+// 3. 步驟 2：幾何手動切割 (8種圖形)
 function changeActiveSourceAngle() {
   activeAngleKey = document.getElementById('angleSelect').value;
   drawCropCanvas();
@@ -102,7 +103,6 @@ function updateCropShape() {
   drawCropCanvas();
 }
 
-// 8 種幾何圖形路徑 (相對比例 0~1)
 function getShapePoints(shape) {
   switch (shape) {
     case 'diamond': return [[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]];
@@ -136,7 +136,6 @@ function drawCropCanvas() {
 
     cropCtx.drawImage(img, renderX, renderY, renderW, renderH);
 
-    // 繪製動態黃色切割選框
     cropCtx.save();
     cropCtx.translate(cropBox.x + cropBox.width / 2, cropBox.y + cropBox.height / 2);
     cropCtx.rotate((cropBox.rotation * Math.PI) / 180);
@@ -177,6 +176,7 @@ function transformActiveBox(type, val) {
   drawCropCanvas();
 }
 
+// 切割五官並【即時顯示】
 function cutCurrentFacet() {
   const img = angleImages[activeAngleKey];
   if (!img) {
@@ -213,7 +213,7 @@ function cutCurrentFacet() {
   fCtx.drawImage(img, relX, relY, cropW, cropH, 0, 0, cropW, cropH);
   fCtx.restore();
 
-  // 畢加索黑框
+  // 畢加索邊框
   fCtx.strokeStyle = '#000000';
   fCtx.lineWidth = Math.max(6, Math.round(cropW * 0.03));
   fCtx.stroke();
@@ -225,10 +225,47 @@ function cutCurrentFacet() {
     height: cropBox.height
   });
 
-  alert(`已切下 [${activeAngleKey}] 角度五官！可繼續切割或進入步驟三。`);
+  // 即時刷新步驟二預覽區
+  renderStage2Preview();
 }
 
-// 4. 步驟 3：一鍵轉換 Line Drawing (DoG 鋼筆線稿演算法)
+// 渲染步驟二即時預覽區
+function renderStage2Preview() {
+  const previewDiv = document.getElementById('stage2FacetsPreview');
+  if (!previewDiv) return;
+
+  if (rawFacets.length === 0) {
+    previewDiv.innerHTML = '<span style="color:#888;">按下「✂️ 切割選取區域五官」後，切下的五官會即時顯示在這裡！</span>';
+    return;
+  }
+
+  previewDiv.innerHTML = '';
+  rawFacets.forEach((item, idx) => {
+    const container = document.createElement('div');
+    container.className = 'library-item-container';
+
+    const img = document.createElement('img');
+    img.src = item.canvas.toDataURL();
+    img.className = 'library-item';
+    img.title = `切下的 [${item.angle}] 五官`;
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-item-btn';
+    delBtn.innerHTML = '✕';
+    delBtn.title = '刪除此切片';
+    delBtn.onclick = (e) => {
+      e.stopPropagation();
+      rawFacets.splice(idx, 1);
+      renderStage2Preview();
+    };
+
+    container.appendChild(img);
+    container.appendChild(delBtn);
+    previewDiv.appendChild(container);
+  });
+}
+
+// 4. 步驟 3：一鍵轉換 Line Drawing
 function convertAllToLineDrawing() {
   if (rawFacets.length === 0) {
     alert('尚未切割任何五官素材！請先在步驟二手動切割。');
@@ -249,7 +286,6 @@ function convertAllToLineDrawing() {
     const imgData = origCanvas.getContext('2d').getImageData(0, 0, w, h);
     const data = imgData.data;
 
-    // 二值化高對比極簡 Line Drawing 處理
     for (let i = 0; i < data.length; i += 4) {
       if (data[i + 3] > 0) {
         const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
@@ -260,7 +296,6 @@ function convertAllToLineDrawing() {
 
     lineCtx.putImageData(imgData, 0, 0);
 
-    // 強化粗黑手繪外框
     lineCtx.strokeStyle = '#000000';
     lineCtx.lineWidth = Math.max(8, Math.round(w * 0.04));
     lineCtx.strokeRect(0, 0, w, h);
