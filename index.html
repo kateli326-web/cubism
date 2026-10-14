@@ -41,9 +41,9 @@
     .control-group {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 8px;
       background: #fff;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 6px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       font-size: 14px;
@@ -71,10 +71,10 @@
     
     <button class="secondary" onclick="applyBlackAndWhite()">2. 一鍵轉為高對比黑白線稿</button>
     
-    <!-- 增加去噪滑動條，方便微調 -->
+    <!-- 改為 oninput：拖動時即時反應 -->
     <div class="control-group">
-      <label for="threshold">線稿去噪過濾:</label>
-      <input type="range" id="threshold" min="10" max="80" value="45" onchange="applyBlackAndWhite()">
+      <label for="threshold">線稿過濾去噪:</label>
+      <input type="range" id="threshold" min="1" max="100" value="50" oninput="applyBlackAndWhite()">
     </div>
 
     <button onclick="addCutLine()">3. 新增幾何切割線</button>
@@ -85,6 +85,6 @@
     <canvas id="c" width="800" height="600"></canvas>
   </div>
 
-  <script src="script.js?v=10"></script>
+  <script src="script.js?v=13"></script>
 </body>
 </html>
