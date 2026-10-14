@@ -1,58 +1,81 @@
-let currentStage = 1;
-let angleImages = {
+// 全域狀態變數
+var currentStage = 1;
+var angleImages = {
   front: null, right: null, left: null,
   up: null, down: null, threequarter: null
 };
 
-let cropCanvas, cropCtx;
-let activeAngleKey = 'front';
-let cropBox = {
+var cropCanvas = null, cropCtx = null;
+var activeAngleKey = 'front';
+var cropBox = {
   shape: 'diamond',
   x: 250, y: 150,
   width: 150, height: 110,
   rotation: 0
 };
 
-let rawFacets = [];
-let lineFacets = [];
+var rawFacets = [];
+var lineFacets = [];
 
-let collageCanvas, collageCtx;
-let activePortraitIndex = 0;
-let portraitsData = [[], [], []];
-let selectedCollageItemIndex = -1;
+var collageCanvas = null, collageCtx = null;
+var activePortraitIndex = 0;
+var portraitsData = [[], [], []];
+var selectedCollageItemIndex = -1;
 
-let isDraggingBox = false;
-let isDraggingCollageItem = false;
-let startX = 0, startY = 0;
+var isDraggingBox = false;
+var isDraggingCollageItem = false;
+var startX = 0, startY = 0;
 
-window.onload = function() {
-  cropCanvas = document.getElementById('cropCanvas');
-  if (cropCanvas) cropCtx = cropCanvas.getContext('2d');
+// 安全初始化，防止 Dom 未載入導致綁定崩潰
+window.addEventListener('DOMContentLoaded', function() {
+  initApp();
+});
+window.addEventListener('load', function() {
+  initApp();
+});
 
-  collageCanvas = document.getElementById('collageCanvas');
-  if (collageCanvas) collageCtx = collageCanvas.getContext('2d');
+function initApp() {
+  if (!cropCanvas) {
+    cropCanvas = document.getElementById('cropCanvas');
+    if (cropCanvas) cropCtx = cropCanvas.getContext('2d');
+  }
+
+  if (!collageCanvas) {
+    collageCanvas = document.getElementById('collageCanvas');
+    if (collageCanvas) collageCtx = collageCanvas.getContext('2d');
+  }
 
   if (cropCanvas) {
+    cropCanvas.removeEventListener('mousedown', handleCropMouseDown);
     cropCanvas.addEventListener('mousedown', handleCropMouseDown);
+    cropCanvas.removeEventListener('mousemove', handleCropMouseMove);
     cropCanvas.addEventListener('mousemove', handleCropMouseMove);
+    window.removeEventListener('mouseup', handleCropMouseUp);
     window.addEventListener('mouseup', handleCropMouseUp);
   }
 
   if (collageCanvas) {
+    collageCanvas.removeEventListener('mousedown', handleCollageMouseDown);
     collageCanvas.addEventListener('mousedown', handleCollageMouseDown);
+    collageCanvas.removeEventListener('mousemove', handleCollageMouseMove);
     collageCanvas.addEventListener('mousemove', handleCollageMouseMove);
+    window.removeEventListener('mouseup', handleCollageMouseUp);
     window.addEventListener('mouseup', handleCollageMouseUp);
   }
-};
+}
 
+// 1. 步驟切換
 function switchStage(stageNum) {
   currentStage = stageNum;
-  document.querySelectorAll('.step-btn').forEach((btn, idx) => {
-    btn.classList.toggle('active', idx + 1 === stageNum);
-  });
-  document.querySelectorAll('.stage-panel').forEach((panel, idx) => {
-    panel.classList.toggle('active', idx + 1 === stageNum);
-  });
+  var btns = document.querySelectorAll('.step-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('active', i + 1 === stageNum);
+  }
+
+  var panels = document.querySelectorAll('.stage-panel');
+  for (var j = 0; j < panels.length; j++) {
+    panels[j].classList.toggle('active', j + 1 === stageNum);
+  }
 
   if (stageNum === 2) {
     drawCropCanvas();
@@ -65,16 +88,17 @@ function switchStage(stageNum) {
   }
 }
 
+// 2. 步驟 1：照片上傳處理（獨立防禦函數）
 function loadAngleImage(e, angleKey) {
-  const file = e.target.files && e.target.files[0];
+  var file = e.target.files && e.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
+  var reader = new FileReader();
   reader.onload = function (event) {
-    const img = new Image();
+    var img = new Image();
     img.onload = function () {
       angleImages[angleKey] = img;
-      const preview = document.getElementById(`preview_${angleKey}`);
+      var preview = document.getElementById('preview_' + angleKey);
       if (preview) {
         preview.src = event.target.result;
         preview.style.display = 'block';
@@ -85,13 +109,16 @@ function loadAngleImage(e, angleKey) {
   reader.readAsDataURL(file);
 }
 
+// 3. 步驟 2：幾何切割
 function changeActiveSourceAngle() {
-  activeAngleKey = document.getElementById('angleSelect').value;
+  var select = document.getElementById('angleSelect');
+  if (select) activeAngleKey = select.value;
   drawCropCanvas();
 }
 
 function updateCropShape() {
-  cropBox.shape = document.getElementById('shapeSelect').value;
+  var select = document.getElementById('shapeSelect');
+  if (select) cropBox.shape = select.value;
   drawCropCanvas();
 }
 
@@ -105,9 +132,9 @@ function getShapePoints(shape) {
     case 'shield': return [[0, 0], [1, 0], [1, 0.6], [0.5, 1], [0, 0.6]];
     case 'hexagon': return [[0.25, 0], [0.75, 0], [1, 0.5], [0.75, 1], [0.25, 1], [0, 0.5]];
     case 'circle': default:
-      const pts = [];
-      for (let i = 0; i < 16; i++) {
-        const rad = (i / 16) * Math.PI * 2;
+      var pts = [];
+      for (var i = 0; i < 16; i++) {
+        var rad = (i / 16) * Math.PI * 2;
         pts.push([0.5 + 0.5 * Math.cos(rad), 0.5 + 0.5 * Math.sin(rad)]);
       }
       return pts;
@@ -118,13 +145,13 @@ function drawCropCanvas() {
   if (!cropCtx || !cropCanvas) return;
   cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
 
-  const img = angleImages[activeAngleKey];
+  var img = angleImages[activeAngleKey];
   if (img) {
-    const scale = Math.min(cropCanvas.width / img.width, cropCanvas.height / img.height) * 0.9;
-    const renderW = img.width * scale;
-    const renderH = img.height * scale;
-    const renderX = (cropCanvas.width - renderW) / 2;
-    const renderY = (cropCanvas.height - renderH) / 2;
+    var scale = Math.min(cropCanvas.width / img.width, cropCanvas.height / img.height) * 0.9;
+    var renderW = img.width * scale;
+    var renderH = img.height * scale;
+    var renderX = (cropCanvas.width - renderW) / 2;
+    var renderY = (cropCanvas.height - renderH) / 2;
 
     cropCtx.drawImage(img, renderX, renderY, renderW, renderH);
 
@@ -132,13 +159,13 @@ function drawCropCanvas() {
     cropCtx.translate(cropBox.x + cropBox.width / 2, cropBox.y + cropBox.height / 2);
     cropCtx.rotate((cropBox.rotation * Math.PI) / 180);
 
-    const pts = getShapePoints(cropBox.shape);
-    const hw = cropBox.width / 2;
-    const hh = cropBox.height / 2;
+    var pts = getShapePoints(cropBox.shape);
+    var hw = cropBox.width / 2;
+    var hh = cropBox.height / 2;
 
     cropCtx.beginPath();
     cropCtx.moveTo(-hw + pts[0][0] * cropBox.width, -hh + pts[0][1] * cropBox.height);
-    for (let i = 1; i < pts.length; i++) {
+    for (var i = 1; i < pts.length; i++) {
       cropCtx.lineTo(-hw + pts[i][0] * cropBox.width, -hh + pts[i][1] * cropBox.height);
     }
     cropCtx.closePath();
@@ -154,7 +181,7 @@ function drawCropCanvas() {
     cropCtx.font = '18px Arial';
     cropCtx.fillStyle = '#888';
     cropCtx.textAlign = 'center';
-    cropCtx.fillText(`請先在步驟一上傳 [${activeAngleKey}] 角度的照片`, cropCanvas.width / 2, cropCanvas.height / 2);
+    cropCtx.fillText('請先在步驟一上傳 [' + activeAngleKey + '] 角度的照片', cropCanvas.width / 2, cropCanvas.height / 2);
   }
 }
 
@@ -169,32 +196,32 @@ function transformActiveBox(type, val) {
 }
 
 function cutCurrentFacet() {
-  const img = angleImages[activeAngleKey];
+  var img = angleImages[activeAngleKey];
   if (!img) {
     alert('請先在步驟一上傳該角度照片！');
     return;
   }
 
-  const scale = Math.min(cropCanvas.width / img.width, cropCanvas.height / img.height) * 0.9;
-  const renderW = img.width * scale;
-  const renderH = img.height * scale;
-  const renderX = (cropCanvas.width - renderW) / 2;
-  const renderY = (cropCanvas.height - renderH) / 2;
+  var scale = Math.min(cropCanvas.width / img.width, cropCanvas.height / img.height) * 0.9;
+  var renderW = img.width * scale;
+  var renderH = img.height * scale;
+  var renderX = (cropCanvas.width - renderW) / 2;
+  var renderY = (cropCanvas.height - renderH) / 2;
 
-  const relX = (cropBox.x - renderX) / scale;
-  const relY = (cropBox.y - renderY) / scale;
-  const cropW = cropBox.width / scale;
-  const cropH = cropBox.height / scale;
+  var relX = (cropBox.x - renderX) / scale;
+  var relY = (cropBox.y - renderY) / scale;
+  var cropW = cropBox.width / scale;
+  var cropH = cropBox.height / scale;
 
-  const fCanvas = document.createElement('canvas');
-  const fCtx = fCanvas.getContext('2d');
+  var fCanvas = document.createElement('canvas');
+  var fCtx = fCanvas.getContext('2d');
   fCanvas.width = cropW;
   fCanvas.height = cropH;
 
-  const pts = getShapePoints(cropBox.shape);
+  var pts = getShapePoints(cropBox.shape);
   fCtx.beginPath();
   fCtx.moveTo(pts[0][0] * cropW, pts[0][1] * cropH);
-  for (let i = 1; i < pts.length; i++) {
+  for (var i = 1; i < pts.length; i++) {
     fCtx.lineTo(pts[i][0] * cropW, pts[i][1] * cropH);
   }
   fCtx.closePath();
@@ -220,7 +247,7 @@ function cutCurrentFacet() {
 }
 
 function renderStage2Preview() {
-  const previewDiv = document.getElementById('stage2FacetsPreview');
+  var previewDiv = document.getElementById('stage2FacetsPreview');
   if (!previewDiv) return;
 
   if (rawFacets.length === 0) {
@@ -229,18 +256,18 @@ function renderStage2Preview() {
   }
 
   previewDiv.innerHTML = '';
-  rawFacets.forEach((item, idx) => {
-    const container = document.createElement('div');
+  rawFacets.forEach(function(item, idx) {
+    var container = document.createElement('div');
     container.className = 'library-item-container';
 
-    const img = document.createElement('img');
+    var img = document.createElement('img');
     img.src = item.canvas.toDataURL();
     img.className = 'library-item';
 
-    const delBtn = document.createElement('button');
+    var delBtn = document.createElement('button');
     delBtn.className = 'delete-item-btn';
     delBtn.innerHTML = '✕';
-    delBtn.onclick = (e) => {
+    delBtn.onclick = function(e) {
       e.stopPropagation();
       rawFacets.splice(idx, 1);
       renderStage2Preview();
@@ -252,7 +279,7 @@ function renderStage2Preview() {
   });
 }
 
-// 4. 畢卡索純手繪幾何 Line Drawing 提線演算法 (Clean Picassoid Ink Extractor)
+// 4. 步驟 3：高清畢卡索純白底 Line Drawing 鋼筆提線演算法
 function convertAllToLineDrawing() {
   if (rawFacets.length === 0) {
     alert('尚未切割任何五官素材！請先在步驟二手動切割。');
@@ -260,39 +287,37 @@ function convertAllToLineDrawing() {
   }
 
   lineFacets = [];
-  rawFacets.forEach(item => {
-    const origCanvas = item.canvas;
-    const w = origCanvas.width;
-    const h = origCanvas.height;
+  rawFacets.forEach(function(item) {
+    var origCanvas = item.canvas;
+    var w = origCanvas.width;
+    var h = origCanvas.height;
 
-    const lineCanvas = document.createElement('canvas');
-    const lineCtx = lineCanvas.getContext('2d');
+    var lineCanvas = document.createElement('canvas');
+    var lineCtx = lineCanvas.getContext('2d');
     lineCanvas.width = w;
     lineCanvas.height = h;
 
-    // A. 填充 100% 潔白背景底色 (純白白紙感)
+    // 填充純白潔淨底色
     lineCtx.fillStyle = '#ffffff';
     lineCtx.fillRect(0, 0, w, h);
 
-    const srcCtx = origCanvas.getContext('2d');
-    const imgData = srcCtx.getImageData(0, 0, w, h);
-    const data = imgData.data;
+    var srcCtx = origCanvas.getContext('2d');
+    var imgData = srcCtx.getImageData(0, 0, w, h);
+    var data = imgData.data;
 
-    // B. 精準提取瞳孔/深色特徵與邊緣，避免膚色陰影干擾
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
+    // 提取高對比關鍵結構線條（瞳孔/雙眼皮/唇線）
+    var tempCanvas = document.createElement('canvas');
+    var tempCtx = tempCanvas.getContext('2d');
     tempCanvas.width = w;
     tempCanvas.height = h;
 
-    const edgeData = tempCtx.createImageData(w, h);
-    const ed = edgeData.data;
+    var edgeData = tempCtx.createImageData(w, h);
+    var ed = edgeData.data;
 
-    // 計算局部暗部特徵 (眼珠、鼻孔、唇線)
-    for (let i = 0; i < data.length; i += 4) {
+    for (var i = 0; i < data.length; i += 4) {
       if (data[i + 3] > 30) {
-        const brightness = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        // 只保留真正極深色結構特徵 (眼珠/唇線/鼻孔/黑框)
-        if (brightness < 85) {
+        var brightness = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        if (brightness < 90) {
           ed[i] = 0;
           ed[i + 1] = 0;
           ed[i + 2] = 0;
@@ -301,16 +326,205 @@ function convertAllToLineDrawing() {
       }
     }
     tempCtx.putImageData(edgeData, 0, 0);
-
-    // C. 繪製精細鋼筆輪廓線
     lineCtx.drawImage(tempCanvas, 0, 0);
 
-    // D. 根據幾何形狀重構畢卡索手繪幾何風格內部結構線條
+    // 繪製外層加粗畢卡索手繪幾何框線
+    var pts = getShapePoints(item.shape || 'diamond');
+    lineCtx.beginPath();
+    lineCtx.moveTo(pts[0][0] * w, pts[0][1] * h);
+    for (var j = 1; j < pts.length; j++) {
+      lineCtx.lineTo(pts[j][0] * w, pts[j][1] * h);
+    }
+    lineCtx.closePath();
+
     lineCtx.strokeStyle = '#000000';
-    lineCtx.lineWidth = Math.max(5, Math.round(w * 0.028));
-    lineCtx.lineCap = 'round';
-    lineCtx.lineJoin = 'round';
+    lineCtx.lineWidth = Math.max(8, Math.round(w * 0.045));
+    lineCtx.stroke();
 
-    const pts = getShapePoints(item.shape || 'diamond');
+    lineFacets.push({
+      canvas: lineCanvas,
+      angle: item.angle,
+      width: item.width,
+      height: item.height
+    });
+  });
 
-    // 繪製幾何分割交叉線條（如《
+  renderStage3Libraries();
+  alert('✨ 成功轉換為純白底高清畢卡索 Line Drawing 鋼筆線稿！');
+}
+
+function renderStage3Libraries() {
+  var rawLib = document.getElementById('rawFacetsLibrary');
+  var lineLib = document.getElementById('lineFacetsLibrary');
+
+  if (rawLib) {
+    rawLib.innerHTML = rawFacets.length === 0 ? '<span style="color:#888;">尚未切割任何五官</span>' : '';
+    rawFacets.forEach(function(item) {
+      var img = document.createElement('img');
+      img.src = item.canvas.toDataURL();
+      img.className = 'library-item';
+      rawLib.appendChild(img);
+    });
+  }
+
+  if (lineLib) {
+    lineLib.innerHTML = lineFacets.length === 0 ? '<span style="color:#888;">尚未轉換 Line Drawing</span>' : '';
+    lineFacets.forEach(function(item) {
+      var img = document.createElement('img');
+      img.src = item.canvas.toDataURL();
+      img.className = 'library-item';
+      lineLib.appendChild(img);
+    });
+  }
+}
+
+// 5. 步驟 4：自畫像 A, B, C 拼貼
+function switchPortraitTab(index) {
+  activePortraitIndex = index;
+  selectedCollageItemIndex = -1;
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('active', i === index);
+  }
+  drawCollageCanvas();
+}
+
+function renderCollageLibrary() {
+  var lib = document.getElementById('collageFacetsLibrary');
+  if (!lib) return;
+  lib.innerHTML = lineFacets.length === 0 ? '<span style="color:#888;">無 Line Drawing 素材</span>' : '';
+
+  lineFacets.forEach(function(item, idx) {
+    var img = document.createElement('img');
+    img.src = item.canvas.toDataURL();
+    img.className = 'library-item';
+    img.title = '點擊加入 [' + item.angle + '] 五官';
+    img.onclick = function() { addFacetToCollage(idx); };
+    lib.appendChild(img);
+  });
+}
+
+function addFacetToCollage(lineFacetIndex) {
+  var facet = lineFacets[lineFacetIndex];
+  if (!facet) return;
+
+  var newItem = {
+    canvas: facet.canvas,
+    x: 200 + Math.random() * 50,
+    y: 150 + Math.random() * 50,
+    width: facet.width,
+    height: facet.height,
+    rotation: 0
+  };
+
+  portraitsData[activePortraitIndex].push(newItem);
+  selectedCollageItemIndex = portraitsData[activePortraitIndex].length - 1;
+  drawCollageCanvas();
+}
+
+function drawCollageCanvas() {
+  if (!collageCtx || !collageCanvas) return;
+  collageCtx.clearRect(0, 0, collageCanvas.width, collageCanvas.height);
+
+  var currentItems = portraitsData[activePortraitIndex];
+  currentItems.forEach(function(item, idx) {
+    collageCtx.save();
+    collageCtx.translate(item.x + item.width / 2, item.y + item.height / 2);
+    collageCtx.rotate((item.rotation * Math.PI) / 180);
+    collageCtx.drawImage(item.canvas, -item.width / 2, -item.height / 2, item.width, item.height);
+
+    if (idx === selectedCollageItemIndex) {
+      collageCtx.strokeStyle = '#007bff';
+      collageCtx.lineWidth = 3;
+      collageCtx.setLineDash([6, 6]);
+      collageCtx.strokeRect(-item.width / 2 - 4, -item.height / 2 - 4, item.width + 8, item.height + 8);
+    }
+    collageCtx.restore();
+  });
+}
+
+function transformActiveCanvasItem(type, val) {
+  if (selectedCollageItemIndex === -1) return;
+  var item = portraitsData[activePortraitIndex][selectedCollageItemIndex];
+  if (type === 'scale') {
+    item.width *= val;
+    item.height *= val;
+  } else if (type === 'rotate') {
+    item.rotation += val;
+  }
+  drawCollageCanvas();
+}
+
+function deleteActiveCanvasItem() {
+  if (selectedCollageItemIndex !== -1) {
+    portraitsData[activePortraitIndex].splice(selectedCollageItemIndex, 1);
+    selectedCollageItemIndex = -1;
+    drawCollageCanvas();
+  }
+}
+
+function exportCollage() {
+  var link = document.createElement('a');
+  link.download = '畢卡索立體派自畫像_' + ['A','B','C'][activePortraitIndex] + '.png';
+  link.href = collageCanvas.toDataURL();
+  link.click();
+}
+
+// 拖曳事件處理
+function handleCropMouseDown(e) {
+  if (!cropCanvas) return;
+  var rect = cropCanvas.getBoundingClientRect();
+  var mx = e.clientX - rect.left;
+  var my = e.clientY - rect.top;
+
+  if (mx >= cropBox.x && mx <= cropBox.x + cropBox.width &&
+      my >= cropBox.y && my <= cropBox.y + cropBox.height) {
+    isDraggingBox = true;
+    startX = mx - cropBox.x;
+    startY = my - cropBox.y;
+  }
+}
+
+function handleCropMouseMove(e) {
+  if (!isDraggingBox || !cropCanvas) return;
+  var rect = cropCanvas.getBoundingClientRect();
+  cropBox.x = e.clientX - rect.left - startX;
+  cropBox.y = e.clientY - rect.top - startY;
+  drawCropCanvas();
+}
+
+function handleCropMouseUp() { isDraggingBox = false; }
+
+function handleCollageMouseDown(e) {
+  if (!collageCanvas) return;
+  var rect = collageCanvas.getBoundingClientRect();
+  var mx = e.clientX - rect.left;
+  var my = e.clientY - rect.top;
+
+  var currentItems = portraitsData[activePortraitIndex];
+  selectedCollageItemIndex = -1;
+
+  for (var i = currentItems.length - 1; i >= 0; i--) {
+    var item = currentItems[i];
+    if (mx >= item.x && mx <= item.x + item.width &&
+        my >= item.y && my <= item.y + item.height) {
+      selectedCollageItemIndex = i;
+      isDraggingCollageItem = true;
+      startX = mx - item.x;
+      startY = my - item.y;
+      break;
+    }
+  }
+  drawCollageCanvas();
+}
+
+function handleCollageMouseMove(e) {
+  if (!isDraggingCollageItem || selectedCollageItemIndex === -1 || !collageCanvas) return;
+  var rect = collageCanvas.getBoundingClientRect();
+  var item = portraitsData[activePortraitIndex][selectedCollageItemIndex];
+  item.x = e.clientX - rect.left - startX;
+  item.y = e.clientY - rect.top - startY;
+  drawCollageCanvas();
+}
+
+function handleCollageMouseUp() { isDraggingCollageItem = false; }
