@@ -1,5 +1,4 @@
-// 全域狀態變數
-var currentStage = 1;
+// 全域變數定義
 var angleImages = {
   front: null, right: null, left: null,
   up: null, down: null, threequarter: null
@@ -26,47 +25,63 @@ var isDraggingBox = false;
 var isDraggingCollageItem = false;
 var startX = 0, startY = 0;
 
-// 安全初始化，防止 Dom 未載入導致綁定崩潰
-window.addEventListener('DOMContentLoaded', function() {
-  initApp();
-});
-window.addEventListener('load', function() {
-  initApp();
-});
+// 自動加載與上傳事件監聽器綁定
+window.addEventListener('DOMContentLoaded', setupApp);
+window.addEventListener('load', setupApp);
 
-function initApp() {
-  if (!cropCanvas) {
-    cropCanvas = document.getElementById('cropCanvas');
-    if (cropCanvas) cropCtx = cropCanvas.getContext('2d');
-  }
+function setupApp() {
+  cropCanvas = document.getElementById('cropCanvas');
+  if (cropCanvas) cropCtx = cropCanvas.getContext('2d');
 
-  if (!collageCanvas) {
-    collageCanvas = document.getElementById('collageCanvas');
-    if (collageCanvas) collageCtx = collageCanvas.getContext('2d');
-  }
+  collageCanvas = document.getElementById('collageCanvas');
+  if (collageCanvas) collageCtx = collageCanvas.getContext('2d');
+
+  // 綁定 6 個角度照片上傳事件
+  var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'];
+  angles.forEach(function(key) {
+    var inputEl = document.getElementById('img_' + key);
+    if (inputEl) {
+      inputEl.onchange = function(e) {
+        handleUpload(e, key);
+      };
+    }
+  });
 
   if (cropCanvas) {
-    cropCanvas.removeEventListener('mousedown', handleCropMouseDown);
-    cropCanvas.addEventListener('mousedown', handleCropMouseDown);
-    cropCanvas.removeEventListener('mousemove', handleCropMouseMove);
-    cropCanvas.addEventListener('mousemove', handleCropMouseMove);
-    window.removeEventListener('mouseup', handleCropMouseUp);
-    window.addEventListener('mouseup', handleCropMouseUp);
+    cropCanvas.onmousedown = handleCropMouseDown;
+    cropCanvas.onmousemove = handleCropMouseMove;
+    window.onmouseup = handleCropMouseUp;
   }
 
   if (collageCanvas) {
-    collageCanvas.removeEventListener('mousedown', handleCollageMouseDown);
-    collageCanvas.addEventListener('mousedown', handleCollageMouseDown);
-    collageCanvas.removeEventListener('mousemove', handleCollageMouseMove);
-    collageCanvas.addEventListener('mousemove', handleCollageMouseMove);
-    window.removeEventListener('mouseup', handleCollageMouseUp);
-    window.addEventListener('mouseup', handleCollageMouseUp);
+    collageCanvas.onmousedown = handleCollageMouseDown;
+    collageCanvas.onmousemove = handleCollageMouseMove;
+    window.onmouseup = handleCollageMouseUp;
   }
 }
 
-// 1. 步驟切換
+// 圖片上傳的核心處理函數
+function handleUpload(e, key) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  var reader = new FileReader();
+  reader.onload = function(evt) {
+    var img = new Image();
+    img.onload = function() {
+      angleImages[key] = img;
+      var prev = document.getElementById('preview_' + key);
+      if (prev) {
+        prev.src = evt.target.result;
+        prev.style.display = 'block';
+      }
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function switchStage(stageNum) {
-  currentStage = stageNum;
   var btns = document.querySelectorAll('.step-btn');
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('active', i + 1 === stageNum);
@@ -88,28 +103,6 @@ function switchStage(stageNum) {
   }
 }
 
-// 2. 步驟 1：照片上傳處理（獨立防禦函數）
-function loadAngleImage(e, angleKey) {
-  var file = e.target.files && e.target.files[0];
-  if (!file) return;
-
-  var reader = new FileReader();
-  reader.onload = function (event) {
-    var img = new Image();
-    img.onload = function () {
-      angleImages[angleKey] = img;
-      var preview = document.getElementById('preview_' + angleKey);
-      if (preview) {
-        preview.src = event.target.result;
-        preview.style.display = 'block';
-      }
-    };
-    img.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-// 3. 步驟 2：幾何切割
 function changeActiveSourceAngle() {
   var select = document.getElementById('angleSelect');
   if (select) activeAngleKey = select.value;
@@ -279,7 +272,6 @@ function renderStage2Preview() {
   });
 }
 
-// 4. 步驟 3：高清畢卡索純白底 Line Drawing 鋼筆提線演算法
 function convertAllToLineDrawing() {
   if (rawFacets.length === 0) {
     alert('尚未切割任何五官素材！請先在步驟二手動切割。');
@@ -297,7 +289,6 @@ function convertAllToLineDrawing() {
     lineCanvas.width = w;
     lineCanvas.height = h;
 
-    // 填充純白潔淨底色
     lineCtx.fillStyle = '#ffffff';
     lineCtx.fillRect(0, 0, w, h);
 
@@ -305,7 +296,6 @@ function convertAllToLineDrawing() {
     var imgData = srcCtx.getImageData(0, 0, w, h);
     var data = imgData.data;
 
-    // 提取高對比關鍵結構線條（瞳孔/雙眼皮/唇線）
     var tempCanvas = document.createElement('canvas');
     var tempCtx = tempCanvas.getContext('2d');
     tempCanvas.width = w;
@@ -318,17 +308,13 @@ function convertAllToLineDrawing() {
       if (data[i + 3] > 30) {
         var brightness = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
         if (brightness < 90) {
-          ed[i] = 0;
-          ed[i + 1] = 0;
-          ed[i + 2] = 0;
-          ed[i + 3] = 255;
+          ed[i] = 0; ed[i + 1] = 0; ed[i + 2] = 0; ed[i + 3] = 255;
         }
       }
     }
     tempCtx.putImageData(edgeData, 0, 0);
     lineCtx.drawImage(tempCanvas, 0, 0);
 
-    // 繪製外層加粗畢卡索手繪幾何框線
     var pts = getShapePoints(item.shape || 'diamond');
     lineCtx.beginPath();
     lineCtx.moveTo(pts[0][0] * w, pts[0][1] * h);
@@ -378,7 +364,6 @@ function renderStage3Libraries() {
   }
 }
 
-// 5. 步驟 4：自畫像 A, B, C 拼貼
 function switchPortraitTab(index) {
   activePortraitIndex = index;
   selectedCollageItemIndex = -1;
@@ -398,7 +383,6 @@ function renderCollageLibrary() {
     var img = document.createElement('img');
     img.src = item.canvas.toDataURL();
     img.className = 'library-item';
-    img.title = '點擊加入 [' + item.angle + '] 五官';
     img.onclick = function() { addFacetToCollage(idx); };
     lib.appendChild(img);
   });
@@ -470,7 +454,6 @@ function exportCollage() {
   link.click();
 }
 
-// 拖曳事件處理
 function handleCropMouseDown(e) {
   if (!cropCanvas) return;
   var rect = cropCanvas.getBoundingClientRect();
