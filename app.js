@@ -101,20 +101,19 @@ function switchStage(stageNum) {
 }
 
 // -------------------------------------------------------------
-// 【核心】畢卡索眼球/瞳孔清晰重構 Line Drawing 引擎
+// 【自適應真實局部重構線稿引擎】精準提煉學生真實眼睛與五官
 // -------------------------------------------------------------
 function convertFullFaceLineDrawing() {
   var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'];
   var hasImage = false;
   
   var colorMode = document.getElementById('lineColorSelect') ? document.getElementById('lineColorSelect').value : 'black';
-  var lineMode = document.getElementById('lineModeSelect') ? document.getElementById('lineModeSelect').value : 'picasso';
 
   angles.forEach(function(key) {
     var img = angleImages[key];
     if (img) {
       hasImage = true;
-      var lineImgCanvas = processPhotoToCleanLineArt(img, colorMode, lineMode, key);
+      var lineImgCanvas = processPhotoToNaturalLineArt(img, colorMode);
       lineImages[key] = lineImgCanvas;
 
       var prev = document.getElementById('line_preview_' + key);
@@ -128,11 +127,11 @@ function convertFullFaceLineDrawing() {
   if (!hasImage) {
     alert('請先在步驟一上傳至少一張照片！');
   } else {
-    alert('✨ 成功生成眼睛、眼球與瞳孔超清晰的畢卡索 Line Drawing！');
+    alert('✨ 已成功提取真實高清晰五官與眼睛線稿！');
   }
 }
 
-function processPhotoToCleanLineArt(sourceImg, colorMode, lineMode, angleKey) {
+function processPhotoToNaturalLineArt(sourceImg, colorMode) {
   var canvas = document.createElement('canvas');
   var ctx = canvas.getContext('2d');
   
@@ -154,9 +153,17 @@ function processPhotoToCleanLineArt(sourceImg, colorMode, lineMode, angleKey) {
     gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
   }
 
-  // 2. 高斯降噪
-  var g1 = gaussianBlur(gray, w, h, 1);
-  var g2 = gaussianBlur(gray, w, h, 3);
+  // 2. 自適應局部增強：分開眼白與眼珠，防止眼睛糊成一塊
+  var blurLocal = gaussianBlur(gray, w, h, 8);
+  var norm = new Float32Array(w * h);
+  for (var i = 0; i < w * h; i++) {
+    var diff = gray[i] - blurLocal[i];
+    norm[i] = Math.min(255, Math.max(0, 128 + diff * 2.5)); // 強化內部構造對比
+  }
+
+  // 3. 多尺度邊緣融合 (Multi-scale Edge Extraction)
+  var g1 = gaussianBlur(norm, w, h, 1);
+  var g2 = gaussianBlur(norm, w, h, 3);
 
   var outputCanvas = document.createElement('canvas');
   outputCanvas.width = w;
@@ -169,15 +176,14 @@ function processPhotoToCleanLineArt(sourceImg, colorMode, lineMode, angleKey) {
   var outData = outCtx.getImageData(0, 0, w, h);
   var od = outData.data;
 
-  var rgbColor = [10, 10, 10]; // 黑鋼筆
+  var rgbColor = [15, 15, 15]; // 黑鋼筆
   if (colorMode === 'blue') rgbColor = [0, 90, 200];
   if (colorMode === 'green') rgbColor = [0, 140, 60];
   if (colorMode === 'red') rgbColor = [210, 20, 40];
 
-  var tau = 0.98; 
   for (var i = 0; i < w * h; i++) {
-    var dog = g1[i] - tau * g2[i];
-    if (dog < -2.2) {
+    var edgeVal = g1[i] - 0.96 * g2[i];
+    if (edgeVal < -1.8) {
       var pIdx = i * 4;
       od[pIdx] = rgbColor[0];
       od[pIdx + 1] = rgbColor[1];
@@ -188,59 +194,7 @@ function processPhotoToCleanLineArt(sourceImg, colorMode, lineMode, angleKey) {
 
   outCtx.putImageData(outData, 0, 0);
 
-  // 3. 【關鍵強化】如果選擇畢卡索模式，進行眼球、眼框與睫毛重構繪製
-  if (lineMode === 'picasso') {
-    outCtx.strokeStyle = 'rgb(' + rgbColor.join(',') + ')';
-    outCtx.fillStyle = 'rgb(' + rgbColor.join(',') + ')';
-    outCtx.lineWidth = Math.max(4, Math.round(w * 0.012));
-    outCtx.lineCap = 'round';
-
-    // 根據不同角度重構眼球與眼神特徵
-    if (angleKey === 'front' || angleKey === 'threequarter') {
-      // 繪製左眼幾何輪廓與瞳孔 (Left Eye)
-      drawPicassoEye(outCtx, w * 0.35, h * 0.42, w * 0.12, h * 0.08);
-      // 繪製右眼幾何輪廓與瞳孔 (Right Eye)
-      drawPicassoEye(outCtx, w * 0.65, h * 0.42, w * 0.12, h * 0.08);
-    } else if (angleKey === 'right') {
-      drawPicassoEye(outCtx, w * 0.6, h * 0.42, w * 0.14, h * 0.09);
-    } else if (angleKey === 'left') {
-      drawPicassoEye(outCtx, w * 0.4, h * 0.42, w * 0.14, h * 0.09);
-    } else if (angleKey === 'up' || angleKey === 'down') {
-      drawPicassoEye(outCtx, w * 0.35, h * 0.35, w * 0.1, h * 0.07);
-      drawPicassoEye(outCtx, w * 0.65, h * 0.35, w * 0.1, h * 0.07);
-    }
-  }
-
   return outputCanvas;
-}
-
-// 繪製畢卡索風格手繪眼睛（清晰杏仁眼框 + 圓形同心眼珠與瞳孔 + 睫毛）
-function drawPicassoEye(ctx, cx, cy, rx, ry) {
-  // A. 清晰白色背景洗淨眼框區域（確保眼白潔白）
-  ctx.save();
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
-  ctx.fill();
-  ctx.stroke();
-
-  // B. 黑眼珠同心圓 (Iris & Pupil)
-  ctx.beginPath();
-  ctx.arc(cx, cy, ry * 0.6, 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, ry * 0.3, 0, Math.PI * 2);
-  ctx.fill();
-
-  // C. 幾何睫毛 (3 根線條，完全吻合圖 20)
-  for (var i = -1; i <= 1; i++) {
-    ctx.beginPath();
-    ctx.moveTo(cx + i * (rx * 0.4), cy - ry);
-    ctx.lineTo(cx + i * (rx * 0.5), cy - ry - ry * 0.6);
-    ctx.stroke();
-  }
-  ctx.restore();
 }
 
 function gaussianBlur(src, w, h, radius) {
