@@ -39,7 +39,7 @@
       box-shadow: 0 4px 8px rgba(0,123,255,0.3);
     }
 
-    .stage-panel { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 1100px; margin: 0 auto; }
+    .stage-panel { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 1150px; margin: 0 auto; }
     .stage-panel.active { display: block; }
 
     .upload-grid {
@@ -97,12 +97,32 @@
       margin-top: 15px;
     }
     .library-item-container { position: relative; display: inline-block; }
-    .library-item { height: 85px; border: 2px solid #333; border-radius: 6px; cursor: pointer; background: white; }
+    .library-item { height: 75px; border: 2px solid #333; border-radius: 6px; cursor: pointer; background: white; }
     .delete-item-btn {
       position: absolute; top: -8px; right: -8px; background: #dc3545; color: white;
       border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px;
       text-align: center; cursor: pointer; font-weight: bold; border: none; padding: 0;
     }
+
+    /* 角度分類區域樣式 */
+    .angle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .angle-group-card {
+      border: 1px solid #007bff;
+      border-radius: 6px;
+      padding: 8px;
+      background: #f0f7ff;
+      cursor: pointer;
+      text-align: left;
+    }
+    .angle-group-card:hover { background: #e0f0ff; }
+    .angle-group-card h5 { margin: 0 0 6px 0; color: #005ac8; font-size: 13px; }
+    .angle-group-items { display: flex; gap: 6px; flex-wrap: wrap; min-height: 50px; align-items: center; }
+    .empty-tip { font-size: 11px; color: #aaa; }
 
     .portrait-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
     .tab-btn { background: #e9ecef; border: 1px solid #ccc; padding: 6px 16px; border-radius: 15px; cursor: pointer; }
@@ -112,13 +132,13 @@
 <body>
 
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
-  <p class="subtitle">上傳 6 角度照片 ➔ 全臉轉 Line Drawing 線稿 ➔ 幾何切割五官 ➔ 拼合立體派自畫像</p>
+  <p class="subtitle">上傳 6 角度照片 ➔ 全臉轉真實 Line Drawing 線稿 ➔ 幾何切割五官 ➔ 分類角度與參考畢卡索結構拼貼</p>
 
   <div class="step-nav">
     <button class="step-btn active" onclick="switchStage(1)">步驟 1: 上傳照片</button>
     <button class="step-btn" onclick="switchStage(2)">步驟 2: 全臉 Line Drawing</button>
     <button class="step-btn" onclick="switchStage(3)">步驟 3: 幾何切割五官</button>
-    <button class="step-btn" onclick="switchStage(4)">步驟 4: 拼合自畫像</button>
+    <button class="step-btn" onclick="switchStage(4)">步驟 4: 五官角度分類與拼貼自畫像</button>
   </div>
 
   <!-- 步驟 1 面板 -->
@@ -157,13 +177,13 @@
       </div>
     </div>
     <br>
-    <button class="btn-success" onclick="switchStage(2)">已上傳完畢 ➔ 進入步驟二生成全臉線稿</button>
+    <button class="btn-success" onclick="switchStage(2)">已上傳完畢 ➔ 進入步驟二生成全臉真實線稿</button>
   </div>
 
-  <!-- 步驟 2 面板：全臉 Line Drawing 轉換 -->
+  <!-- 步驟 2 面板：全臉 Line Drawing 轉換（還原寫生線稿） -->
   <div id="stage2" class="stage-panel">
     <h3>步驟二：一鍵將 6 個角度全臉轉換為手繪 Line Drawing 線稿：</h3>
-    <p>即刻生成極高對比、結構清晰的畢卡索《哭泣的女人》幾何粗線條風格！</p>
+    <p>提取真實照片手繪線條，觀察自己不同角度的顔面結構線！</p>
     
     <div class="toolbar-group">
       <label><b>筆觸色彩：</b></label>
@@ -191,6 +211,7 @@
 
   <!-- 步驟 3 面板：幾何手動切割五官線稿 -->
   <div id="stage3" class="stage-panel">
+    <h3>步驟三：選擇角度與幾何圖形，手動切割五官線稿素材：</h3>
     <div class="toolbar-group">
       <label><b>選擇照片角度:</b></label>
       <select id="angleSelect" onchange="changeActiveSourceAngle()">
@@ -236,13 +257,21 @@
     </div>
 
     <br>
-    <button class="btn-success" onclick="switchStage(4)">切割完成 ➔ 進入步驟四自畫像組合</button>
+    <button class="btn-success" onclick="switchStage(4)">切割完成 ➔ 進入步驟四進行角度分類與拼貼</button>
   </div>
 
-  <!-- 步驟 4 面板 -->
+  <!-- 步驟 4 面板：五官角度分類 + 畢卡索即時參考圖 + 拼貼 -->
   <div id="stage4" class="stage-panel">
-    <h3>模仿畢卡索《哭泣的女人》立體主義自畫像拼貼畫布：</h3>
-    
+    <h3>步驟四：已切割五官角度分類，對比畢卡索幾何結構進行自畫像拼貼：</h3>
+
+    <!-- 1. 自動角度分類卡片區域 -->
+    <div style="text-align: left; margin-bottom: 15px;">
+      <h4 style="margin: 0 0 5px 0; color: #007bff;">📁 步驟 4.1：切割五官的角度分類庫（點擊角度/五官可查看對應畢卡索結構參考圖）：</h4>
+      <div id="classifiedFacetsContainer" class="angle-grid"></div>
+    </div>
+
+    <hr style="border: none; border-top: 1px dashed #ccc; margin: 15px 0;">
+
     <div class="portrait-tabs">
       <button class="tab-btn active" onclick="switchPortraitTab(0)">自畫像 A</button>
       <button class="tab-btn" onclick="switchPortraitTab(1)">自畫像 B</button>
@@ -258,19 +287,21 @@
       <button class="btn-dark" onclick="exportCollage()">📥 下載當前自畫像</button>
     </div>
 
-    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-      <div style="text-align: left;">
-        <h4>點擊線稿素材加入畫布：</h4>
-        <div id="collageFacetsLibrary" class="facets-library" style="flex-direction: column; width: 180px; max-height: 500px; overflow-y: auto;">
-        </div>
+    <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start; flex-wrap: wrap;">
+      <!-- 2. 即時顯示對應角度的畢卡索幾何參考畫布 -->
+      <div style="background: #f8f9fa; border: 2px solid #007bff; border-radius: 8px; padding: 10px; text-align: center;">
+        <h5 id="picassoRefTitle" style="margin: 0 0 8px 0; color: #005ac8;">🎨 畢卡索《哭泣的女人》繪畫參考圖</h5>
+        <canvas id="picassoRefCanvas" width="300" height="300"></canvas>
       </div>
       
+      <!-- 3. 主拼貼畫布 -->
       <div>
-        <canvas id="collageCanvas" width="700" height="550"></canvas>
+        <h5 style="margin: 0 0 8px 0; color: #333;">🖼️ 立體派自畫像拼貼畫布</h5>
+        <canvas id="collageCanvas" width="650" height="500"></canvas>
       </div>
     </div>
   </div>
 
-  <script src="app.js?v=2026_STABLE_PICASSO_FIXED"></script>
+  <script src="app.js?v=2026_SCAFFOLDING_PEDAGOGY_V3"></script>
 </body>
 </html>
