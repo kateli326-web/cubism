@@ -30,7 +30,7 @@ var isDraggingCollageItem = false;
 var startX = 0, startY = 0;
 var currentStage = 1;
 
-// 1. 上傳照片
+// 1. 原生極速圖片上傳（絕對不崩潰）
 function uploadImageDirect(event, angleKey) {
   try {
     var input = event.target;
@@ -106,7 +106,7 @@ function switchStage(stageNum) {
 }
 
 // -------------------------------------------------------------
-// 【步驟二：還原真實相片手繪 Line Drawing 效果】
+// 【步驟二：原生 Canvas 提煉真實寫生 Line Drawing 線稿】
 // -------------------------------------------------------------
 function convertFullFaceLineDrawing() {
   var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'];
@@ -136,7 +136,7 @@ function convertFullFaceLineDrawing() {
   }
 }
 
-// 真實寫生邊緣提取（還原真實相片線條）
+// 超穩健原生 Canvas 灰階高對比線稿提煉技術
 function processPhotoToNaturalRealLineArt(sourceImg, colorMode) {
   var canvas = document.createElement('canvas');
   var ctx = canvas.getContext('2d');
@@ -149,52 +149,33 @@ function processPhotoToNaturalRealLineArt(sourceImg, colorMode) {
   canvas.width = w;
   canvas.height = h;
 
+  // 1. 繪製原圖
   ctx.drawImage(sourceImg, 0, 0, w, h);
-  var imgData = ctx.getImageData(0, 0, w, h);
-  var data = imgData.data;
+  
+  // 2. 套用高對比素描濾鏡效果 (模擬真實寫生線稿)
+  ctx.filter = 'grayscale(100%) contrast(300%) brightness(120%)';
+  ctx.drawImage(canvas, 0, 0);
+  ctx.filter = 'none';
 
-  // 灰階與自適應對比
-  var gray = new Float32Array(w * h);
-  for (var i = 0; i < data.length; i += 4) {
-    gray[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-  }
+  // 3. 色彩替換 (若選擇藍/綠/紅)
+  if (colorMode !== 'black') {
+    var imgData = ctx.getImageData(0, 0, w, h);
+    var d = imgData.data;
+    var rgb = [0, 90, 200]; // 經典藍
+    if (colorMode === 'green') rgb = [0, 140, 60];
+    if (colorMode === 'red') rgb = [210, 20, 40];
 
-  var outputCanvas = document.createElement('canvas');
-  outputCanvas.width = w;
-  outputCanvas.height = h;
-  var outCtx = outputCanvas.getContext('2d');
-
-  outCtx.fillStyle = '#ffffff';
-  outCtx.fillRect(0, 0, w, h);
-
-  var outData = outCtx.getImageData(0, 0, w, h);
-  var od = outData.data;
-
-  var rgbColor = [20, 20, 20];
-  if (colorMode === 'blue') rgbColor = [0, 90, 200];
-  if (colorMode === 'green') rgbColor = [0, 140, 60];
-  if (colorMode === 'red') rgbColor = [210, 20, 40];
-
-  // 簡單梯度邊緣提煉
-  for (var y = 1; y < h - 1; y++) {
-    for (var x = 1; x < w - 1; x++) {
-      var idx = y * w + x;
-      var gx = gray[idx + 1] - gray[idx - 1];
-      var gy = gray[idx + w] - gray[idx - w];
-      var grad = Math.sqrt(gx * gx + gy * gy);
-
-      if (grad > 28) {
-        var pIdx = idx * 4;
-        od[pIdx] = rgbColor[0];
-        od[pIdx + 1] = rgbColor[1];
-        od[pIdx + 2] = rgbColor[2];
-        od[pIdx + 3] = 255;
+    for (var i = 0; i < d.length; i += 4) {
+      if (d[i] < 180) { // 深色線條替換為選擇的顏色
+        d[i] = rgb[0];
+        d[i+1] = rgb[1];
+        d[i+2] = rgb[2];
       }
     }
+    ctx.putImageData(imgData, 0, 0);
   }
 
-  outCtx.putImageData(outData, 0, 0);
-  return outputCanvas;
+  return canvas;
 }
 
 function changeActiveSourceAngle() {
@@ -245,4 +226,218 @@ function drawCropCanvas() {
 
     cropCtx.save();
     cropCtx.translate(cropBox.x + cropBox.width / 2, cropBox.y + cropBox.height / 2);
-    cropCtx
+    cropCtx.rotate((cropBox.rotation * Math.PI) / 180);
+
+    var pts = getShapePoints(cropBox.shape);
+    var hw = cropBox.width / 2;
+    var hh = cropBox.height / 2;
+
+    cropCtx.beginPath();
+    cropCtx.moveTo(-hw + pts[0][0] * cropBox.width, -hh + pts[0][1] * cropBox.height);
+    for (var i = 1; i < pts.length; i++) {
+      cropCtx.lineTo(-hw + pts[i][0] * cropBox.width, -hh + pts[i][1] * cropBox.height);
+    }
+    cropCtx.closePath();
+
+    cropCtx.strokeStyle = '#ffc107';
+    cropCtx.lineWidth = 4;
+    cropCtx.setLineDash([8, 4]);
+    cropCtx.stroke();
+    cropCtx.fillStyle = 'rgba(255, 193, 7, 0.2)';
+    cropCtx.fill();
+    cropCtx.restore();
+  } else {
+    cropCtx.font = '18px Arial';
+    cropCtx.fillStyle = '#888';
+    cropCtx.textAlign = 'center';
+    cropCtx.fillText('請先在步驟二生成 [' + activeAngleKey + '] 角度的 Line Drawing 線稿', cropCanvas.width / 2, cropCanvas.height / 2);
+  }
+}
+
+function transformActiveBox(type, val) {
+  if (type === 'scale') {
+    cropBox.width *= val;
+    cropBox.height *= val;
+  } else if (type === 'rotate') {
+    cropBox.rotation += val;
+  }
+  drawCropCanvas();
+}
+
+function cutCurrentFacet() {
+  var img = lineImages[activeAngleKey] || angleImages[activeAngleKey];
+  if (!img) {
+    alert('請先在步驟二生成該角度的 Line Drawing 線稿！');
+    return;
+  }
+
+  var scale = Math.min(cropCanvas.width / img.width, cropCanvas.height / img.height) * 0.9;
+  var renderW = img.width * scale;
+  var renderH = img.height * scale;
+  var renderX = (cropCanvas.width - renderW) / 2;
+  var renderY = (cropCanvas.height - renderH) / 2;
+
+  var relX = (cropBox.x - renderX) / scale;
+  var relY = (cropBox.y - renderY) / scale;
+  var cropW = cropBox.width / scale;
+  var cropH = cropBox.height / scale;
+
+  var fCanvas = document.createElement('canvas');
+  var fCtx = fCanvas.getContext('2d');
+  fCanvas.width = cropW;
+  fCanvas.height = cropH;
+
+  var pts = getShapePoints(cropBox.shape);
+  fCtx.beginPath();
+  fCtx.moveTo(pts[0][0] * cropW, pts[0][1] * cropH);
+  for (var i = 1; i < pts.length; i++) {
+    fCtx.lineTo(pts[i][0] * cropW, pts[i][1] * cropH);
+  }
+  fCtx.closePath();
+
+  fCtx.save();
+  fCtx.clip();
+  fCtx.drawImage(img, relX, relY, cropW, cropH, 0, 0, cropW, cropH);
+  fCtx.restore();
+
+  fCtx.strokeStyle = '#000000';
+  fCtx.lineWidth = Math.max(6, Math.round(cropW * 0.03));
+  fCtx.stroke();
+
+  lineFacets.push({
+    canvas: fCanvas,
+    angle: activeAngleKey,
+    shape: cropBox.shape,
+    width: cropBox.width,
+    height: cropBox.height
+  });
+
+  renderStage3Preview();
+}
+
+function renderStage3Preview() {
+  var previewDiv = document.getElementById('stage3FacetsPreview');
+  if (!previewDiv) return;
+
+  if (lineFacets.length === 0) {
+    previewDiv.innerHTML = '<span style="color:#888;">按下「✂️ 切割選取區域五官線稿」後，切下的線稿五官會顯示在這裡！</span>';
+    return;
+  }
+
+  previewDiv.innerHTML = '';
+  lineFacets.forEach(function(item, idx) {
+    var container = document.createElement('div');
+    container.className = 'library-item-container';
+
+    var img = document.createElement('img');
+    img.src = item.canvas.toDataURL();
+    img.className = 'library-item';
+
+    var delBtn = document.createElement('button');
+    delBtn.className = 'delete-item-btn';
+    delBtn.innerHTML = '✕';
+    delBtn.onclick = function(e) {
+      e.stopPropagation();
+      lineFacets.splice(idx, 1);
+      renderStage3Preview();
+    };
+
+    container.appendChild(img);
+    container.appendChild(delBtn);
+    previewDiv.appendChild(container);
+  });
+}
+
+// -------------------------------------------------------------
+// 【步驟四：五官角度分類與畢卡索幾何參考圖即時顯示】
+// -------------------------------------------------------------
+var angleNames = {
+  front: '1. 正面五官',
+  right: '2. 右側面五官',
+  left: '3. 左側面五官',
+  up: '4. 仰視五官',
+  down: '5. 俯視五官',
+  threequarter: '6. 三七面五官'
+};
+
+function renderClassifiedFacets() {
+  var classifiedContainer = document.getElementById('classifiedFacetsContainer');
+  if (!classifiedContainer) return;
+  classifiedContainer.innerHTML = '';
+
+  var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'];
+
+  angles.forEach(function(angleKey) {
+    var groupDiv = document.createElement('div');
+    groupDiv.className = 'angle-group-card';
+    groupDiv.onclick = function() { updatePicassoReference(angleKey); };
+
+    var title = document.createElement('h5');
+    title.innerText = angleNames[angleKey];
+    groupDiv.appendChild(title);
+
+    var itemsDiv = document.createElement('div');
+    itemsDiv.className = 'angle-group-items';
+
+    var facetsOfAngle = lineFacets.filter(function(f) { return f.angle === angleKey; });
+
+    if (facetsOfAngle.length === 0) {
+      itemsDiv.innerHTML = '<span class="empty-tip">未切割</span>';
+    } else {
+      facetsOfAngle.forEach(function(facet) {
+        var img = document.createElement('img');
+        img.src = facet.canvas.toDataURL();
+        img.className = 'library-item';
+        img.onclick = function(e) {
+          e.stopPropagation();
+          addFacetToCollageObj(facet);
+          updatePicassoReference(angleKey);
+        };
+        itemsDiv.appendChild(img);
+      });
+    }
+
+    groupDiv.appendChild(itemsDiv);
+    classifiedContainer.appendChild(groupDiv);
+  });
+}
+
+function updatePicassoReference(angleKey) {
+  var refCanvas = document.getElementById('picassoRefCanvas');
+  var titleElem = document.getElementById('picassoRefTitle');
+  if (!refCanvas) return;
+  var ctx = refCanvas.getContext('2d');
+  
+  if (titleElem) {
+    titleElem.innerText = '🎨 畢卡索《哭泣的女人》繪畫參考圖（' + angleNames[angleKey] + '）';
+  }
+
+  ctx.clearRect(0, 0, refCanvas.width, refCanvas.height);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, refCanvas.width, refCanvas.height);
+
+  ctx.strokeStyle = '#005ac8';
+  ctx.fillStyle = '#005ac8';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  if (angleKey === 'front') {
+    ctx.beginPath(); ctx.moveTo(80, 50); ctx.lineTo(220, 50); ctx.lineTo(240, 180); ctx.lineTo(150, 260); ctx.lineTo(60, 180); ctx.closePath(); ctx.stroke();
+    drawCubistEye(ctx, 105, 120, 30, 18);
+    drawCubistEye(ctx, 195, 120, 30, 18);
+    ctx.beginPath(); ctx.moveTo(150, 90); ctx.lineTo(135, 170); ctx.lineTo(165, 170); ctx.closePath(); ctx.stroke();
+    drawCubistMouth(ctx, 150, 215, 60, 25);
+
+  } else if (angleKey === 'right' || angleKey === 'threequarter') {
+    ctx.beginPath(); ctx.moveTo(90, 40); ctx.lineTo(200, 40); ctx.lineTo(220, 130); ctx.lineTo(180, 180); ctx.lineTo(150, 250); ctx.lineTo(90, 200); ctx.closePath(); ctx.stroke();
+    drawCubistEye(ctx, 175, 125, 35, 20);
+    ctx.beginPath(); ctx.moveTo(175, 140); ctx.lineTo(225, 170); ctx.lineTo(185, 180); ctx.stroke();
+    drawCubistEar(ctx, 80, 130, 25, 45);
+    drawCubistMouth(ctx, 175, 215, 45, 22);
+
+  } else if (angleKey === 'left') {
+    ctx.beginPath(); ctx.moveTo(210, 40); ctx.lineTo(100, 40); ctx.lineTo(80, 130); ctx.lineTo(120, 180); ctx.lineTo(150, 250); ctx.lineTo(210, 200); ctx.closePath(); ctx.stroke();
+    drawCubistEye(ctx, 125, 125, 35, 20);
+    ctx.beginPath(); ctx.moveTo(125, 140); ctx.lineTo(75, 170); ctx.lineTo(115, 180); ctx.stroke();
+    drawCubistEar(ctx, 220, 130, 25, 4
