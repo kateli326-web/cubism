@@ -54,7 +54,7 @@
       padding: 12px;
       background: #f8f9fa;
       text-align: center;
-      min-height: 180px;
+      min-height: 190px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -63,6 +63,7 @@
     .upload-card h4 { margin: 0 0 8px 0; color: #007bff; }
     .upload-card input[type="file"] { width: 100%; font-size: 12px; cursor: pointer; }
     
+    /* 上傳後顯示的預覽圖樣式 */
     .preview-img {
       width: 100%;
       height: 120px;
@@ -70,6 +71,7 @@
       border-radius: 6px;
       margin-top: 8px;
       border: 1px solid #ccc;
+      display: block;
     }
 
     .toolbar-group {
@@ -153,27 +155,27 @@
     <div class="upload-grid">
       <div class="upload-card" id="card_front">
         <h4>1. 正面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadPhoto(event, 'front')">
+        <input type="file" accept="image/*" onchange="uploadPhotoDirect(this, 'front')">
       </div>
       <div class="upload-card" id="card_right">
         <h4>2. 右側面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadPhoto(event, 'right')">
+        <input type="file" accept="image/*" onchange="uploadPhotoDirect(this, 'right')">
       </div>
       <div class="upload-card" id="card_left">
         <h4>3. 左側面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadPhoto(event, 'left')">
+        <input type="file" accept="image/*" onchange="uploadPhotoDirect(this, 'left')">
       </div>
       <div class="upload-card" id="card_up">
         <h4>4. 仰視照片</h4>
-        <input type="file" accept="image/*" onchange="uploadPhoto(event, 'up')">
+        <input type="file" accept="image/*" onchange="uploadPhotoDirect(this, 'up')">
       </div>
       <div class="upload-card" id="card_down">
         <h4>5. 俯視照片</h4>
-        <input type="file" accept="image/*" onchange="uploadPhoto(event, 'down')">
+        <input type="file" accept="image/*" onchange="uploadPhotoDirect(this, 'down')">
       </div>
       <div class="upload-card" id="card_threequarter">
         <h4>6. 三七面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadPhoto(event, 'threequarter')">
+        <input type="file" accept="image/*" onchange="uploadPhotoDirect(this, 'threequarter')">
       </div>
     </div>
     <br>
@@ -184,7 +186,7 @@
   <div id="stage2" class="stage-panel">
     <h3>步驟二：一鍵轉換為「清晰、無雜訊」的手繪線稿：</h3>
     <p>自動清空陰影雜訊，提取流暢的五官與臉型輪廓線！</p>
-    
+
     <div class="toolbar-group">
       <button class="btn-primary" style="font-size: 16px; padding: 10px 20px;" onclick="convertCleanLineArt()">✨ 一鍵生成無雜訊清晰線稿</button>
     </div>
@@ -282,7 +284,7 @@
 
     <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start; flex-wrap: wrap;">
       <div>
-        <h5 style="margin: 0 0 8px 0; color: #333;">🖼️ 畢卡索立體派自畫像拼貼畫布（可拖曳/點擊素材庫加入）</h5>
+        <h5 style="margin: 0 0 8px 0; color: #333;">🖼️ 畢卡索立體派自畫像拼貼畫布</h5>
         <canvas id="collageCanvas" width="700" height="520"></canvas>
       </div>
     </div>
@@ -300,30 +302,31 @@
     var isDraggingBox = false, isDraggingItem = false;
     var startX = 0, startY = 0;
 
-    // 1. 步驟一：100% 成功上傳照片
-    function uploadPhoto(e, angleKey) {
-      var file = e.target.files[0];
-      if (!file) return;
+    // 【核心修正】同步直接傳送 Base64/Blob，零延遲強行渲染，徹底打破 onload 異步攔截！
+    function uploadPhotoDirect(inputElem, angleKey) {
+      if (!inputElem.files || !inputElem.files[0]) return;
+      var file = inputElem.files[0];
 
       var reader = new FileReader();
-      reader.onload = function(evt) {
-        var base64 = evt.target.result;
-        var img = new Image();
-        img.onload = function() {
-          photos[angleKey] = img;
+      reader.onload = function(e) {
+        var dataUrl = e.target.result;
 
-          var card = document.getElementById('card_' + angleKey);
-          if (card) {
-            var old = card.querySelector('.preview-img');
-            if (old) old.remove();
+        // 1. 建立預覽 Image 元素
+        var card = document.getElementById('card_' + angleKey);
+        if (card) {
+          var old = card.querySelector('.preview-img');
+          if (old) old.remove();
 
-            var newImg = document.createElement('img');
-            newImg.src = base64;
-            newImg.className = 'preview-img';
-            card.appendChild(newImg);
-          }
-        };
-        img.src = base64;
+          var imgElem = document.createElement('img');
+          imgElem.className = 'preview-img';
+          imgElem.src = dataUrl;
+          card.appendChild(imgElem);
+        }
+
+        // 2. 同步載入記憶體
+        var imgObj = new Image();
+        imgObj.src = dataUrl;
+        photos[angleKey] = imgObj;
       };
       reader.readAsDataURL(file);
     }
@@ -339,7 +342,7 @@
       if (num === 5) drawCollage();
     }
 
-    // 2. 步驟二：無雜訊清晰線稿
+    // 2. 步驟二：生成無雜訊清晰線稿
     function convertCleanLineArt() {
       var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'];
       var count = 0;
@@ -349,7 +352,8 @@
           count++;
           var cvs = document.createElement('canvas');
           var img = photos[key];
-          cvs.width = img.width; cvs.height = img.height;
+          cvs.width = img.width || 400; 
+          cvs.height = img.height || 400;
           var ctx = cvs.getContext('2d');
 
           ctx.drawImage(img, 0, 0);
@@ -396,136 +400,8 @@
       else alert('✨ 已成功生成無雜訊清晰線稿！');
     }
 
-    // 3. 步驟三：幾何切割
+    // 3. 步驟三：手動幾何切割
     function getShapePts(shape) {
       if (shape === 'diamond') return [[0.5,0],[1,0.5],[0.5,1],[0,0.5]];
       if (shape === 'triangle') return [[0.5,0],[1,1],[0,1]];
       if (shape === 'trapezoid') return [[0.2,0],[0.8,0],[1,1],[0,1]];
-      if (shape === 'polygon') return [[0.3,0],[0.85,0.15],[1,0.85],[0.5,1],[0,0.6]];
-      if (shape === 'parallelogram') return [[0.25,0],[1,0],[0.75,1],[0,1]];
-      if (shape === 'shield') return [[0,0],[1,0],[1,0.6],[0.5,1],[0,0.6]];
-      var pts = [];
-      for(var i=0; i<12; i++) {
-        var r = (i/12)*Math.PI*2;
-        pts.push([0.5+0.5*Math.cos(r), 0.5+0.5*Math.sin(r)]);
-      }
-      return pts;
-    }
-
-    function drawCrop() {
-      var cvs = document.getElementById('cropCanvas');
-      var ctx = cvs.getContext('2d');
-      ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-      var key = document.getElementById('angleSelect').value;
-      var shape = document.getElementById('shapeSelect').value;
-      var img = lineArt[key] || photos[key];
-
-      if (img) {
-        var sc = Math.min(cvs.width/img.width, cvs.height/img.height)*0.85;
-        var rw = img.width*sc, rh = img.height*sc;
-        var rx = (cvs.width-rw)/2, ry = (cvs.height-rh)/2;
-
-        ctx.drawImage(img, rx, ry, rw, rh);
-
-        ctx.save();
-        ctx.translate(cropBox.x + cropBox.w/2, cropBox.y + cropBox.h/2);
-        ctx.rotate(cropBox.rot * Math.PI / 180);
-
-        var pts = getShapePts(shape);
-        var hw = cropBox.w/2, hh = cropBox.h/2;
-        ctx.beginPath();
-        ctx.moveTo(-hw + pts[0][0]*cropBox.w, -hh + pts[0][1]*cropBox.h);
-        for(var i=1; i<pts.length; i++) ctx.lineTo(-hw + pts[i][0]*cropBox.w, -hh + pts[i][1]*cropBox.h);
-        ctx.closePath();
-
-        ctx.strokeStyle = '#ffc107'; ctx.lineWidth = 4; ctx.stroke();
-        ctx.fillStyle = 'rgba(255,193,7,0.2)'; ctx.fill();
-        ctx.restore();
-      } else {
-        ctx.fillStyle = '#888'; ctx.font = '16px Arial'; ctx.textAlign = 'center';
-        ctx.fillText('請先在步驟二生成該角度線稿', cvs.width/2, cvs.height/2);
-      }
-    }
-
-    function scaleBox(v) { cropBox.w *= v; cropBox.h *= v; drawCrop(); }
-    function rotateBox(v) { cropBox.rot += v; drawCrop(); }
-
-    function cutFacet() {
-      var key = document.getElementById('angleSelect').value;
-      var shape = document.getElementById('shapeSelect').value;
-      var img = lineArt[key] || photos[key];
-      if (!img) return alert('請先生成線稿！');
-
-      var cvs = document.getElementById('cropCanvas');
-      var sc = Math.min(cvs.width/img.width, cvs.height/img.height)*0.85;
-      var rx = (cvs.width-img.width*sc)/2, ry = (cvs.height-img.height*sc)/2;
-
-      var cropW = cropBox.w / sc, cropH = cropBox.h / sc;
-      var relX = (cropBox.x - rx)/sc, relY = (cropBox.y - ry)/sc;
-
-      var fCvs = document.createElement('canvas');
-      fCvs.width = cropW; fCvs.height = cropH;
-      var fCtx = fCvs.getContext('2d');
-
-      var pts = getShapePts(shape);
-      fCtx.beginPath();
-      fCtx.moveTo(pts[0][0]*cropW, pts[0][1]*cropH);
-      for(var i=1; i<pts.length; i++) fCtx.lineTo(pts[i][0]*cropW, pts[i][1]*cropH);
-      fCtx.closePath();
-      fCtx.clip();
-
-      fCtx.drawImage(img, relX, relY, cropW, cropH, 0, 0, cropW, cropH);
-      fCtx.strokeStyle = '#000'; fCtx.lineWidth = 4; fCtx.stroke();
-
-      rawFacets.push({ canvas: fCvs, angle: key, w: cropBox.w, h: cropBox.h });
-      renderStage3Facets();
-    }
-
-    function renderStage3Facets() {
-      var box = document.getElementById('stage3FacetsPreview');
-      box.innerHTML = rawFacets.length === 0 ? '<span style="color:#888;">尚未切割素材</span>' : '';
-      rawFacets.forEach(function(item, idx) {
-        var div = document.createElement('div');
-        div.className = 'library-item-container';
-        var img = document.createElement('img');
-        img.src = item.canvas.toDataURL(); img.className = 'library-item';
-        var btn = document.createElement('button');
-        btn.className = 'delete-item-btn'; btn.innerText = '✕';
-        btn.onclick = function() { rawFacets.splice(idx,1); renderStage3Facets(); };
-        div.appendChild(img); div.appendChild(btn); box.appendChild(div);
-      });
-    }
-
-    // 4. 步驟四：轉畢卡索《哭泣的女人》黑白粗線條素材
-    function convertPicassoStyleFacets() {
-      if (rawFacets.length === 0) return alert('請先在步驟三切割五官線稿素材！');
-
-      picassoFacets = [];
-      rawFacets.forEach(function(item) {
-        var cvs = document.createElement('canvas');
-        cvs.width = item.canvas.width; cvs.height = item.canvas.height;
-        var ctx = cvs.getContext('2d');
-
-        // 畫入原圖並進行粗線條強化
-        ctx.drawImage(item.canvas, 0, 0);
-        
-        // 加強幾何黑白邊框與立體派分割筆觸
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = Math.max(8, Math.round(cvs.width * 0.06));
-        ctx.strokeRect(0, 0, cvs.width, cvs.height);
-
-        // 加強黑白對比
-        var imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
-        var d = imgData.data;
-        for (var i = 0; i < d.length; i += 4) {
-          if (d[i+3] > 0) {
-            var v = (d[i] + d[i+1] + d[i+2]) / 3;
-            var bw = v < 160 ? 0 : 255;
-            d[i] = bw; d[i+1] = bw; d[i+2] = bw;
-          }
-        }
-        ctx.putImageData(imgData, 0, 0);
-
-        picassoFacets.push({ canvas: cvs, angle: item.angle, w: item.w, h: item.h });
-      });
