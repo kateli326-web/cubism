@@ -104,7 +104,6 @@
       text-align: center; cursor: pointer; font-weight: bold; border: none; padding: 0;
     }
 
-    /* 角度分類區域樣式 */
     .angle-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -135,10 +134,10 @@
   <p class="subtitle">上傳 6 角度照片 ➔ 全臉轉真實 Line Drawing 線稿 ➔ 幾何切割五官 ➔ 分類角度與參考畢卡索結構拼貼</p>
 
   <div class="step-nav">
-    <button class="step-btn active" onclick="switchStage(1)">步驟 1: 上傳照片</button>
-    <button class="step-btn" onclick="switchStage(2)">步驟 2: 全臉 Line Drawing</button>
-    <button class="step-btn" onclick="switchStage(3)">步驟 3: 幾何切割五官</button>
-    <button class="step-btn" onclick="switchStage(4)">步驟 4: 五官角度分類與拼貼自畫像</button>
+    <button class="step-btn active" id="btn_step1" onclick="switchStage(1)">步驟 1: 上傳照片</button>
+    <button class="step-btn" id="btn_step2" onclick="switchStage(2)">步驟 2: 全臉 Line Drawing</button>
+    <button class="step-btn" id="btn_step3" onclick="switchStage(3)">步驟 3: 幾何切割五官</button>
+    <button class="step-btn" id="btn_step4" onclick="switchStage(4)">步驟 4: 五官角度分類與拼貼自畫像</button>
   </div>
 
   <!-- 步驟 1 面板 -->
@@ -147,32 +146,32 @@
     <div class="upload-grid">
       <div class="upload-card">
         <h4>1. 正面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'front')">
+        <input type="file" id="input_front" accept="image/*">
         <img id="preview_front">
       </div>
       <div class="upload-card">
         <h4>2. 右側面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'right')">
+        <input type="file" id="input_right" accept="image/*">
         <img id="preview_right">
       </div>
       <div class="upload-card">
         <h4>3. 左側面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'left')">
+        <input type="file" id="input_left" accept="image/*">
         <img id="preview_left">
       </div>
       <div class="upload-card">
         <h4>4. 仰視照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'up')">
+        <input type="file" id="input_up" accept="image/*">
         <img id="preview_up">
       </div>
       <div class="upload-card">
         <h4>5. 俯視照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'down')">
+        <input type="file" id="input_down" accept="image/*">
         <img id="preview_down">
       </div>
       <div class="upload-card">
         <h4>6. 三七面照片</h4>
-        <input type="file" accept="image/*" onchange="uploadImageDirect(event, 'threequarter')">
+        <input type="file" id="input_threequarter" accept="image/*">
         <img id="preview_threequarter">
       </div>
     </div>
@@ -180,7 +179,7 @@
     <button class="btn-success" onclick="switchStage(2)">已上傳完畢 ➔ 進入步驟二生成全臉真實線稿</button>
   </div>
 
-  <!-- 步驟 2 面板：全臉 Line Drawing 轉換（還原寫生線稿） -->
+  <!-- 步驟 2 面板 -->
   <div id="stage2" class="stage-panel">
     <h3>步驟二：一鍵將 6 個角度全臉轉換為手繪 Line Drawing 線稿：</h3>
     <p>提取真實照片手繪線條，觀察自己不同角度的顔面結構線！</p>
@@ -209,7 +208,7 @@
     <button class="btn-success" onclick="switchStage(3)">線稿生成完成 ➔ 進入步驟三切割五官</button>
   </div>
 
-  <!-- 步驟 3 面板：幾何手動切割五官線稿 -->
+  <!-- 步驟 3 面板 -->
   <div id="stage3" class="stage-panel">
     <h3>步驟三：選擇角度與幾何圖形，手動切割五官線稿素材：</h3>
     <div class="toolbar-group">
@@ -260,48 +259,9 @@
     <button class="btn-success" onclick="switchStage(4)">切割完成 ➔ 進入步驟四進行角度分類與拼貼</button>
   </div>
 
-  <!-- 步驟 4 面板：五官角度分類 + 畢卡索即時參考圖 + 拼貼 -->
+  <!-- 步驟 4 面板 -->
   <div id="stage4" class="stage-panel">
     <h3>步驟四：已切割五官角度分類，對比畢卡索幾何結構進行自畫像拼貼：</h3>
 
-    <!-- 1. 自動角度分類卡片區域 -->
     <div style="text-align: left; margin-bottom: 15px;">
-      <h4 style="margin: 0 0 5px 0; color: #007bff;">📁 步驟 4.1：切割五官的角度分類庫（點擊角度/五官可查看對應畢卡索結構參考圖）：</h4>
-      <div id="classifiedFacetsContainer" class="angle-grid"></div>
-    </div>
-
-    <hr style="border: none; border-top: 1px dashed #ccc; margin: 15px 0;">
-
-    <div class="portrait-tabs">
-      <button class="tab-btn active" onclick="switchPortraitTab(0)">自畫像 A</button>
-      <button class="tab-btn" onclick="switchPortraitTab(1)">自畫像 B</button>
-      <button class="tab-btn" onclick="switchPortraitTab(2)">自畫像 C</button>
-    </div>
-
-    <div class="toolbar-group">
-      <button onclick="transformActiveCanvasItem('scale', 1.1)">放大五官</button>
-      <button onclick="transformActiveCanvasItem('scale', 0.9)">縮小五官</button>
-      <button onclick="transformActiveCanvasItem('rotate', 15)">順旋轉</button>
-      <button onclick="transformActiveCanvasItem('rotate', -15)">逆旋轉</button>
-      <button class="btn-danger" onclick="deleteActiveCanvasItem()">刪除選中五官</button>
-      <button class="btn-dark" onclick="exportCollage()">📥 下載當前自畫像</button>
-    </div>
-
-    <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start; flex-wrap: wrap;">
-      <!-- 2. 即時顯示對應角度的畢卡索幾何參考畫布 -->
-      <div style="background: #f8f9fa; border: 2px solid #007bff; border-radius: 8px; padding: 10px; text-align: center;">
-        <h5 id="picassoRefTitle" style="margin: 0 0 8px 0; color: #005ac8;">🎨 畢卡索《哭泣的女人》繪畫參考圖</h5>
-        <canvas id="picassoRefCanvas" width="300" height="300"></canvas>
-      </div>
-      
-      <!-- 3. 主拼貼畫布 -->
-      <div>
-        <h5 style="margin: 0 0 8px 0; color: #333;">🖼️ 立體派自畫像拼貼畫布</h5>
-        <canvas id="collageCanvas" width="650" height="500"></canvas>
-      </div>
-    </div>
-  </div>
-
- <script src="app.js?v=2026_ZERO_CRASH_REAL_SKETCH"></script>
-</body>
-</html>
+      <h4 style="margin: 0 0 5px 0; color: #
