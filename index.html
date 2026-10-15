@@ -54,7 +54,7 @@
       padding: 12px;
       background: #f8f9fa;
       text-align: center;
-      min-height: 190px;
+      min-height: 200px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -63,14 +63,13 @@
     .upload-card h4 { margin: 0 0 8px 0; color: #007bff; }
     .upload-card input[type="file"] { width: 100%; font-size: 12px; cursor: pointer; }
     
-    .preview-img {
+    .preview-canvas {
       width: 100%;
       height: 120px;
-      object-fit: cover;
-      border-radius: 6px;
       margin-top: 8px;
       border: 1px solid #ccc;
-      display: block;
+      border-radius: 6px;
+      background-color: #fff;
     }
 
     .toolbar-group {
@@ -154,27 +153,33 @@
     <div class="upload-grid">
       <div class="upload-card">
         <h4>1. 正面照片</h4>
-        <input type="file" accept="image/*" onchange="processFileUpload(this, 'front')">
+        <input type="file" accept="image/*" onchange="uploadAndDraw(this, 'front')">
+        <canvas class="preview-canvas" id="canvas_preview_front"></canvas>
       </div>
       <div class="upload-card">
         <h4>2. 右側面照片</h4>
-        <input type="file" accept="image/*" onchange="processFileUpload(this, 'right')">
+        <input type="file" accept="image/*" onchange="uploadAndDraw(this, 'right')">
+        <canvas class="preview-canvas" id="canvas_preview_right"></canvas>
       </div>
       <div class="upload-card">
         <h4>3. 左側面照片</h4>
-        <input type="file" accept="image/*" onchange="processFileUpload(this, 'left')">
+        <input type="file" accept="image/*" onchange="uploadAndDraw(this, 'left')">
+        <canvas class="preview-canvas" id="canvas_preview_left"></canvas>
       </div>
       <div class="upload-card">
         <h4>4. 仰視照片</h4>
-        <input type="file" accept="image/*" onchange="processFileUpload(this, 'up')">
+        <input type="file" accept="image/*" onchange="uploadAndDraw(this, 'up')">
+        <canvas class="preview-canvas" id="canvas_preview_up"></canvas>
       </div>
       <div class="upload-card">
         <h4>5. 俯視照片</h4>
-        <input type="file" accept="image/*" onchange="processFileUpload(this, 'down')">
+        <input type="file" accept="image/*" onchange="uploadAndDraw(this, 'down')">
+        <canvas class="preview-canvas" id="canvas_preview_down"></canvas>
       </div>
       <div class="upload-card">
         <h4>6. 三七面照片</h4>
-        <input type="file" accept="image/*" onchange="processFileUpload(this, 'threequarter')">
+        <input type="file" accept="image/*" onchange="uploadAndDraw(this, 'threequarter')">
+        <canvas class="preview-canvas" id="canvas_preview_threequarter"></canvas>
       </div>
     </div>
     <br>
@@ -191,12 +196,12 @@
     </div>
 
     <div class="upload-grid">
-      <div class="upload-card" id="line_card_front"><h4>1. 正面線稿</h4></div>
-      <div class="upload-card" id="line_card_right"><h4>2. 右側面線稿</h4></div>
-      <div class="upload-card" id="line_card_left"><h4>3. 左側面線稿</h4></div>
-      <div class="upload-card" id="line_card_up"><h4>4. 仰視線稿</h4></div>
-      <div class="upload-card" id="line_card_down"><h4>5. 俯視線稿</h4></div>
-      <div class="upload-card" id="line_card_threequarter"><h4>6. 三七面線稿</h4></div>
+      <div class="upload-card"><h4>1. 正面線稿</h4><canvas class="preview-canvas" id="line_canvas_front"></canvas></div>
+      <div class="upload-card"><h4>2. 右側面線稿</h4><canvas class="preview-canvas" id="line_canvas_right"></canvas></div>
+      <div class="upload-card"><h4>3. 左側面線稿</h4><canvas class="preview-canvas" id="line_canvas_left"></canvas></div>
+      <div class="upload-card"><h4>4. 仰視線稿</h4><canvas class="preview-canvas" id="line_canvas_up"></canvas></div>
+      <div class="upload-card"><h4>5. 俯視線稿</h4><canvas class="preview-canvas" id="line_canvas_down"></canvas></div>
+      <div class="upload-card"><h4>6. 三七面線稿</h4><canvas class="preview-canvas" id="line_canvas_threequarter"></canvas></div>
     </div>
     <br>
     <button class="btn-success" onclick="switchStage(3)">線稿完成 ➔ 進入步驟三切割五官</button>
@@ -227,4 +232,10 @@
         <option value="shield">7. 盾形</option>
       </select>
 
-      <button class="btn-warning" onclick="cutFacet()">✂️ 切割選取五官線稿</
+      <button class="btn-warning" onclick="cutFacet()">✂️ 切割選取五官線稿</button>
+    </div>
+
+    <div class="toolbar-group">
+      <button onclick="scaleBox(1.1)">放大選框</button>
+      <button onclick="scaleBox(0.9)">縮小選框</button>
+      <button onclick="rotateBox
