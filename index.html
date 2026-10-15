@@ -54,19 +54,23 @@
       padding: 12px;
       background: #f8f9fa;
       text-align: center;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
     }
     .upload-card h4 { margin: 0 0 8px 0; color: #007bff; }
     .upload-card input[type="file"] { width: 100%; font-size: 12px; cursor: pointer; }
     
-    /* 修復：不讓圖片預設隱藏，避免載入失敗 */
-    .upload-card img {
+    /* 動態生成的圖片樣式 */
+    .preview-img {
       width: 100%;
       height: 120px;
       object-fit: cover;
       border-radius: 6px;
       margin-top: 8px;
       border: 1px solid #ccc;
-      background-color: #eee;
     }
 
     .toolbar-group {
@@ -154,35 +158,29 @@
   <div id="stage1" class="stage-panel active">
     <h3>步驟一：請上傳 6 個不同角度的照片：</h3>
     <div class="upload-grid">
-      <div class="upload-card">
+      <div class="upload-card" id="card_front">
         <h4>1. 正面照片</h4>
         <input type="file" accept="image/*" onchange="uploadPhoto(event, 'front')">
-        <img id="preview_front" alt="尚未選擇照片">
       </div>
-      <div class="upload-card">
+      <div class="upload-card" id="card_right">
         <h4>2. 右側面照片</h4>
         <input type="file" accept="image/*" onchange="uploadPhoto(event, 'right')">
-        <img id="preview_right" alt="尚未選擇照片">
       </div>
-      <div class="upload-card">
+      <div class="upload-card" id="card_left">
         <h4>3. 左側面照片</h4>
         <input type="file" accept="image/*" onchange="uploadPhoto(event, 'left')">
-        <img id="preview_left" alt="尚未選擇照片">
       </div>
-      <div class="upload-card">
+      <div class="upload-card" id="card_up">
         <h4>4. 仰視照片</h4>
         <input type="file" accept="image/*" onchange="uploadPhoto(event, 'up')">
-        <img id="preview_up" alt="尚未選擇照片">
       </div>
-      <div class="upload-card">
+      <div class="upload-card" id="card_down">
         <h4>5. 俯視照片</h4>
         <input type="file" accept="image/*" onchange="uploadPhoto(event, 'down')">
-        <img id="preview_down" alt="尚未選擇照片">
       </div>
-      <div class="upload-card">
+      <div class="upload-card" id="card_threequarter">
         <h4>6. 三七面照片</h4>
         <input type="file" accept="image/*" onchange="uploadPhoto(event, 'threequarter')">
-        <img id="preview_threequarter" alt="尚未選擇照片">
       </div>
     </div>
     <br>
@@ -207,4 +205,32 @@
     </div>
 
     <div class="upload-grid">
-      <div class="upload-card"><h4>1. 正面線稿
+      <div class="upload-card" id="line_card_front"><h4>1. 正面線稿</h4></div>
+      <div class="upload-card" id="line_card_right"><h4>2. 右側面線稿</h4></div>
+      <div class="upload-card" id="line_card_left"><h4>3. 左側面線稿</h4></div>
+      <div class="upload-card" id="line_card_up"><h4>4. 仰視線稿</h4></div>
+      <div class="upload-card" id="line_card_down"><h4>5. 俯視線稿</h4></div>
+      <div class="upload-card" id="line_card_threequarter"><h4>6. 三七面線稿</h4></div>
+    </div>
+    <br>
+    <button class="btn-success" onclick="switchStage(3)">線稿生成完成 ➔ 進入步驟三切割五官</button>
+  </div>
+
+  <!-- 步驟 3 面板 -->
+  <div id="stage3" class="stage-panel">
+    <h3>步驟三：選擇角度與幾何圖形，手動切割五官線稿素材：</h3>
+    <div class="toolbar-group">
+      <label><b>選擇照片角度:</b></label>
+      <select id="angleSelect" onchange="changeActiveAngle()">
+        <option value="front">1. 正面</option>
+        <option value="right">2. 右側面</option>
+        <option value="left">3. 左側面</option>
+        <option value="up">4. 仰視</option>
+        <option value="down">5. 俯視</option>
+        <option value="threequarter">6. 三七面</option>
+      </select>
+
+      <label><b>選擇幾何圖形:</b></label>
+      <select id="shapeSelect" onchange="changeShape()">
+        <option value="diamond">1. 菱形</option>
+        <option value="triangle">2.
