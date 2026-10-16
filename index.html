@@ -39,7 +39,6 @@
     .angle-group-card h5 { margin: 0 0 6px 0; color: #005ac8; font-size: 13px; }
     .angle-group-items { display: flex; gap: 6px; flex-wrap: wrap; min-height: 50px; align-items: center; }
 
-    /* 步驟六專用樣式 */
     .teacher-advice-card {
       background: #eef6ff; border-left: 5px solid #007bff; padding: 15px 20px;
       text-align: left; margin: 15px 0; border-radius: 0 8px 8px 0;
@@ -54,7 +53,7 @@
 <body>
 
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
-  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換幾何素材 ➔ 畢卡索向量風格化 ➔ 自由拼合 ➔ 教師評核修改意見</p>
+  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換幾何素材 ➔ 畢卡索向量風格化 ➔ 自由拼合 ➔ 修改意見與進階指導</p>
 
   <div class="step-nav">
     <button class="step-btn active" id="btn_step1" onclick="switchStage(1)">步驟 1: 上傳照片</button>
@@ -63,7 +62,7 @@
     <button class="step-btn" id="btn_step4" onclick="switchStage(4)">步驟 4: 照片切割素材</button>
     <button class="step-btn" id="btn_step45" onclick="switchStage(4.5)">步驟 4.5: 畢卡索向量幾何素材</button>
     <button class="step-btn" id="btn_step5" onclick="switchStage(5)">步驟 5: 自由拼合創作</button>
-    <button class="step-btn" id="btn_step6" onclick="switchStage(6)">步驟 6: 教師指導與評核修改</button>
+    <button class="step-btn" id="btn_step6" onclick="switchStage(6)">步驟 6: 修改意見與建議</button>
   </div>
 
   <!-- 步驟 1 面板 -->
@@ -153,7 +152,7 @@
       <button onclick="rotateItem(-15)">逆旋轉</button>
       <button class="btn-danger" onclick="deleteItem()">刪除選中元件</button>
       <button class="btn-warning" onclick="autoIntegratePicassoArt()">✨ 自動繪製幾何分割連線</button>
-      <button class="btn-purple" style="font-size: 15px; padding: 8px 18px;" onclick="switchStage(6)">🎓 完成初稿 ➔ 進入步驟六獲取教師評核指導</button>
+      <button class="btn-purple" style="font-size: 15px; padding: 8px 18px;" onclick="switchStage(6)">🎓 完成初稿 ➔ 進入步驟六獲取修改意見</button>
     </div>
 
     <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
@@ -175,36 +174,36 @@
     </div>
   </div>
 
-  <!-- 步驟 6 面板（全新：教師專業指導意見與三張預設黑粗線幾何範例圖） -->
+  <!-- 步驟 6 面板（修改意見與根據步驟 5 動態生成 3 張幾何優化圖） -->
   <div id="stage6" class="stage-panel">
-    <h3>步驟六：中學視覺藝術科教師專業評核與《哭泣的女人》進階修改建議：</h3>
+    <h3>步驟六：修改意見與《哭泣的女人》進階建議：</h3>
 
     <div class="teacher-advice-card">
-      <h4 style="margin:0 0 10px 0; color:#005ac8;">🍎 視覺藝術科老師修改指導意見：</h4>
+      <h4 style="margin:0 0 10px 0; color:#005ac8;">💡 修改意見：</h4>
       <ul>
-        <li><b>1. 視角交錯與幾何重疊（Cross-Perspective Alignment）</b>：畢卡索《哭泣的女人》核心在於將正面與側面的眼睛、鼻子同時並置。建議將側面的鼻子與正面的眼睛交錯疊加，製造多維度的空間錯視感。</li>
-        <li><b>2. 情感動態黑粗線條（Emotional Line Dynamic）</b>：哭泣的意象需要透過極端斜線與銳角表現。建議在眼睛下方加入幾何放射狀的淚滴線條，並將嘴唇調整為斜向的鋸齒梯形，以展現劇烈的面部張力。</li>
-        <li><b>3. 幾何邊框分割與張力平衡（Framing & Segmentation）</b>：面型底板與五官之間應使用粗細對比強烈的黑粗線連接，將頭部的幾何多邊形向外延伸至背景，形成完整且具立體派精神的結構線框架。</li>
+        <li><b>1. 試吓「正面 + 側面」疊加</b>：畢卡索畫《哭泣的女人》最特別的地方，就是把正面的眼睛和側面的鼻子、眼睛疊在同一張臉上！試下把側面的鼻子疊在正面的臉型中間。</li>
+        <li><b>2. 加幾條「幾何淚痕與情緒線」</b>：想表現哭泣的情緒，可在眼睛下方加上幾條垂直的幾何粗線或尖尖的淚滴，嘴巴也可以轉成傾斜的梯形或鋸齒狀！</li>
+        <li><b>3. 用黑粗線把面型切割開</b>：立體派喜歡把臉分成幾個幾何區塊，可以畫幾條粗黑直線穿過臉部，把不同角度的五官框起來，看起來更有立體感！</li>
       </ul>
     </div>
 
     <div class="toolbar-group">
-      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="generateTeacherPresetSuggestions()">✨ 一鍵參考畢卡索《哭泣的女人》生成 3 張預設修改範例圖</button>
-      <button class="btn-dark" onclick="exportStage6Images()">📥 下載評核報告與修改圖</button>
+      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="generateTeacherPresetSuggestions()">✨ 根據你在步驟五的創作，生成 3 張《哭泣的女人》修改圖</button>
+      <button class="btn-dark" onclick="exportStage6Images()">📥 下載修改建議作品表</button>
     </div>
 
-    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 根據教師建議自動生成的 3 張極簡黑粗線幾何修改方案（純線條框架、無色彩）：</h4>
+    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 根據你在步驟五的擺位與素材，以《哭泣的女人》為藍圖生成的 3 張黑粗線修改圖（純線條框架、無色彩）：</h4>
     <div class="preset-grid">
       <div class="preset-card">
-        <h5>方案 A：雙重視角交錯與幾何淚滴（對標經典動態）</h5>
+        <h5>方案 A：雙重角度交錯（結合正面與側面擺位）</h5>
         <canvas id="presetCanvasA" width="340" height="280"></canvas>
       </div>
       <div class="preset-card">
-        <h5>方案 B：極限銳角分割與鋸齒嘴唇（對標張力結構）</h5>
+        <h5>方案 B：加入幾何淚痕與情緒張力線</h5>
         <canvas id="presetCanvasB" width="340" height="280"></canvas>
       </div>
       <div class="preset-card">
-        <h5>方案 C：多維空間縱深與錯位雙眼（對標抽象構成）</h5>
+        <h5>方案 C：面型斜向切割與結構強化</h5>
         <canvas id="presetCanvasC" width="340" height="280"></canvas>
       </div>
     </div>
@@ -540,90 +539,57 @@
       alert('✨ 已自動整合繪製立體派幾何分割線條！');
     }
 
-    // 步驟六：生成 3 張預設白底黑粗線無色彩幾何範例圖
+    // 步驟六升級：動態讀取步驟五學生選擇的幾何面型與五官佈局，並渲染 3 張幾何優化方案圖
     function generateTeacherPresetSuggestions() {
-      drawPresetA();
-      drawPresetB();
-      drawPresetC();
+      renderStudentBasedPreset('presetCanvasA', 'A');
+      renderStudentBasedPreset('presetCanvasB', 'B');
+      renderStudentBasedPreset('presetCanvasC', 'C');
     }
 
-    function drawPresetA() {
-      var cvs = document.getElementById('presetCanvasA'); if(!cvs) return;
+    function renderStudentBasedPreset(canvasId, mode) {
+      var cvs = document.getElementById(canvasId); if(!cvs) return;
       var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
       ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = '#000000'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
-      // 臉型外框
-      ctx.beginPath(); ctx.moveTo(w*0.25, h*0.1); ctx.lineTo(w*0.75, h*0.1);
-      ctx.lineTo(w*0.85, h*0.65); ctx.lineTo(w*0.5, h*0.9); ctx.lineTo(w*0.15, h*0.65); ctx.closePath(); ctx.stroke();
+      var srcCvs = document.getElementById('collageCanvas');
+      var scale = Math.min(w / srcCvs.width, h / srcCvs.height) * 0.9;
+      var offsetX = (w - srcCvs.width * scale) / 2;
+      var offsetY = (h - srcCvs.height * scale) / 2;
 
-      // 正面+側面中軸分割
-      ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.moveTo(w*0.5, h*0.1); ctx.lineTo(w*0.42, h*0.5); ctx.lineTo(w*0.5, h*0.9); ctx.stroke();
+      // 1. 複製學生在步驟五的真實繪圖內容
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(scale, scale);
+      collageItems.forEach(function(item) {
+        ctx.save(); ctx.translate(item.x + item.w/2, item.y + item.h/2); ctx.rotate(item.rot * Math.PI / 180);
+        ctx.drawImage(item.canvas, -item.w/2, -item.h/2, item.w, item.h);
+        ctx.restore();
+      });
+      ctx.restore();
 
-      // 雙眼（正面+側面）
-      ctx.beginPath(); ctx.arc(w*0.35, h*0.32, 18, 0, Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(w*0.35, h*0.32, 8, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(w*0.6, h*0.25); ctx.lineTo(w*0.75, h*0.35); ctx.lineTo(w*0.6, h*0.42); ctx.closePath(); ctx.stroke();
-      ctx.beginPath(); ctx.arc(w*0.65, h*0.33, 6, 0, Math.PI*2); ctx.fill();
+      // 2. 根據畢卡索《哭泣的女人》為藍圖，疊加幾何修改線條
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
-      // 經典幾何淚滴
-      ctx.beginPath(); ctx.moveTo(w*0.35, h*0.42); ctx.lineTo(w*0.35, h*0.68); ctx.stroke();
-      ctx.beginPath(); ctx.arc(w*0.35, h*0.7, 5, 0, Math.PI*2); ctx.fill();
-
-      // 嘴巴（梯形鋸齒）
-      ctx.beginPath(); ctx.moveTo(w*0.3, h*0.72); ctx.lineTo(w*0.7, h*0.68); ctx.lineTo(w*0.55, h*0.85); ctx.closePath(); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(w*0.3, h*0.72); ctx.lineTo(w*0.7, h*0.68); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(w*0.45, h*0.72); ctx.lineTo(w*0.45, h*0.8); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(w*0.55, h*0.71); ctx.lineTo(w*0.55, h*0.82); ctx.stroke();
-    }
-
-    function drawPresetB() {
-      var cvs = document.getElementById('presetCanvasB'); if(!cvs) return;
-      var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = '#000000'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-
-      // 多邊形臉型
-      ctx.beginPath(); ctx.moveTo(w*0.2, h*0.15); ctx.lineTo(w*0.8, h*0.08);
-      ctx.lineTo(w*0.9, h*0.55); ctx.lineTo(w*0.6, h*0.92); ctx.lineTo(w*0.1, h*0.7); ctx.closePath(); ctx.stroke();
-
-      // 咬手帕的極限幾何三角形
-      ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.moveTo(w*0.35, h*0.5); ctx.lineTo(w*0.8, h*0.75); ctx.lineTo(w*0.2, h*0.88); ctx.closePath(); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(w*0.35, h*0.5); ctx.lineTo(w*0.5, h*0.82); ctx.stroke();
-
-      // 眼睛與睫毛
-      ctx.beginPath(); ctx.arc(w*0.38, h*0.3, 16, 0, Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(w*0.38, h*0.3, 7, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(w*0.3, h*0.18); ctx.lineTo(w*0.32, h*0.24); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(w*0.38, h*0.16); ctx.lineTo(w*0.38, h*0.23); ctx.stroke();
-
-      ctx.beginPath(); ctx.arc(w*0.68, h*0.26, 18, 0, Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(w*0.68, h*0.26, 8, 0, Math.PI*2); ctx.fill();
-    }
-
-    function drawPresetC() {
-      var cvs = document.getElementById('presetCanvasC'); if(!cvs) return;
-      var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = '#000000'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-
-      // 盾形傾斜臉型
-      ctx.beginPath(); ctx.moveTo(w*0.15, h*0.18); ctx.lineTo(w*0.75, h*0.1);
-      ctx.lineTo(w*0.88, h*0.62); ctx.lineTo(w*0.45, h*0.92); ctx.lineTo(w*0.12, h*0.6); ctx.closePath(); ctx.stroke();
-
-      // 雙眼上下極端錯位
-      ctx.beginPath(); ctx.arc(w*0.35, h*0.25, 20, 0, Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(w*0.35, h*0.25, 9, 0, Math.PI*2); ctx.fill();
-
-      ctx.beginPath(); ctx.arc(w*0.65, h*0.45, 20, 0, Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(w*0.65, h*0.45, 9, 0, Math.PI*2); ctx.fill();
-
-      // 立體派長鼻子與縱深線
-      ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.moveTo(w*0.42, h*0.12); ctx.lineTo(w*0.28, h*0.62); ctx.lineTo(w*0.55, h*0.62); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(w*0.3, h*0.75); ctx.lineTo(w*0.7, h*0.75); ctx.stroke();
+      if (mode === 'A') {
+        // 方案 A：加入側面與正面交錯中軸連線
+        ctx.beginPath(); ctx.moveTo(w*0.5, h*0.1); ctx.lineTo(w*0.42, h*0.5); ctx.lineTo(w*0.5, h*0.9); ctx.stroke();
+        ctx.beginPath(); ctx.arc(w*0.5, h*0.5, w*0.38, 0, Math.PI*2); ctx.stroke();
+      } else if (mode === 'B') {
+        // 方案 B：眼睛下方補上經典幾何淚痕與手帕張力線
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(w*0.35, h*0.38); ctx.lineTo(w*0.35, h*0.75); ctx.stroke();
+        ctx.beginPath(); ctx.arc(w*0.35, h*0.78, 6, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(w*0.62, h*0.38); ctx.lineTo(w*0.62, h*0.72); ctx.stroke();
+        ctx.beginPath(); ctx.arc(w*0.62, h*0.75, 6, 0, Math.PI*2); ctx.fill();
+        // 咬手帕鋸齒線
+        ctx.beginPath(); ctx.moveTo(w*0.25, h*0.65); ctx.lineTo(w*0.75, h*0.85); ctx.lineTo(w*0.2, h*0.92); ctx.closePath(); ctx.stroke();
+      } else {
+        // 方案 C：斜向幾何幾何切割框架
+        ctx.beginPath(); ctx.moveTo(w*0.1, h*0.2); ctx.lineTo(w*0.9, h*0.8); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(w*0.85, h*0.15); ctx.lineTo(w*0.15, h*0.85); ctx.stroke();
+        ctx.lineWidth = 6;
+        ctx.strokeRect(w*0.08, h*0.08, w*0.84, h*0.84);
+      }
     }
 
     function scaleItem(v) { if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].w *= v; collageItems[selectedItemIndex].h *= v; drawCollage(); } }
@@ -634,7 +600,7 @@
     function exportStage6Images() {
       var cvs = document.getElementById('presetCanvasA');
       var a = document.createElement('a');
-      a.download = '畢卡索哭泣的女人_教師指導評核建議圖.png'; a.href = cvs.toDataURL(); a.click();
+      a.download = '畢卡索哭泣的女人_修改意見指導圖.png'; a.href = cvs.toDataURL(); a.click();
     }
 
     window.onload = function() {
