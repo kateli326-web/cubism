@@ -174,34 +174,34 @@
     </div>
   </div>
 
-  <!-- 步驟 6 面板：乾淨不混亂的純前端幾何肖像重構 -->
+  <!-- 步驟 6 面板：動態評語與升級版《哭泣的女人》幾何重構肖像 -->
   <div id="stage6" class="stage-panel">
     <h3>步驟六：AI 藝術評核與《哭泣的女人》修改意見：</h3>
 
     <div class="teacher-advice-card">
-      <h4 style="margin:0 0 10px 0; color:#005ac8;">💡 修改意見與幾何鎖定解析：</h4>
+      <h4 style="margin:0 0 10px 0; color:#005ac8;">💡 智慧分析與修改意見解析：</h4>
       <div id="aiAnalysisOutput">
         <ul>
-          <li><b>1. 同時視角</b>：<span id="advice1">把不同角度的五官同時呈現出來。</span></li>
-          <li><b>2. 破碎的幾何</b>：<span id="advice2">運用「破碎的幾何」視覺語言，面部被拆解成三角形、鋸齒形與多角形或其他幾何圖形（除了圓形線條）。</span></li>
-          <li><b>3. 粗重黑色輪廓線</b>：<span id="advice3">運用粗重黑色輪廓線，像幾何網格般鎖定塊面，因為想產生尖銳、緊張的心理感受。</span></li>
+          <li><b>1. 同時視角</b>：<span id="advice1">分析中...</span></li>
+          <li><b>2. 破碎的幾何</b>：<span id="advice2">分析中...</span></li>
+          <li><b>3. 粗重黑色輪廓線</b>：<span id="advice3">分析中...</span></li>
         </ul>
       </div>
     </div>
 
     <div class="toolbar-group">
-      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="generateTeacherPresetSuggestions()">✨ 讀取步驟五初稿，生成乾淨幾何線條肖像圖</button>
+      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="runAIAnalysisAndGenerate()">✨ 讀取步驟五初稿，生成經典《哭泣的女人》重構肖像圖</button>
       <button class="btn-dark" onclick="exportStage6Images()">📥 下載修改意見與肖像作品表</button>
     </div>
 
-    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 直接基於你在步驟五的拼貼初稿（100%保留尺寸與位置），無雜線優化重構的肖像圖：</h4>
+    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 融入《哭泣的女人》經典幾何淚痕與雙色立體切面的重構肖像（100%保留初稿元件）：</h4>
     <div class="preset-grid">
       <div class="preset-card">
-        <h5>方案 A：【同時視角重組】立體派正側面鋸齒分割主軸與五官貫穿</h5>
+        <h5>方案 A：【同時視角重組】雙色正側面切面底座與立體派幾何淚痕貫穿</h5>
         <canvas id="presetCanvasA" width="460" height="360"></canvas>
       </div>
       <div class="preset-card">
-        <h5>方案 C：【粗重黑線網格】粗黑輪廓塊面鎖定與背景幾何畫廊線</h5>
+        <h5>方案 C：【粗重黑線網格】多邊形黑粗輪廓鎖定與咬手帕鋸齒背景網格</h5>
         <canvas id="presetCanvasC" width="460" height="360"></canvas>
       </div>
     </div>
@@ -354,7 +354,7 @@
         ctx.beginPath(); ctx.moveTo(pts[0][0]*cvs.width, pts[0][1]*cvs.height);
         for(var k=1; k<pts.length; k++) ctx.lineTo(pts[k][0]*cvs.width, pts[k][1]*cvs.height);
         ctx.closePath(); ctx.strokeStyle = '#000000'; ctx.lineWidth = Math.max(6, Math.round(cvs.width * 0.05)); ctx.stroke();
-        return { canvas: cvs, angle: item.angle, w: item.w, h: item.h };
+        return { canvas: cvs, angle: item.angle, shape: item.shape, w: item.w, h: item.h };
       });
       renderFacetsGrid('photoFacetsContainer', photoFacets);
     }
@@ -379,24 +379,14 @@
         if (item.shape === 'triangle' || item.shape === 'diamond') {
           ctx.beginPath(); ctx.moveTo(w*0.25, h*0.52); ctx.lineTo(w*0.5, h*0.35); ctx.lineTo(w*0.75, h*0.52); ctx.lineTo(w*0.5, h*0.68); ctx.closePath(); ctx.stroke();
           ctx.fillRect(w*0.42, h*0.45, w*0.16, h*0.14);
-          ctx.beginPath(); ctx.moveTo(w*0.38, h*0.28); ctx.lineTo(w*0.32, h*0.12); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.25); ctx.lineTo(w*0.5, h*0.08); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(w*0.62, h*0.28); ctx.lineTo(w*0.68, h*0.12); ctx.stroke();
         } else if (item.shape === 'trapezoid' || item.shape === 'polygon') {
           ctx.beginPath(); ctx.moveTo(w*0.15, h*0.5); ctx.lineTo(w*0.85, h*0.5); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(w*0.15, h*0.35); ctx.lineTo(w*0.85, h*0.35); ctx.lineTo(w*0.5, h*0.75); ctx.closePath(); ctx.stroke();
-          for(var xP = 0.3; xP <= 0.7; xP += 0.12) {
-            ctx.beginPath(); ctx.moveTo(w*xP, h*0.35); ctx.lineTo(w*xP, h*0.5); ctx.stroke();
-          }
-        } else if (item.shape === 'shield' || item.shape === 'parallelogram') {
-          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.15); ctx.lineTo(w*0.25, h*0.75); ctx.lineTo(w*0.75, h*0.75); ctx.closePath(); ctx.stroke();
-          ctx.strokeRect(w*0.35, h*0.72, 10, 10);
-          ctx.strokeRect(w*0.55, h*0.72, 10, 10);
         } else {
-          ctx.beginPath(); ctx.moveTo(w*0.3, h*0.2); ctx.lineTo(w*0.7, h*0.3); ctx.lineTo(w*0.8, h*0.7); ctx.lineTo(w*0.4, h*0.85); ctx.lineTo(w*0.2, h*0.5); ctx.closePath(); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(w*0.3, h*0.2); ctx.lineTo(w*0.7, h*0.3); ctx.lineTo(w*0.8, h*0.7); ctx.lineTo(w*0.4, h*0.85); ctx.closePath(); ctx.stroke();
         }
 
-        vectorFacets.push({ canvas: cvs, angle: item.angle, w: item.w, h: item.h });
+        vectorFacets.push({ canvas: cvs, angle: item.angle, shape: item.shape, w: item.w, h: item.h });
       });
       renderFacetsGrid('vectorFacetsContainer', vectorFacets);
     }
@@ -419,41 +409,12 @@
         ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
         ctx.strokeStyle = '#000000'; ctx.lineWidth = 10; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
 
-        if (ft.type === 'front_face') {
-          ctx.beginPath();
-          ctx.moveTo(w*0.2, h*0.15); ctx.lineTo(w*0.8, h*0.15);
-          ctx.lineTo(w*0.88, h*0.65); ctx.lineTo(w*0.5, h*0.92);
-          ctx.lineTo(w*0.12, h*0.65); ctx.closePath(); ctx.stroke();
-        } else if (ft.type === 'split_face') {
-          ctx.beginPath();
-          ctx.moveTo(w*0.2, h*0.12); ctx.lineTo(w*0.8, h*0.12);
-          ctx.lineTo(w*0.85, h*0.68); ctx.lineTo(w*0.5, h*0.92);
-          ctx.lineTo(w*0.15, h*0.68); ctx.closePath(); ctx.stroke();
-          ctx.lineWidth = 8;
-          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.12); ctx.lineTo(w*0.5, h*0.92); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(w*0.15, h*0.45); ctx.lineTo(w*0.85, h*0.45); ctx.stroke();
-        } else if (ft.type === 'right_profile') {
-          ctx.beginPath();
-          ctx.moveTo(w*0.25, h*0.12); ctx.lineTo(w*0.65, h*0.12);
-          ctx.lineTo(w*0.82, h*0.35); ctx.lineTo(w*0.6, h*0.52);
-          ctx.lineTo(w*0.8, h*0.68); ctx.lineTo(w*0.5, h*0.9);
-          ctx.lineTo(w*0.25, h*0.82); ctx.closePath(); ctx.stroke();
-        } else if (ft.type === 'left_profile') {
-          ctx.beginPath();
-          ctx.moveTo(w*0.75, h*0.12); ctx.lineTo(w*0.35, h*0.12);
-          ctx.lineTo(w*0.18, h*0.35); ctx.lineTo(w*0.4, h*0.52);
-          ctx.lineTo(w*0.2, h*0.68); ctx.lineTo(w*0.5, h*0.9);
-          ctx.lineTo(w*0.75, h*0.82); ctx.closePath(); ctx.stroke();
-        } else {
-          ctx.beginPath();
-          ctx.moveTo(w*0.15, h*0.2); ctx.lineTo(w*0.7, h*0.1);
-          ctx.lineTo(w*0.9, h*0.6); ctx.lineTo(w*0.55, h*0.92);
-          ctx.lineTo(w*0.1, h*0.7); ctx.closePath(); ctx.stroke();
-          ctx.lineWidth = 6;
-          ctx.beginPath(); ctx.moveTo(w*0.4, h*0.14); ctx.lineTo(w*0.55, h*0.92); ctx.stroke();
-        }
+        ctx.beginPath();
+        ctx.moveTo(w*0.2, h*0.15); ctx.lineTo(w*0.8, h*0.15);
+        ctx.lineTo(w*0.88, h*0.65); ctx.lineTo(w*0.5, h*0.92);
+        ctx.lineTo(w*0.12, h*0.65); ctx.closePath(); ctx.stroke();
 
-        faceBaseFacets.push({ canvas: cvs, title: ft.name, w: 220, h: 280 });
+        faceBaseFacets.push({ canvas: cvs, title: ft.name, angle: 'front', w: 220, h: 280 });
       });
     }
 
@@ -511,7 +472,16 @@
     }
 
     function addToCollage(facet) {
-      collageItems.push({ canvas: facet.canvas, x: 230 + Math.random()*40, y: 120 + Math.random()*40, w: facet.w, h: facet.h, rot: 0 });
+      collageItems.push({
+        canvas: facet.canvas,
+        angle: facet.angle || 'front',
+        shape: facet.shape || 'diamond',
+        x: 230 + Math.random()*40,
+        y: 120 + Math.random()*40,
+        w: facet.w,
+        h: facet.h,
+        rot: 0
+      });
       selectedItemIndex = collageItems.length - 1; drawCollage();
     }
 
@@ -531,11 +501,11 @@
       selectedItemIndex = -1; var cvs = document.getElementById('collageCanvas'), ctx = cvs.getContext('2d');
       drawCollage(); ctx.lineWidth = 6; ctx.strokeStyle = '#000000'; ctx.lineJoin = 'miter';
       ctx.beginPath(); ctx.moveTo(180, 80); ctx.lineTo(520, 80); ctx.lineTo(560, 360); ctx.lineTo(350, 480); ctx.lineTo(140, 360); ctx.closePath(); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(140, 360); ctx.lineTo(560, 360); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); stroke();
       alert('✨ 已自動整合繪製粗重黑線網格！');
     }
 
+    // 💡 解決問題一：動態分析學生初稿，生成獨一無二的個人化評語！
     function runAIAnalysisAndGenerate() {
       var count = collageItems.length;
       var el1 = document.getElementById('advice1');
@@ -543,25 +513,50 @@
       var el3 = document.getElementById('advice3');
 
       if (count === 0) {
-        if(el1) el1.innerText = "把不同角度的五官同時呈現出來（建議在步驟五加入素材）。";
-        if(el2) el2.innerText = "運用「破碎的幾何」視覺語言，面部被拆解成三角形、鋸齒形與多角形或其他幾何圖形（除了圓形線條）。";
-        if(el3) el3.innerText = "運用粗重黑色輪廓線，像幾何網格般鎖定塊面，因為想產生尖銳、緊張的心理感受。";
-      } else {
-        if(el1) el1.innerText = "你已在畫布擺放 " + count + " 個素材。建議將正面的眼睛與側面的鼻樑強烈重疊，達成同時視角！";
-        if(el2) el2.innerText = "面部已被拆解為幾何塊面，可將嘴部與下巴重構為咬手帕的鋸齒梯形與放射狀幾何淚痕。";
-        if(el3) el3.innerText = "運用粗重黑線將臉部與背景切割成多邊形網格，產生尖銳緊張的立體派張力。";
+        if(el1) el1.innerText = "畫布上尚無素材，請返回步驟五加入五官與面型！";
+        if(el2) el2.innerText = "請嘗試切割三角形與多邊形素材加入作品。";
+        if(el3) el3.innerText = "請完成拼貼後再檢視黑色輪廓鎖定效果。";
+        generateTeacherPresetSuggestions();
+        return;
       }
+
+      // 1. 分析視角多樣性
+      var anglesUsed = {};
+      collageItems.forEach(function(it) { if (it.angle) anglesUsed[it.angle] = true; });
+      var angleKeys = Object.keys(anglesUsed);
+      
+      if (angleKeys.length >= 3) {
+        el1.innerHTML = "<b>太棒了！</b>你使用了 " + angleKeys.length + " 種不同角度素材（" + angleKeys.map(function(k){return angleNames[k];}).join('、') + "），成功建構出立體派極具張力的同時視角！";
+      } else if (angleKeys.length === 2) {
+        el1.innerHTML = "你目前組合了 " + angleKeys.map(function(k){return angleNames[k];}).join('與') + " 視角。建議再加入一個俯視或仰視五官，強化同時視角的衝突感！";
+      } else {
+        el1.innerHTML = "你目前主要使用「" + (angleNames[angleKeys[0]] || "單一角度") + "」，建議多加入側面或三七面素材進行強烈重疊，呈現立體主義多角度交錯的特徵！";
+      }
+
+      // 2. 分析幾何圖形種類
+      var shapesUsed = {};
+      collageItems.forEach(function(it) { if (it.shape) shapesUsed[it.shape] = true; });
+      var shapeKeys = Object.keys(shapesUsed);
+
+      if (shapesUsed['triangle'] || shapesUsed['polygon'] || shapesUsed['trapezoid']) {
+        el1.parentElement.nextElementSibling.children[1].innerHTML = "作品成功運用了<b>破碎的幾何語言</b>（如" + shapeKeys.join('、') + "），面部線條銳利，非常符合《哭泣的女人》尖銳緊張的情感表達！";
+      } else {
+        el1.parentElement.nextElementSibling.children[1].innerHTML = "目前素材的幾何形狀較圓潤，建議加入更多「三角形」或「不規則梯形」素材，讓作品視覺張力更強烈！";
+      }
+
+      // 3. 分析整體構圖與鎖定建議
+      el1.parentElement.nextElementSibling.nextElementSibling.children[1].innerHTML = "畫布共有 " + count + " 個幾何區塊。右側重構圖已為你加上<b>立體派雙色切面底座</b>與<b>咬手帕幾何網格</b>，將所有元件緊密鎖定成一體！";
 
       generateTeacherPresetSuggestions();
     }
 
-    // 全新純前端幾何繪製：乾淨、流暢、無雜線網格
+    // 💡 解決問題二：高質感《哭泣的女人》幾何重構肖像（雙色切面 + 幾何淚痕 + 手帕鋸齒網格）
     function generateTeacherPresetSuggestions() {
-      renderCleanPicassoPortrait('presetCanvasA', 'A');
-      renderCleanPicassoPortrait('presetCanvasC', 'C');
+      renderArtisticPicassoPortrait('presetCanvasA', 'A');
+      renderArtisticPicassoPortrait('presetCanvasC', 'C');
     }
 
-    function renderCleanPicassoPortrait(canvasId, mode) {
+    function renderArtisticPicassoPortrait(canvasId, mode) {
       var cvs = document.getElementById(canvasId); if(!cvs) return;
       var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
       ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
@@ -571,7 +566,29 @@
       var offsetX = (w - srcCvs.width * sc) / 2;
       var offsetY = (h - srcCvs.height * sc) / 2;
 
-      // 1. 完全保留學生在步驟五創作的初稿尺寸與原位置（原汁原味）
+      // 1. 繪製畢卡索經典「雙色/灰色底座切面」（分割正側面）
+      if (mode === 'A') {
+        // 左半側淺灰色立體切面
+        ctx.fillStyle = '#f0f0f0';
+        ctx.beginPath();
+        ctx.moveTo(w*0.15, h*0.1);
+        ctx.lineTo(w*0.5, h*0.05);
+        ctx.lineTo(w*0.42, h*0.5);
+        ctx.lineTo(w*0.52, h*0.9);
+        ctx.lineTo(w*0.2, h*0.85);
+        ctx.closePath(); ctx.fill();
+
+        // 右半側極簡條紋切面底座
+        ctx.fillStyle = '#e8e8e8';
+        ctx.beginPath();
+        ctx.moveTo(w*0.5, h*0.05);
+        ctx.lineTo(w*0.85, h*0.12);
+        ctx.lineTo(w*0.8, h*0.88);
+        ctx.lineTo(w*0.52, h*0.9);
+        ctx.closePath(); ctx.fill();
+      }
+
+      // 2. 100% 保留學生在步驟五創作的原尺寸與原位置元件
       ctx.save();
       ctx.translate(offsetX, offsetY);
       ctx.scale(sc, sc);
@@ -587,53 +604,59 @@
       ctx.strokeStyle = '#000000'; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
 
       if (mode === 'A') {
-        // 方案 A【同時視角重組】：乾淨的立體派正側面鋸齒分割線 + 精準貫穿
+        // 方案 A：貫穿正側面的鋸齒中軸 + 經典立體派幾何淚痕（Pointed Tears）
         ctx.lineWidth = 7;
-        // 中央立體派鋸齒分割主軸（從頂部貫穿到底部，切割正面與側面）
         ctx.beginPath();
-        ctx.moveTo(w * 0.48, 10);
-        ctx.lineTo(w * 0.52, h * 0.25);
-        ctx.lineTo(w * 0.42, h * 0.5);
-        ctx.lineTo(w * 0.55, h * 0.75);
-        ctx.lineTo(w * 0.50, h - 10);
+        ctx.moveTo(w*0.5, 10);
+        ctx.lineTo(w*0.52, h*0.3);
+        ctx.lineTo(w*0.42, h*0.55);
+        ctx.lineTo(w*0.55, h*0.78);
+        ctx.lineTo(w*0.48, h - 10);
         ctx.stroke();
 
-        // 橫向幾何面切割線（連接兩側）
-        ctx.lineWidth = 5;
-        ctx.beginPath(); ctx.moveTo(w * 0.15, h * 0.35); ctx.lineTo(w * 0.85, h * 0.35); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w * 0.2, h * 0.65); ctx.lineTo(w * 0.8, h * 0.65); ctx.stroke();
-
-        // 側面立體派尖角鼻樑幾何塊面
-        ctx.lineWidth = 6;
+        // 幾何放射狀淚痕（《哭泣的女人》視覺核心標誌）
+        ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(w * 0.42, h * 0.35);
-        ctx.lineTo(w * 0.28, h * 0.48);
-        ctx.lineTo(w * 0.42, h * 0.5);
-        ctx.stroke();
+        ctx.moveTo(w*0.35, h*0.35); ctx.lineTo(w*0.28, h*0.58); ctx.lineTo(w*0.32, h*0.62); ctx.closePath(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(w*0.65, h*0.38); ctx.lineTo(w*0.72, h*0.6); ctx.lineTo(w*0.68, h*0.63); ctx.closePath(); ctx.stroke();
+
       } else {
-        // 方案 C【粗重黑線網格】：包覆學生元件的外圍輪廓，加上藝廊垂直橫向牆面線
+        // 方案 C：多邊形黑粗邊輪廓 + 咬手帕鋸齒背景網格（Jagged Handkerchief & Grid）
         ctx.lineWidth = 8;
-        
-        // 如果學生有擺放素材，針對素材整體繪製粗黑包覆幾何外框
+        // 學生元件外圍多邊形整體包覆
         if (collageItems.length > 0) {
           collageItems.forEach(function(item) {
             var ix = offsetX + item.x * sc;
             var iy = offsetY + item.y * sc;
             var iw = item.w * sc;
             var ih = item.h * sc;
-            ctx.strokeRect(ix - 3, iy - 3, iw + 6, ih + 6);
+            ctx.strokeRect(ix - 4, iy - 4, iw + 8, ih + 8);
           });
         }
 
-        // 背景：乾淨有序的畢卡索畫廊網格線（橫平豎直）
-        ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(w * 0.15, 0); ctx.lineTo(w * 0.15, h); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w * 0.85, 0); ctx.lineTo(w * 0.85, h); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0, h * 0.2); ctx.lineTo(w, h * 0.2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0, h * 0.8); ctx.lineTo(w, h * 0.8); ctx.stroke();
+        // 下半部「咬手帕鋸齒折痕」（《哭泣的女人》代表元素）
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(w*0.25, h*0.7);
+        ctx.lineTo(w*0.35, h*0.62);
+        ctx.lineTo(w*0.45, h*0.72);
+        ctx.lineTo(w*0.55, h*0.61);
+        ctx.lineTo(w*0.65, h*0.73);
+        ctx.lineTo(w*0.75, h*0.65);
+        ctx.stroke();
+
+        // 背景密集的縱橫幾何畫廊斜網格
+        ctx.lineWidth = 3;
+        for(var xP = 0.1; xP <= 0.9; xP += 0.2) {
+          ctx.beginPath(); ctx.moveTo(w*xP, 0); ctx.lineTo(w*xP, h); ctx.stroke();
+        }
+        for(var yP = 0.15; yP <= 0.85; yP += 0.25) {
+          ctx.beginPath(); ctx.moveTo(0, h*yP); ctx.lineTo(w, h*yP); ctx.stroke();
+        }
       }
 
-      // 畫布外邊框強化
+      // 外邊框加強
       ctx.lineWidth = 8; ctx.strokeRect(0, 0, w, h);
     }
 
