@@ -339,4 +339,374 @@
         };
         imgObj.src = base64Data;
       };
-      reader.readAsData
+      reader.readAsDataURL(file);
+    }
+
+    function switchStage(num) {
+      for (var i = 1; i <= 5; i++) {
+        var b = document.getElementById('btn_step' + i);
+        var p = document.getElementById('stage' + i);
+        if (b) b.classList.toggle('active', i === num);
+        if (p) p.classList.toggle('active', i === num);
+      }
+      if (num === 3) drawCrop();
+      if (num === 5) drawCollage();
+    }
+
+    // 2. 步驟二：生成無雜訊線稿
+    function convertCleanLineArt() {
+      var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'];
+      var count = 0;
+
+      angles.forEach(function(key) {
+        if (photos[key]) {
+          count++;
+          var cvs = document.createElement('canvas');
+          var img = photos[key];
+          cvs.width = img.width || 500; 
+          cvs.height = img.height || 500;
+          var ctx = cvs.getContext('2d');
+
+          ctx.drawImage(img, 0, 0);
+          var imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+          var d = imgData.data;
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, cvs.width, cvs.height);
+          var outData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+          var od = outData.data;
+
+          var w = cvs.width, h = cvs.height;
+          for (var y = 1; y < h - 1; y++) {
+            for (var x = 1; x < w - 1; x++) {
+              var idx = (y * w + x) * 4;
+              var avg = (d[idx] + d[idx+1] + d[idx+2]) / 3;
+              var avgRight = (d[idx+4] + d[idx+5] + d[idx+6]) / 3;
+              var avgDown = (d[idx+w*4] + d[idx+w*4+1] + d[idx+w*4+2]) / 3;
+
+              var diff = Math.abs(avg - avgRight) + Math.abs(avg - avgDown);
+              if (diff > 18) {
+                od[idx] = 0; od[idx+1] = 0; od[idx+2] = 0; od[idx+3] = 255;
+              }
+            }
+          }
+          ctx.putImageData(outData, 0, 0);
+
+          lineArt[key] = cvs;
+
+          var lineImg = document.getElementById('line_img_' + key);
+          if (lineImg) {
+            lineImg.src = cvs.toDataURL();
+            lineImg.style.display = 'block';
+          }
+        }
+      });
+
+      if (count === 0) alert('請先在上一步驟上傳照片！');
+      else alert('✨ 已成功生成無雜訊清晰線稿！');
+    }
+
+    // 3. 步驟三：幾何切割
+    function getShapePts(shape) {
+      if (shape === 'diamond') return [[0.5,0],[1,0.5],[0.5,1],[0,0.5]];
+      if (shape === 'triangle') return [[0.5,0],[1,1],[0,1]];
+      if (shape === 'trapezoid') return [[0.2,0],[0.8,0],[1,1],[0,1]];
+      if (shape === 'polygon') return [[0.3,0],[0.85,0.15],[1,0.85],[0.5,1],[0,0.6]];
+      if (shape === 'parallelogram') return [[0.25,0],[1,0],[0.75,1],[0,1]];
+      if (shape === 'shield') return [[0,0],[1,0],[1,0.6],[0.5,1],[0,0.6]];
+      var pts = [];
+      for(var i=0; i<12; i++) {
+        var r = (i/12)*Math.PI*2;
+        pts.push([0.5+0.5*Math.cos(r), 0.5+0.5*Math.sin(r)]);
+      }
+      return pts;
+    }
+
+    function drawCrop() {
+      var cvs = document.getElementById('cropCanvas');
+      var ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      var key = document.getElementById('angleSelect').value;
+      var shape = document.getElementById('shapeSelect').value;
+      var img = lineArt[key] || photos[key];
+
+      if (img) {
+        var sc = Math.min(cvs.width/(img.width||500), cvs.height/(img.height||500))*0.85;
+        var rw = (img.width||500)*sc, rh = (img.height||500)*sc;
+        var rx = (cvs.width-rw)/2, ry = (cvs.height-rh)/2;
+
+        ctx.drawImage(img, rx, ry, rw, rh);
+
+        ctx.save();
+        ctx.translate(cropBox.x + cropBox.w/2, cropBox.y + cropBox.h/2);
+        ctx.rotate(cropBox.rot * Math.PI / 180);
+
+        var pts = getShapePts(shape);
+        var hw = cropBox.w/2, hh = cropBox.h/2;
+        ctx.beginPath();
+        ctx.moveTo(-hw + pts[0][0]*cropBox.w, -hh + pts[0][1]*cropBox.h);
+        for(var i=1; i<pts.length; i++) ctx.lineTo(-hw + pts[i][0]*cropBox.w, -hh + pts[i][1]*cropBox.h);
+        ctx.closePath();
+
+        ctx.strokeStyle = '#ffc107'; ctx.lineWidth = 4; ctx.stroke();
+        ctx.fillStyle = 'rgba(255,193,7,0.2)'; ctx.fill();
+        ctx.restore();
+      } else {
+        ctx.fillStyle = '#888'; ctx.font = '16px Arial'; ctx.textAlign = 'center';
+        ctx.fillText('請先在步驟二生成該角度線稿', cvs.width/2, cvs.height/2);
+      }
+    }
+
+    function scaleBox(v) { cropBox.w *= v; cropBox.h *= v; drawCrop(); }
+    function rotateBox(v) { cropBox.rot += v; drawCrop(); }
+
+    function cutFacet() {
+      var key = document.getElementById('angleSelect').value;
+      var shape = document.getElementById('shapeSelect').value;
+      var img = lineArt[key] || photos[key];
+      if (!img) return alert('請先生成線稿！');
+
+      var cvs = document.getElementById('cropCanvas');
+      var iw = img.width || 500, ih = img.height || 500;
+      var sc = Math.min(cvs.width/iw, cvs.height/ih)*0.85;
+      var rx = (cvs.width-iw*sc)/2, ry = (cvs.height-ih*sc)/2;
+
+      var cropW = cropBox.w / sc, cropH = cropBox.h / sc;
+      var relX = (cropBox.x - rx)/sc, relY = (cropBox.y - ry)/sc;
+
+      var fCvs = document.createElement('canvas');
+      fCvs.width = cropW; fCvs.height = cropH;
+      var fCtx = fCvs.getContext('2d');
+
+      var pts = getShapePts(shape);
+      fCtx.beginPath();
+      fCtx.moveTo(pts[0][0]*cropW, pts[0][1]*cropH);
+      for(var i=1; i<pts.length; i++) fCtx.lineTo(pts[i][0]*cropW, pts[i][1]*cropH);
+      fCtx.closePath();
+      fCtx.clip();
+
+      fCtx.drawImage(img, relX, relY, cropW, cropH, 0, 0, cropW, cropH);
+      fCtx.strokeStyle = '#000'; fCtx.lineWidth = 4; fCtx.stroke();
+
+      rawFacets.push({ canvas: fCvs, angle: key, shape: shape, w: cropBox.w, h: cropBox.h });
+      renderStage3Facets();
+    }
+
+    function renderStage3Facets() {
+      var box = document.getElementById('stage3FacetsPreview');
+      box.innerHTML = rawFacets.length === 0 ? '<span style="color:#888;">尚未切割素材</span>' : '';
+      rawFacets.forEach(function(item, idx) {
+        var div = document.createElement('div');
+        div.className = 'library-item-container';
+        var img = document.createElement('img');
+        img.src = item.canvas.toDataURL(); img.className = 'library-item';
+        var btn = document.createElement('button');
+        btn.className = 'delete-item-btn'; btn.innerText = '✕';
+        btn.onclick = function() { rawFacets.splice(idx,1); renderStage3Facets(); };
+        div.appendChild(img); div.appendChild(btn); box.appendChild(div);
+      });
+    }
+
+    // 4. 步驟四：雙模式轉換（黑白粗線條 vs 彩色面具風格）
+    function convertPicassoStyleFacets(mode) {
+      if (rawFacets.length === 0) return alert('請先在步驟三切割五官線稿素材！');
+
+      picassoFacets = [];
+      rawFacets.forEach(function(item, idx) {
+        var cvs = document.createElement('canvas');
+        cvs.width = item.canvas.width; cvs.height = item.canvas.height;
+        var ctx = cvs.getContext('2d');
+
+        if (mode === 'color') {
+          var c1 = picassoColors[idx % picassoColors.length];
+          var c2 = picassoColors[(idx + 3) % picassoColors.length];
+
+          var grad = ctx.createLinearGradient(0, 0, cvs.width, cvs.height);
+          grad.addColorStop(0, c1);
+          grad.addColorStop(1, c2);
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+          ctx.drawImage(item.canvas, 0, 0);
+
+          var imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+          var d = imgData.data;
+          for (var i = 0; i < d.length; i += 4) {
+            var v = (d[i] + d[i+1] + d[i+2]) / 3;
+            if (v < 120) {
+              d[i] = 0; d[i+1] = 0; d[i+2] = 0;
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+        } else {
+          ctx.drawImage(item.canvas, 0, 0);
+          var imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+          var d = imgData.data;
+          for (var i = 0; i < d.length; i += 4) {
+            if (d[i+3] > 0) {
+              var v = (d[i] + d[i+1] + d[i+2]) / 3;
+              var bw = v < 160 ? 0 : 255;
+              d[i] = bw; d[i+1] = bw; d[i+2] = bw;
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+        }
+
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = Math.max(8, Math.round(cvs.width * 0.08));
+        ctx.strokeRect(0, 0, cvs.width, cvs.height);
+
+        picassoFacets.push({ canvas: cvs, angle: item.angle, w: item.w, h: item.h });
+      });
+
+      renderPicassoFacetsContainer();
+      alert(mode === 'color' ? '✨ 已成功生成畢卡索高對比彩色面具素材！' : '✨ 已成功生成畢卡索黑白粗線條素材！');
+    }
+
+    var angleNames = { front:'1. 正面', right:'2. 右側面', left:'3. 左側面', up:'4. 仰視', down:'5. 俯視', threequarter:'6. 三七面' };
+
+    function renderPicassoFacetsContainer() {
+      var box = document.getElementById('picassoFacetsContainer');
+      box.innerHTML = '';
+      ['front','right','left','up','down','threequarter'].forEach(function(key) {
+        var card = document.createElement('div');
+        card.className = 'angle-group-card';
+        card.innerHTML = '<h5>' + angleNames[key] + '</h5>';
+
+        var itemsDiv = document.createElement('div');
+        itemsDiv.className = 'angle-group-items';
+        var list = picassoFacets.filter(function(f){ return f.angle === key; });
+
+        if (list.length === 0) {
+          itemsDiv.innerHTML = '<span style="font-size:11px;color:#aaa;">無素材</span>';
+        } else {
+          list.forEach(function(facet) {
+            var img = document.createElement('img');
+            img.src = facet.canvas.toDataURL(); img.className = 'library-item';
+            img.title = '點擊加入拼貼畫布';
+            img.onclick = function() { addToCollage(facet); };
+            itemsDiv.appendChild(img);
+          });
+        }
+        card.appendChild(itemsDiv); box.appendChild(card);
+      });
+    }
+
+    // 5. 步驟五：自由拼合與整合
+    function addToCollage(facet) {
+      collageItems.push({
+        canvas: facet.canvas, x: 250 + Math.random()*50, y: 150 + Math.random()*50, w: facet.w, h: facet.h, rot: 0
+      });
+      selectedItemIndex = collageItems.length - 1;
+      drawCollage();
+    }
+
+    function drawCollage() {
+      var cvs = document.getElementById('collageCanvas');
+      var ctx = cvs.getContext('2d');
+      ctx.clearRect(0,0,cvs.width,cvs.height);
+
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,cvs.width,cvs.height);
+
+      collageItems.forEach(function(item, i) {
+        ctx.save();
+        ctx.translate(item.x + item.w/2, item.y + item.h/2);
+        ctx.rotate(item.rot * Math.PI / 180);
+        ctx.drawImage(item.canvas, -item.w/2, -item.h/2, item.w, item.h);
+
+        if (i === selectedItemIndex) {
+          ctx.strokeStyle = '#007bff'; ctx.lineWidth = 3;
+          ctx.setLineDash([6,6]);
+          ctx.strokeRect(-item.w/2 - 4, -item.h/2 - 4, item.w + 8, item.h + 8);
+        }
+        ctx.restore();
+      });
+    }
+
+    function autoIntegratePicassoArt() {
+      if (collageItems.length === 0) return alert('請先將素材加入畫布進行拼合！');
+
+      selectedItemIndex = -1;
+      var cvs = document.getElementById('collageCanvas');
+      var ctx = cvs.getContext('2d');
+
+      drawCollage();
+
+      ctx.lineWidth = 6; ctx.strokeStyle = '#000000';
+
+      ctx.beginPath();
+      ctx.moveTo(180, 80); ctx.lineTo(520, 80);
+      ctx.lineTo(560, 360); ctx.lineTo(350, 480);
+      ctx.lineTo(140, 360); ctx.closePath(); ctx.stroke();
+
+      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(140, 360); ctx.lineTo(560, 360); ctx.stroke();
+
+      alert('✨ 已自動整合生成畢卡索風格立體派自畫像作品！');
+    }
+
+    function scaleItem(v) {
+      if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].w *= v; collageItems[selectedItemIndex].h *= v; drawCollage(); }
+    }
+    function rotateItem(v) {
+      if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].rot += v; drawCollage(); }
+    }
+    function deleteItem() {
+      if (selectedItemIndex !== -1) { collageItems.splice(selectedItemIndex,1); selectedItemIndex = -1; drawCollage(); }
+    }
+    function exportImage() {
+      var cvs = document.getElementById('collageCanvas');
+      var a = document.createElement('a');
+      a.download = '畢卡索立體派自畫像作品.png'; a.href = cvs.toDataURL(); a.click();
+    }
+
+    window.onload = function() {
+      var cCvs = document.getElementById('cropCanvas');
+      if (cCvs) {
+        cCvs.onmousedown = function(e) {
+          var r = cCvs.getBoundingClientRect();
+          var mx = e.clientX - r.left, my = e.clientY - r.top;
+          if (mx >= cropBox.x && mx <= cropBox.x+cropBox.w && my >= cropBox.y && my <= cropBox.y+cropBox.h) {
+            isDraggingBox = true; startX = mx - cropBox.x; startY = my - cropBox.y;
+          }
+        };
+        cCvs.onmousemove = function(e) {
+          if (isDraggingBox) {
+            var r = cCvs.getBoundingClientRect();
+            cropBox.x = e.clientX - r.left - startX; cropBox.y = e.clientY - r.top - startY;
+            drawCrop();
+          }
+        };
+        cCvs.onmouseup = function() { isDraggingBox = false; };
+      }
+
+      var clCvs = document.getElementById('collageCanvas');
+      if (clCvs) {
+        clCvs.onmousedown = function(e) {
+          var r = clCvs.getBoundingClientRect();
+          var mx = e.clientX - r.left, my = e.clientY - r.top;
+          selectedItemIndex = -1;
+          for (var i = collageItems.length - 1; i >= 0; i--) {
+            var item = collageItems[i];
+            if (mx >= item.x && mx <= item.x + item.w && my >= item.y && my <= item.y + item.h) {
+              selectedItemIndex = i; isDraggingItem = true;
+              startX = mx - item.x; startY = my - item.y; break;
+            }
+          }
+          drawCollage();
+        };
+        clCvs.onmousemove = function(e) {
+          if (isDraggingItem && selectedItemIndex !== -1) {
+            var r = clCvs.getBoundingClientRect();
+            var item = collageItems[selectedItemIndex];
+            item.x = e.clientX - r.left - startX; item.y = e.clientY - r.top - startY;
+            drawCollage();
+          }
+        };
+        clCvs.onmouseup = function() { isDraggingItem = false; };
+      }
+    };
+  </script>
+</body>
+</html>
