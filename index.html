@@ -53,7 +53,7 @@
 <body>
 
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
-  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換幾何素材 ➔ 畢卡索向量風格化 ➔ 自由拼合 ➔ AI 藝術指導與進階修改</p>
+  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換幾何素材 ➔ 畢卡索向量風格化 ➔ 自由拼合 ➔ AI 藝術指導與肖像生成</p>
 
   <div class="step-nav">
     <button class="step-btn active" id="btn_step1" onclick="switchStage(1)">步驟 1: 上傳照片</button>
@@ -152,7 +152,7 @@
       <button onclick="rotateItem(-15)">逆旋轉</button>
       <button class="btn-danger" onclick="deleteItem()">刪除選中元件</button>
       <button class="btn-warning" onclick="autoIntegratePicassoArt()">✨ 自動繪製幾何分割連線</button>
-      <button class="btn-purple" style="font-size: 15px; padding: 8px 18px;" onclick="switchStage(6)">🎓 完成初稿 ➔ 進入步驟六獲取 AI 評核修改意見</button>
+      <button class="btn-purple" style="font-size: 15px; padding: 8px 18px;" onclick="switchStage(6)">🎓 完成初稿 ➔ 進入步驟六獲取 AI 評核與重構肖像</button>
     </div>
 
     <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
@@ -174,39 +174,39 @@
     </div>
   </div>
 
-  <!-- 步驟 6 面板：三大原則評核與根據步驟 5 動態生成 3 張《哭泣的女人》完整修改圖 -->
+  <!-- 步驟 6 面板：三大原則AI分析與重構生成 3 張完整畢卡索/哭泣的女人肖像完成圖 -->
   <div id="stage6" class="stage-panel">
-    <h3>步驟六：AI 藝術評核與《哭泣的女人》修改意見：</h3>
+    <h3>步驟六：AI 藝術評核與《哭泣的女人》進階修改建議：</h3>
 
     <div class="teacher-advice-card">
-      <h4 style="margin:0 0 10px 0; color:#005ac8;">💡 AI 針對你步驟五作品的修改意見評核：</h4>
+      <h4 style="margin:0 0 10px 0; color:#005ac8;">💡 修改意見：</h4>
       <div id="aiAnalysisOutput">
         <ul>
-          <li><b>1. 同時視角（Multi-Angle Perspective）</b>：<span id="advice1">正在分析你在步驟五放置的五官角度...</span></li>
-          <li><b>2. 破碎的幾何（Fragmented Geometry）</b>：<span id="advice2">正在分析你的面部拆解與幾何圖形...</span></li>
-          <li><b>3. 粗重黑色輪廓線（Heavy Black Contours）</b>：<span id="advice3">正在分析你的輪廓線強度與網格鎖定...</span></li>
+          <li><b>1. 同時視角</b>：<span id="advice1">把不同角度的五官同時呈現出來。</span></li>
+          <li><b>2. 破碎的幾何</b>：<span id="advice2">運用「破碎的幾何」視覺語言，面部被拆解成三角形、鋸齒形與多角形或其他幾何圖形（除了圓形線條）。</span></li>
+          <li><b>3. 粗重黑色輪廓線</b>：<span id="advice3">運用粗重黑色輪廓線，像幾何網格般鎖定塊面，因為想產生尖銳、緊張的心理感受。</span></li>
         </ul>
       </div>
     </div>
 
     <div class="toolbar-group">
-      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="generateTeacherPresetSuggestions()">✨ 根據你的構圖與 AI 意見，生成 3 張《哭泣的女人》模仿完成圖</button>
-      <button class="btn-dark" onclick="exportStage6Images()">📥 下載修改意見作品表</button>
+      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="generateTeacherPresetSuggestions()">✨ 讀取步驟五初稿，生成 3 張畢卡索《哭泣的女人》重構肖像完成圖</button>
+      <button class="btn-dark" onclick="exportStage6Images()">📥 下載修改意見與肖像作品表</button>
     </div>
 
-    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 根據你的素材與擺位，依據三大原則生成的 3 張畢卡索《哭泣的女人》模仿完成圖（純黑粗線條框架、零圓形線條、無色彩）：</h4>
+    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 根據你在步驟五選擇的素材與擺位，依據三大原則與《哭泣的女人》藍圖重構生成的 3 張黑粗線肖像完成圖：</h4>
     <div class="preset-grid">
       <div class="preset-card">
-        <h5>完成圖 A：【同時視角重組】多重角度同時呈現與交錯拼貼</h5>
-        <canvas id="presetCanvasA" width="340" height="280"></canvas>
+        <h5>完成圖 A：【同時視角重組】正面雙眼與側面斜鼻重疊肖像</h5>
+        <canvas id="presetCanvasA" width="340" height="380"></canvas>
       </div>
       <div class="preset-card">
-        <h5>完成圖 B：【破碎幾何情緒】三角形/鋸齒形拆解與淚痕張力</h5>
-        <canvas id="presetCanvasB" width="340" height="280"></canvas>
+        <h5>完成圖 B：【破碎幾何情緒】咬手帕鋸齒梯形與放射狀淚痕</h5>
+        <canvas id="presetCanvasB" width="340" height="380"></canvas>
       </div>
       <div class="preset-card">
-        <h5>完成圖 C：【粗重黑線網格】幾何網格塊面鎖定與尖銳結構</h5>
-        <canvas id="presetCanvasC" width="340" height="280"></canvas>
+        <h5>完成圖 C：【粗重黑線網格】背景與面部幾何塊面鎖定肖像</h5>
+        <canvas id="presetCanvasC" width="340" height="380"></canvas>
       </div>
     </div>
   </div>
@@ -535,12 +535,11 @@
       selectedItemIndex = -1; var cvs = document.getElementById('collageCanvas'), ctx = cvs.getContext('2d');
       drawCollage(); ctx.lineWidth = 6; ctx.strokeStyle = '#000000'; ctx.lineJoin = 'miter';
       ctx.beginPath(); ctx.moveTo(180, 80); ctx.lineTo(520, 80); ctx.lineTo(560, 360); ctx.lineTo(350, 480); ctx.lineTo(140, 360); ctx.closePath(); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); stroke();
       ctx.beginPath(); ctx.moveTo(140, 360); ctx.lineTo(560, 360); ctx.stroke();
       alert('✨ 已自動整合繪製粗重黑線網格！');
     }
 
-    // AI 動態分析學生作品並輸出三大原則評語
     function runAIAnalysisAndGenerate() {
       var count = collageItems.length;
       var el1 = document.getElementById('advice1');
@@ -548,75 +547,108 @@
       var el3 = document.getElementById('advice3');
 
       if (count === 0) {
-        if(el1) el1.innerText = "你尚未在步驟五加入任何素材。建議至少選擇一個幾何面型與 2 個不同角度的五官，將正面與側面同時呈現！";
-        if(el2) el2.innerText = "目前畫布空白。請將面部拆解成三角形、鋸齒形或多角形塊面，展現立體派破碎美感。";
-        if(el3) el3.innerText = "請使用黑粗線條鎖定塊面，營造《哭泣的女人》尖銳緊張的情緒張力。";
+        if(el1) el1.innerText = "把不同角度的五官同時呈現出來（建議在步驟五加入素材）。";
+        if(el2) el2.innerText = "運用「破碎的幾何」視覺語言，面部被拆解成三角形、鋸齒形與多角形或其他幾何圖形（除了圓形線條）。";
+        if(el3) el3.innerText = "運用粗重黑色輪廓線，像幾何網格般鎖定塊面，因為想產生尖銳、緊張的心理感受。";
       } else {
-        if(el1) el1.innerText = "你已在畫布放入 " + count + " 個幾何素材！要完美模仿畢卡索《哭泣的女人》，建議嘗試將「側面的鼻子」直接疊加在「正面的雙眼」之間，創造極致的同時視角重疊。";
-        if(el2) el2.innerText = "你的構圖已初具幾何雛形。建議進一步將面型與嘴唇拆解成更尖銳的三角形與鋸齒梯形（避免使用圓形），大幅增強情緒張力。";
-        if(el3) el3.innerText = "目前元件相對獨立。建議運用像幾何網格一樣的粗重黑色輪廓線，穿過五官並鎖定塊面，產生尖銳、緊張的立體主義視覺效果！";
+        if(el1) el1.innerText = "你已在畫布擺放 " + count + " 個素材。建議將正面的眼睛與側面的鼻樑強烈重疊，達成同時視角！";
+        if(el2) el2.innerText = "面部已被拆解為幾何塊面，可將嘴部與下巴重構為咬手帕的鋸齒梯形與放射狀幾何淚痕。";
+        if(el3) el3.innerText = "運用粗重黑線將臉部與背景切割成多邊形網格，產生尖銳緊張的立體派張力。";
       }
 
       generateTeacherPresetSuggestions();
     }
 
-    // 根據三大原則，以《哭泣的女人》為藍圖，生成 3 張高度模仿立體派的完成圖
+    // 核心重構：將學生在步驟五擺放的元件進行語意重組，繪製出真正具備《哭泣的女人》肖像架構的完成圖
     function generateTeacherPresetSuggestions() {
-      renderStudentBasedPreset('presetCanvasA', 'A');
-      renderStudentBasedPreset('presetCanvasB', 'B');
-      renderStudentBasedPreset('presetCanvasC', 'C');
+      renderPicassoPortraitPreset('presetCanvasA', 'A');
+      renderPicassoPortraitPreset('presetCanvasB', 'B');
+      renderPicassoPortraitPreset('presetCanvasC', 'C');
     }
 
-    function renderStudentBasedPreset(canvasId, mode) {
+    function renderPicassoPortraitPreset(canvasId, mode) {
       var cvs = document.getElementById(canvasId); if(!cvs) return;
       var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
       ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
-      var srcCvs = document.getElementById('collageCanvas');
-      var scale = Math.min(w / srcCvs.width, h / srcCvs.height) * 0.85;
-      var offsetX = (w - srcCvs.width * scale) / 2;
-      var offsetY = (h - srcCvs.height * scale) / 2;
+      ctx.strokeStyle = '#000000'; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
 
-      // 複製學生步驟五創作素材
+      // 1. 繪製畢卡索《哭泣的女人》背景幾何牆面與粗黑線網格框
+      ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(w*0.1, 0); ctx.lineTo(w*0.1, h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w*0.9, 0); ctx.lineTo(w*0.9, h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, h*0.28); ctx.lineTo(w, h*0.28); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, h*0.75); ctx.lineTo(w, h*0.75); ctx.stroke();
+
+      // 2. 繪製頭飾帽子與幾何頭髮折線（《哭泣的女人》藍圖）
+      ctx.lineWidth = 7;
+      ctx.beginPath(); ctx.moveTo(w*0.2, h*0.12); ctx.lineTo(w*0.8, h*0.08); ctx.lineTo(w*0.88, h*0.18); ctx.lineTo(w*0.12, h*0.2); ctx.closePath(); ctx.stroke();
+      // 帽子上的朵花/多邊形裝飾
+      ctx.beginPath(); ctx.moveTo(w*0.42, h*0.04); ctx.lineTo(w*0.58, h*0.04); ctx.lineTo(w*0.65, h*0.14); ctx.lineTo(w*0.35, h*0.14); ctx.closePath(); ctx.stroke();
+
+      // 左側流線型頭髮塊面
+      ctx.lineWidth = 5;
+      for(var hairX = 0.12; hairX <= 0.24; hairX += 0.04) {
+        ctx.beginPath(); ctx.moveTo(w*hairX, h*0.2); ctx.lineTo(w*(hairX-0.03), h*0.65); ctx.lineTo(w*hairX, h*0.85); ctx.stroke();
+      }
+
+      // 3. 讀取並將學生在步驟五的擺位元件「立體派化嵌入」中央面型區域
       ctx.save();
-      ctx.translate(offsetX, offsetY);
+      var srcCvs = document.getElementById('collageCanvas');
+      var scale = 0.38;
+      ctx.translate(w*0.26, h*0.22);
       ctx.scale(scale, scale);
       collageItems.forEach(function(item) {
-        ctx.save(); ctx.translate(item.x + item.w/2, item.y + item.h/2); ctx.rotate(item.rot * Math.PI / 180);
-        ctx.drawImage(item.canvas, -item.w/2, -item.h/2, item.w, item.h);
+        ctx.save();
+        ctx.translate(item.x * 0.5, item.y * 0.5);
+        ctx.rotate(item.rot * Math.PI / 180);
+        ctx.drawImage(item.canvas, -item.w/4, -item.h/4, item.w*0.7, item.h*0.7);
         ctx.restore();
       });
       ctx.restore();
 
-      // 嚴格落實三大原則：1. 同時視角重疊、2. 破碎幾何（零圓形）、3. 粗重黑色輪廓網格鎖定
-      ctx.strokeStyle = '#000000'; ctx.lineWidth = 7; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
+      // 4. 根據三大原則，疊加《哭泣的女人》經典結構特徵線
+      ctx.lineWidth = 7;
 
       if (mode === 'A') {
-        // 完成圖 A【同時視角重組】：正面與側面切割中軸交錯網格
+        // 完成圖 A【同時視角】：強烈渲染正面雙眼 + 側面凸出尖角鼻樑
         ctx.beginPath();
-        ctx.moveTo(w*0.18, h*0.12); ctx.lineTo(w*0.82, h*0.12);
-        ctx.lineTo(w*0.9, h*0.72); ctx.lineTo(w*0.5, h*0.95);
-        ctx.lineTo(w*0.1, h*0.72); ctx.closePath(); ctx.stroke();
-        // 重疊側面鼻樑與正面中軸網格
-        ctx.lineWidth = 5;
-        ctx.beginPath(); ctx.moveTo(w*0.5, h*0.12); ctx.lineTo(w*0.38, h*0.52); ctx.lineTo(w*0.62, h*0.52); ctx.lineTo(w*0.5, h*0.95); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w*0.1, h*0.4); ctx.lineTo(w*0.9, h*0.4); ctx.stroke();
+        // 側面大鼻樑貫穿正面
+        ctx.moveTo(w*0.5, h*0.18); ctx.lineTo(w*0.32, h*0.48); ctx.lineTo(w*0.65, h*0.48); ctx.stroke();
+        // 正面立體派雙眼框
+        ctx.strokeRect(w*0.35, h*0.25, w*0.16, h*0.12);
+        ctx.strokeRect(w*0.62, h*0.28, w*0.16, h*0.12);
+        // 幾何面型分界線
+        ctx.beginPath(); ctx.moveTo(w*0.5, h*0.18); ctx.lineTo(w*0.5, h*0.88); ctx.stroke();
       } else if (mode === 'B') {
-        // 完成圖 B【破碎幾何情緒】：三角形拆解、鋸齒手帕與斜向淚痕（無圓形）
+        // 完成圖 B【破碎幾何與手帕】：尖銳咬手帕梯形嘴部 + 放射狀鋸齒淚痕
         ctx.lineWidth = 6;
-        // 三角形眼睛與鋸齒淚痕
-        ctx.beginPath(); ctx.moveTo(w*0.25, h*0.25); ctx.lineTo(w*0.45, h*0.25); ctx.lineTo(w*0.35, h*0.42); ctx.closePath(); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w*0.35, h*0.42); ctx.lineTo(w*0.28, h*0.78); ctx.lineTo(w*0.38, h*0.78); ctx.closePath(); ctx.stroke();
-        // 咬手帕鋸齒幾何
-        ctx.beginPath(); ctx.moveTo(w*0.18, h*0.62); ctx.lineTo(w*0.82, h*0.78); ctx.lineTo(w*0.12, h*0.92); ctx.closePath(); ctx.stroke();
+        // 咬手帕白塊面（梯形）
+        ctx.beginPath(); ctx.moveTo(w*0.35, h*0.48); ctx.lineTo(w*0.82, h*0.58); ctx.lineTo(w*0.45, h*0.78); ctx.lineTo(w*0.28, h*0.62); ctx.closePath(); ctx.stroke();
+        // 網格牙齒線條
+        for(var tooth = 0.42; tooth <= 0.72; tooth += 0.08) {
+          ctx.beginPath(); ctx.moveTo(w*tooth, h*0.52); ctx.lineTo(w*tooth, h*0.65); ctx.stroke();
+        }
+        // 放射狀幾何淚滴線
+        ctx.beginPath(); ctx.moveTo(w*0.42, h*0.35); ctx.lineTo(w*0.38, h*0.72); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(w*0.48, h*0.35); ctx.lineTo(w*0.48, h*0.75); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(w*0.68, h*0.38); ctx.lineTo(w*0.72, h*0.72); ctx.stroke();
       } else {
-        // 完成圖 C【粗重黑線網格】：立體派極限多邊形網格鎖定塊面
-        ctx.lineWidth = 6;
-        ctx.beginPath(); ctx.moveTo(w*0.06, h*0.12); ctx.lineTo(w*0.94, h*0.88); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w*0.94, h*0.12); ctx.lineTo(w*0.06, h*0.88); ctx.stroke();
+        // 完成圖 C【粗重黑線網格】：全面以黑粗線幾何網格將頭部、面型與頸部切割鎖定
         ctx.lineWidth = 8;
-        ctx.strokeRect(w*0.06, h*0.06, w*0.88, h*0.88);
+        // 頭面多邊形框架
+        ctx.beginPath();
+        ctx.moveTo(w*0.28, h*0.2); ctx.lineTo(w*0.8, h*0.18);
+        ctx.lineTo(w*0.88, h*0.65); ctx.lineTo(w*0.55, h*0.88);
+        ctx.lineTo(w*0.28, h*0.72); ctx.closePath(); ctx.stroke();
+        // 幾何頸部與肩部網格
+        ctx.beginPath(); ctx.moveTo(w*0.35, h*0.75); ctx.lineTo(w*0.35, h*0.98); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(w*0.68, h*0.75); ctx.lineTo(w*0.68, h*0.98); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(w*0.2, h*0.88); ctx.lineTo(w*0.85, h*0.88); ctx.stroke();
       }
+
+      // 外外框線條強化
+      ctx.lineWidth = 8; ctx.strokeRect(0, 0, w, h);
     }
 
     function scaleItem(v) { if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].w *= v; collageItems[selectedItemIndex].h *= v; drawCollage(); } }
@@ -627,7 +659,7 @@
     function exportStage6Images() {
       var cvs = document.getElementById('presetCanvasA');
       var a = document.createElement('a');
-      a.download = '畢卡索哭泣的女人_AI修改意見與完成圖.png'; a.href = cvs.toDataURL(); a.click();
+      a.download = '畢卡索哭泣的女人_AI修改意見與肖像圖.png'; a.href = cvs.toDataURL(); a.click();
     }
 
     window.onload = function() {
