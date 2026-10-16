@@ -38,12 +38,23 @@
     .angle-group-card { border: 1px solid #007bff; border-radius: 6px; padding: 8px; background: #f0f7ff; text-align: left; }
     .angle-group-card h5 { margin: 0 0 6px 0; color: #005ac8; font-size: 13px; }
     .angle-group-items { display: flex; gap: 6px; flex-wrap: wrap; min-height: 50px; align-items: center; }
+
+    /* 步驟六專用樣式 */
+    .teacher-advice-card {
+      background: #eef6ff; border-left: 5px solid #007bff; padding: 15px 20px;
+      text-align: left; margin: 15px 0; border-radius: 0 8px 8px 0;
+    }
+    .teacher-advice-card ul { margin: 8px 0 0 20px; padding: 0; line-height: 1.7; color: #222; }
+    .teacher-advice-card li { margin-bottom: 6px; font-size: 14px; }
+    .preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 15px; }
+    .preset-card { background: #fdfdfd; border: 1px solid #ddd; border-radius: 8px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .preset-card h5 { margin: 0 0 8px 0; color: #333; font-size: 14px; }
   </style>
 </head>
 <body>
 
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
-  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換幾何素材 ➔ 畢卡索向量風格化 ➔ 自由拼合立體派自畫像</p>
+  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換幾何素材 ➔ 畢卡索向量風格化 ➔ 自由拼合 ➔ 教師評核修改意見</p>
 
   <div class="step-nav">
     <button class="step-btn active" id="btn_step1" onclick="switchStage(1)">步驟 1: 上傳照片</button>
@@ -51,7 +62,8 @@
     <button class="step-btn" id="btn_step3" onclick="switchStage(3)">步驟 3: 手動幾何切割五官</button>
     <button class="step-btn" id="btn_step4" onclick="switchStage(4)">步驟 4: 照片切割素材</button>
     <button class="step-btn" id="btn_step45" onclick="switchStage(4.5)">步驟 4.5: 畢卡索向量幾何素材</button>
-    <button class="step-btn" id="btn_step5" onclick="switchStage(5)">步驟 5: 自由拼合與整合作品</button>
+    <button class="step-btn" id="btn_step5" onclick="switchStage(5)">步驟 5: 自由拼合創作</button>
+    <button class="step-btn" id="btn_step6" onclick="switchStage(6)">步驟 6: 教師指導與評核修改</button>
   </div>
 
   <!-- 步驟 1 面板 -->
@@ -130,7 +142,7 @@
     <br><button class="btn-success" onclick="switchStage(5)">向量素材生成完成 ➔ 進入步驟五自由拼合作品</button>
   </div>
 
-  <!-- 步驟 5 面板（全新優化：新增「哭泣的女人」面型底板素材庫 + 五官素材庫） -->
+  <!-- 步驟 5 面板 -->
   <div id="stage5" class="stage-panel">
     <h3>步驟五：選擇幾何面型與五官，自由拼合畢卡索立體派自畫像作品：</h3>
 
@@ -141,7 +153,7 @@
       <button onclick="rotateItem(-15)">逆旋轉</button>
       <button class="btn-danger" onclick="deleteItem()">刪除選中元件</button>
       <button class="btn-warning" onclick="autoIntegratePicassoArt()">✨ 自動繪製幾何分割連線</button>
-      <button class="btn-dark" onclick="exportImage()">📥 下載作品</button>
+      <button class="btn-purple" style="font-size: 15px; padding: 8px 18px;" onclick="switchStage(6)">🎓 完成初稿 ➔ 進入步驟六獲取教師評核指導</button>
     </div>
 
     <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
@@ -151,7 +163,6 @@
       </div>
     </div>
 
-    <!-- 素材選擇庫列表 -->
     <div style="margin-top: 20px; text-align: left;">
       <h4 style="margin: 0 0 5px 0; color: #28a745;">🎭 畢卡索《哭泣的女人》幾何粗線條面型素材庫（點擊加入畫布作為底座）：</h4>
       <div id="stage5FaceLibrary" class="facets-library"></div>
@@ -161,6 +172,41 @@
 
       <h4 style="margin: 15px 0 5px 0; color: #6f42c1;">🎨 步驟 4.5 畢卡索向量幾何五官素材庫（點擊加入畫布）：</h4>
       <div id="stage5VectorLibrary" class="facets-library"><span style="color:#888;">尚未生成向量素材，請先完成步驟 4.5</span></div>
+    </div>
+  </div>
+
+  <!-- 步驟 6 面板（全新：教師專業指導意見與三張預設黑粗線幾何範例圖） -->
+  <div id="stage6" class="stage-panel">
+    <h3>步驟六：中學視覺藝術科教師專業評核與《哭泣的女人》進階修改建議：</h3>
+
+    <div class="teacher-advice-card">
+      <h4 style="margin:0 0 10px 0; color:#005ac8;">🍎 視覺藝術科老師修改指導意見：</h4>
+      <ul>
+        <li><b>1. 視角交錯與幾何重疊（Cross-Perspective Alignment）</b>：畢卡索《哭泣的女人》核心在於將正面與側面的眼睛、鼻子同時並置。建議將側面的鼻子與正面的眼睛交錯疊加，製造多維度的空間錯視感。</li>
+        <li><b>2. 情感動態黑粗線條（Emotional Line Dynamic）</b>：哭泣的意象需要透過極端斜線與銳角表現。建議在眼睛下方加入幾何放射狀的淚滴線條，並將嘴唇調整為斜向的鋸齒梯形，以展現劇烈的面部張力。</li>
+        <li><b>3. 幾何邊框分割與張力平衡（Framing & Segmentation）</b>：面型底板與五官之間應使用粗細對比強烈的黑粗線連接，將頭部的幾何多邊形向外延伸至背景，形成完整且具立體派精神的結構線框架。</li>
+      </ul>
+    </div>
+
+    <div class="toolbar-group">
+      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="generateTeacherPresetSuggestions()">✨ 一鍵參考畢卡索《哭泣的女人》生成 3 張預設修改範例圖</button>
+      <button class="btn-dark" onclick="exportStage6Images()">📥 下載評核報告與修改圖</button>
+    </div>
+
+    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 根據教師建議自動生成的 3 張極簡黑粗線幾何修改方案（純線條框架、無色彩）：</h4>
+    <div class="preset-grid">
+      <div class="preset-card">
+        <h5>方案 A：雙重視角交錯與幾何淚滴（對標經典動態）</h5>
+        <canvas id="presetCanvasA" width="340" height="280"></canvas>
+      </div>
+      <div class="preset-card">
+        <h5>方案 B：極限銳角分割與鋸齒嘴唇（對標張力結構）</h5>
+        <canvas id="presetCanvasB" width="340" height="280"></canvas>
+      </div>
+      <div class="preset-card">
+        <h5>方案 C：多維空間縱深與錯位雙眼（對標抽象構成）</h5>
+        <canvas id="presetCanvasC" width="340" height="280"></canvas>
+      </div>
     </div>
   </div>
 
@@ -184,7 +230,7 @@
     }
 
     function switchStage(num) {
-      var stages = [1, 2, 3, 4, 4.5, 5];
+      var stages = [1, 2, 3, 4, 4.5, 5, 6];
       stages.forEach(function(s) {
         var sKey = s === 4.5 ? '45' : s;
         var b = document.getElementById('btn_step' + sKey);
@@ -196,6 +242,7 @@
       if (num === 4) generateBasicPhotoFacets();
       if (num === 4.5) convertPicassoVectorArt();
       if (num === 5) { initFaceBases(); renderStage5Libraries(); drawCollage(); }
+      if (num === 6) { generateTeacherPresetSuggestions(); }
     }
 
     function convertCleanLineArt() {
@@ -359,7 +406,6 @@
       renderFacetsGrid('vectorFacetsContainer', vectorFacets);
     }
 
-    // 初始化《哭泣的女人》幾何粗線條面型素材（各種角度與切割分面底板）
     function initFaceBases() {
       if (faceBaseFacets.length > 0) return;
       var faceTypes = [
@@ -379,37 +425,31 @@
         ctx.strokeStyle = '#000000'; ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
         if (ft.type === 'front_face') {
-          // 正面經典畢卡索幾何臉型
           ctx.beginPath();
           ctx.moveTo(w*0.2, h*0.15); ctx.lineTo(w*0.8, h*0.15);
           ctx.lineTo(w*0.88, h*0.65); ctx.lineTo(w*0.5, h*0.92);
           ctx.lineTo(w*0.12, h*0.65); ctx.closePath(); ctx.stroke();
         } else if (ft.type === 'split_face') {
-          // 經典分割臉型（中軸線切割）
           ctx.beginPath();
           ctx.moveTo(w*0.2, h*0.12); ctx.lineTo(w*0.8, h*0.12);
           ctx.lineTo(w*0.85, h*0.68); ctx.lineTo(w*0.5, h*0.92);
           ctx.lineTo(w*0.15, h*0.68); ctx.closePath(); ctx.stroke();
-          // 中軸分割線
           ctx.lineWidth = 8;
           ctx.beginPath(); ctx.moveTo(w*0.5, h*0.12); ctx.lineTo(w*0.5, h*0.92); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(w*0.15, h*0.45); ctx.lineTo(w*0.85, h*0.45); ctx.stroke();
         } else if (ft.type === 'right_profile') {
-          // 右側面幾何剪影臉型
           ctx.beginPath();
           ctx.moveTo(w*0.25, h*0.12); ctx.lineTo(w*0.65, h*0.12);
           ctx.lineTo(w*0.82, h*0.35); ctx.lineTo(w*0.6, h*0.52);
           ctx.lineTo(w*0.8, h*0.68); ctx.lineTo(w*0.5, h*0.9);
           ctx.lineTo(w*0.25, h*0.82); ctx.closePath(); ctx.stroke();
         } else if (ft.type === 'left_profile') {
-          // 左側面幾何剪影臉型
           ctx.beginPath();
           ctx.moveTo(w*0.75, h*0.12); ctx.lineTo(w*0.35, h*0.12);
           ctx.lineTo(w*0.18, h*0.35); ctx.lineTo(w*0.4, h*0.52);
           ctx.lineTo(w*0.2, h*0.68); ctx.lineTo(w*0.5, h*0.9);
           ctx.lineTo(w*0.75, h*0.82); ctx.closePath(); ctx.stroke();
         } else {
-          // 三七面幾何盾形臉型
           ctx.beginPath();
           ctx.moveTo(w*0.15, h*0.2); ctx.lineTo(w*0.7, h*0.1);
           ctx.lineTo(w*0.9, h*0.6); ctx.lineTo(w*0.55, h*0.92);
@@ -444,13 +484,11 @@
       });
     }
 
-    // 渲染步驟五專屬的三大素材庫（包含臉型底座素材）
     function renderStage5Libraries() {
       var fBox = document.getElementById('stage5FaceLibrary');
       var pBox = document.getElementById('stage5PhotoLibrary');
       var vBox = document.getElementById('stage5VectorLibrary');
 
-      // 1. 面型素材庫
       fBox.innerHTML = '';
       faceBaseFacets.forEach(function(facet) {
         var img = document.createElement('img'); img.src = facet.canvas.toDataURL(); img.className = 'library-item';
@@ -459,7 +497,6 @@
         fBox.appendChild(img);
       });
 
-      // 2. 照片素材庫
       pBox.innerHTML = photoFacets.length === 0 ? '<span style="color:#888;">尚未生成照片素材，請先完成步驟 4</span>' : '';
       photoFacets.forEach(function(facet) {
         var img = document.createElement('img'); img.src = facet.canvas.toDataURL(); img.className = 'library-item';
@@ -468,7 +505,6 @@
         pBox.appendChild(img);
       });
 
-      // 3. 向量素材庫
       vBox.innerHTML = vectorFacets.length === 0 ? '<span style="color:#888;">尚未生成向量素材，請先完成步驟 4.5</span>' : '';
       vectorFacets.forEach(function(facet) {
         var img = document.createElement('img'); img.src = facet.canvas.toDataURL(); img.className = 'library-item';
@@ -504,10 +540,102 @@
       alert('✨ 已自動整合繪製立體派幾何分割線條！');
     }
 
+    // 步驟六：生成 3 張預設白底黑粗線無色彩幾何範例圖
+    function generateTeacherPresetSuggestions() {
+      drawPresetA();
+      drawPresetB();
+      drawPresetC();
+    }
+
+    function drawPresetA() {
+      var cvs = document.getElementById('presetCanvasA'); if(!cvs) return;
+      var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+      // 臉型外框
+      ctx.beginPath(); ctx.moveTo(w*0.25, h*0.1); ctx.lineTo(w*0.75, h*0.1);
+      ctx.lineTo(w*0.85, h*0.65); ctx.lineTo(w*0.5, h*0.9); ctx.lineTo(w*0.15, h*0.65); ctx.closePath(); ctx.stroke();
+
+      // 正面+側面中軸分割
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(w*0.5, h*0.1); ctx.lineTo(w*0.42, h*0.5); ctx.lineTo(w*0.5, h*0.9); ctx.stroke();
+
+      // 雙眼（正面+側面）
+      ctx.beginPath(); ctx.arc(w*0.35, h*0.32, 18, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w*0.35, h*0.32, 8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(w*0.6, h*0.25); ctx.lineTo(w*0.75, h*0.35); ctx.lineTo(w*0.6, h*0.42); ctx.closePath(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w*0.65, h*0.33, 6, 0, Math.PI*2); ctx.fill();
+
+      // 經典幾何淚滴
+      ctx.beginPath(); ctx.moveTo(w*0.35, h*0.42); ctx.lineTo(w*0.35, h*0.68); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w*0.35, h*0.7, 5, 0, Math.PI*2); ctx.fill();
+
+      // 嘴巴（梯形鋸齒）
+      ctx.beginPath(); ctx.moveTo(w*0.3, h*0.72); ctx.lineTo(w*0.7, h*0.68); ctx.lineTo(w*0.55, h*0.85); ctx.closePath(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w*0.3, h*0.72); ctx.lineTo(w*0.7, h*0.68); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w*0.45, h*0.72); ctx.lineTo(w*0.45, h*0.8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w*0.55, h*0.71); ctx.lineTo(w*0.55, h*0.82); ctx.stroke();
+    }
+
+    function drawPresetB() {
+      var cvs = document.getElementById('presetCanvasB'); if(!cvs) return;
+      var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+      // 多邊形臉型
+      ctx.beginPath(); ctx.moveTo(w*0.2, h*0.15); ctx.lineTo(w*0.8, h*0.08);
+      ctx.lineTo(w*0.9, h*0.55); ctx.lineTo(w*0.6, h*0.92); ctx.lineTo(w*0.1, h*0.7); ctx.closePath(); ctx.stroke();
+
+      // 咬手帕的極限幾何三角形
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(w*0.35, h*0.5); ctx.lineTo(w*0.8, h*0.75); ctx.lineTo(w*0.2, h*0.88); ctx.closePath(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w*0.35, h*0.5); ctx.lineTo(w*0.5, h*0.82); ctx.stroke();
+
+      // 眼睛與睫毛
+      ctx.beginPath(); ctx.arc(w*0.38, h*0.3, 16, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w*0.38, h*0.3, 7, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(w*0.3, h*0.18); ctx.lineTo(w*0.32, h*0.24); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w*0.38, h*0.16); ctx.lineTo(w*0.38, h*0.23); ctx.stroke();
+
+      ctx.beginPath(); ctx.arc(w*0.68, h*0.26, 18, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w*0.68, h*0.26, 8, 0, Math.PI*2); ctx.fill();
+    }
+
+    function drawPresetC() {
+      var cvs = document.getElementById('presetCanvasC'); if(!cvs) return;
+      var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+      // 盾形傾斜臉型
+      ctx.beginPath(); ctx.moveTo(w*0.15, h*0.18); ctx.lineTo(w*0.75, h*0.1);
+      ctx.lineTo(w*0.88, h*0.62); ctx.lineTo(w*0.45, h*0.92); ctx.lineTo(w*0.12, h*0.6); ctx.closePath(); ctx.stroke();
+
+      // 雙眼上下極端錯位
+      ctx.beginPath(); ctx.arc(w*0.35, h*0.25, 20, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w*0.35, h*0.25, 9, 0, Math.PI*2); ctx.fill();
+
+      ctx.beginPath(); ctx.arc(w*0.65, h*0.45, 20, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w*0.65, h*0.45, 9, 0, Math.PI*2); ctx.fill();
+
+      // 立體派長鼻子與縱深線
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(w*0.42, h*0.12); ctx.lineTo(w*0.28, h*0.62); ctx.lineTo(w*0.55, h*0.62); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w*0.3, h*0.75); ctx.lineTo(w*0.7, h*0.75); ctx.stroke();
+    }
+
     function scaleItem(v) { if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].w *= v; collageItems[selectedItemIndex].h *= v; drawCollage(); } }
     function rotateItem(v) { if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].rot += v; drawCollage(); } }
     function deleteItem() { if (selectedItemIndex !== -1) { collageItems.splice(selectedItemIndex,1); selectedItemIndex = -1; drawCollage(); } }
     function exportImage() { var cvs = document.getElementById('collageCanvas'), a = document.createElement('a'); a.download = '畢卡索立體派自畫像作品.png'; a.href = cvs.toDataURL(); a.click(); }
+
+    function exportStage6Images() {
+      var cvs = document.getElementById('presetCanvasA');
+      var a = document.createElement('a');
+      a.download = '畢卡索哭泣的女人_教師指導評核建議圖.png'; a.href = cvs.toDataURL(); a.click();
+    }
 
     window.onload = function() {
       var cCvs = document.getElementById('cropCanvas');
