@@ -60,7 +60,6 @@
     .upload-card h4 { margin: 0 0 8px 0; color: #007bff; }
     .upload-card input[type="file"] { width: 100%; font-size: 12px; cursor: pointer; }
     
-    /* 修復：容器顯式高度確保預覽圖能順利張開 */
     .img-preview-box {
       width: 100%;
       height: 130px;
@@ -102,7 +101,6 @@
     .btn-success { background: #28a745; color: white; }
     .btn-danger { background: #dc3545; color: white; }
     .btn-dark { background: #343a40; color: white; }
-    .btn-colorful { background: linear-gradient(45deg, #ff416c, #ff4b2b); color: white; }
 
     canvas { border: 2px solid #222; background: #fff; border-radius: 4px; }
 
@@ -119,7 +117,7 @@
       margin-top: 15px;
     }
     .library-item-container { position: relative; display: inline-block; }
-    .library-item { height: 75px; border: 2px solid #333; border-radius: 6px; cursor: pointer; background: white; }
+    .library-item { height: 80px; border: 2px solid #333; border-radius: 6px; cursor: pointer; background: white; padding: 4px; }
     .delete-item-btn {
       position: absolute; top: -8px; right: -8px; background: #dc3545; color: white;
       border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px;
@@ -146,13 +144,13 @@
 <body>
 
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
-  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換畢卡索黑白粗線條/彩色面具 ➔ 自由拼合立體派自畫像</p>
+  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換畢卡索極簡幾何黑粗線素材 ➔ 自由拼合立體派自畫像</p>
 
   <div class="step-nav">
     <button class="step-btn active" id="btn_step1" onclick="switchStage(1)">步驟 1: 上傳照片</button>
     <button class="step-btn" id="btn_step2" onclick="switchStage(2)">步驟 2: 清晰無雜訊線稿</button>
     <button class="step-btn" id="btn_step3" onclick="switchStage(3)">步驟 3: 手動幾何切割五官</button>
-    <button class="step-btn" id="btn_step4" onclick="switchStage(4)">步驟 4: 轉畢卡索風格素材</button>
+    <button class="step-btn" id="btn_step4" onclick="switchStage(4)">步驟 4: 轉畢卡索幾何素材</button>
     <button class="step-btn" id="btn_step5" onclick="switchStage(5)">步驟 5: 自由拼合與整合作品</button>
   </div>
 
@@ -268,12 +266,11 @@
 
   <!-- 步驟 4 面板 -->
   <div id="stage4" class="stage-panel">
-    <h3>步驟四：轉換為畢卡索風格五官素材：</h3>
-    <p>可選擇轉換為「黑白粗線條」或「畢卡索高對比彩色面具風格」素材！</p>
+    <h3>步驟四：一鍵轉換為畢卡索極簡幾何黑粗線素材（對標參考圖）：</h3>
+    <p>自動去除雜訊與灰階，打造乾淨白底、純黑邊框與幾何線條的立體派素材組件！</p>
 
     <div class="toolbar-group">
-      <button class="btn-primary" style="font-size: 15px; padding: 10px 18px;" onclick="convertPicassoStyleFacets('bw')">✍️ 一鍵生成黑白粗線條素材</button>
-      <button class="btn-colorful" style="font-size: 15px; padding: 10px 18px;" onclick="convertPicassoStyleFacets('color')">🎨 一鍵生成畢卡索高對比彩色面具素材</button>
+      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="convertCleanPicassoStyleFacets()">✨ 一鍵生成畢卡索極簡幾何五官素材</button>
     </div>
 
     <div id="picassoFacetsContainer" class="angle-grid"></div>
@@ -316,9 +313,7 @@
     var isDraggingBox = false, isDraggingItem = false;
     var startX = 0, startY = 0;
 
-    var picassoColors = ['#E63946', '#FFB703', '#2A9D8F', '#023E8A', '#7209B7', '#F72585', '#00F5D4', '#FF5714'];
-
-    // 1. 步驟一上傳圖片（修復：使用明確 Base64 賦值與顯示模式）
+    // 1. 上傳照片
     function uploadDirectly(inputElem, angleKey) {
       if (!inputElem.files || !inputElem.files[0]) return;
       var file = inputElem.files[0];
@@ -487,7 +482,6 @@
       fCtx.clip();
 
       fCtx.drawImage(img, relX, relY, cropW, cropH, 0, 0, cropW, cropH);
-      fCtx.strokeStyle = '#000'; fCtx.lineWidth = 4; fCtx.stroke();
 
       rawFacets.push({ canvas: fCvs, angle: key, shape: shape, w: cropBox.w, h: cropBox.h });
       renderStage3Facets();
@@ -508,60 +502,52 @@
       });
     }
 
-    // 4. 步驟四：雙模式轉換（黑白粗線條 vs 彩色面具風格）
-    function convertPicassoStyleFacets(mode) {
+    // 4. 步驟四：對標參考圖的【極簡幾何純黑粗線】轉換演算法
+    function convertCleanPicassoStyleFacets() {
       if (rawFacets.length === 0) return alert('請先在步驟三切割五官線稿素材！');
 
       picassoFacets = [];
-      rawFacets.forEach(function(item, idx) {
+      rawFacets.forEach(function(item) {
         var cvs = document.createElement('canvas');
         cvs.width = item.canvas.width; cvs.height = item.canvas.height;
         var ctx = cvs.getContext('2d');
 
-        if (mode === 'color') {
-          var c1 = picassoColors[idx % picassoColors.length];
-          var c2 = picassoColors[(idx + 3) % picassoColors.length];
+        // 1. 底色設為純白色
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
 
-          var grad = ctx.createLinearGradient(0, 0, cvs.width, cvs.height);
-          grad.addColorStop(0, c1);
-          grad.addColorStop(1, c2);
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, cvs.width, cvs.height);
+        // 2. 畫上切割下來的五官線稿
+        ctx.drawImage(item.canvas, 0, 0);
 
-          ctx.drawImage(item.canvas, 0, 0);
-
-          var imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
-          var d = imgData.data;
-          for (var i = 0; i < d.length; i += 4) {
-            var v = (d[i] + d[i+1] + d[i+2]) / 3;
-            if (v < 120) {
-              d[i] = 0; d[i+1] = 0; d[i+2] = 0;
-            }
+        // 3. 處理像素：清空內部陰影，只留純黑極簡結構線
+        var imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+        var d = imgData.data;
+        for (var i = 0; i < d.length; i += 4) {
+          var avg = (d[i] + d[i+1] + d[i+2]) / 3;
+          if (avg < 190) { // 結構線條變純黑
+            d[i] = 0; d[i+1] = 0; d[i+2] = 0; d[i+3] = 255;
+          } else { // 其餘陰影全部清空變純白
+            d[i] = 255; d[i+1] = 255; d[i+2] = 255; d[i+3] = 255;
           }
-          ctx.putImageData(imgData, 0, 0);
-        } else {
-          ctx.drawImage(item.canvas, 0, 0);
-          var imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
-          var d = imgData.data;
-          for (var i = 0; i < d.length; i += 4) {
-            if (d[i+3] > 0) {
-              var v = (d[i] + d[i+1] + d[i+2]) / 3;
-              var bw = v < 160 ? 0 : 255;
-              d[i] = bw; d[i+1] = bw; d[i+2] = bw;
-            }
-          }
-          ctx.putImageData(imgData, 0, 0);
         }
+        ctx.putImageData(imgData, 0, 0);
+
+        // 4. 畫上畢卡索經典「黑粗雙重外框」（完美呈現參考圖貼紙邊框感）
+        var pts = getShapePts(item.shape || 'diamond');
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0]*cvs.width, pts[0][1]*cvs.height);
+        for(var k=1; k<pts.length; k++) ctx.lineTo(pts[k][0]*cvs.width, pts[k][1]*cvs.height);
+        ctx.closePath();
 
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = Math.max(8, Math.round(cvs.width * 0.08));
-        ctx.strokeRect(0, 0, cvs.width, cvs.height);
+        ctx.lineWidth = Math.max(10, Math.round(cvs.width * 0.08));
+        ctx.stroke();
 
         picassoFacets.push({ canvas: cvs, angle: item.angle, w: item.w, h: item.h });
       });
 
       renderPicassoFacetsContainer();
-      alert(mode === 'color' ? '✨ 已成功生成畢卡索高對比彩色面具素材！' : '✨ 已成功生成畢卡索黑白粗線條素材！');
+      alert('✨ 已成功生成畢卡索極簡幾何五官素材！');
     }
 
     var angleNames = { front:'1. 正面', right:'2. 右側面', left:'3. 左側面', up:'4. 仰視', down:'5. 俯視', threequarter:'6. 三七面' };
