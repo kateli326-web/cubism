@@ -174,7 +174,7 @@
     </div>
   </div>
 
-  <!-- 步驟 6 面板：動態評語與升級版《哭泣的女人》幾何重構肖像 -->
+  <!-- 步驟 6 面板：真正模仿畢卡索風格的肖像參考圖 -->
   <div id="stage6" class="stage-panel">
     <h3>步驟六：AI 藝術評核與《哭泣的女人》修改意見：</h3>
 
@@ -190,19 +190,19 @@
     </div>
 
     <div class="toolbar-group">
-      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="runAIAnalysisAndGenerate()">✨ 讀取步驟五初稿，生成經典《哭泣的女人》重構肖像圖</button>
+      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="runAIAnalysisAndGenerate()">✨ 讀取步驟五初稿，生成畢卡索立體主義繪畫參考圖</button>
       <button class="btn-dark" onclick="exportStage6Images()">📥 下載修改意見與肖像作品表</button>
     </div>
 
-    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 融入《哭泣的女人》經典幾何淚痕與雙色立體切面的重構肖像（100%保留初稿元件）：</h4>
+    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 融入《哭泣的女人》經典髮絲條紋、幾何淚痕與手帕網格的參考肖像（可供畫畫參考）：</h4>
     <div class="preset-grid">
       <div class="preset-card">
-        <h5>方案 A：【同時視角重組】雙色正側面切面底座與立體派幾何淚痕貫穿</h5>
-        <canvas id="presetCanvasA" width="460" height="360"></canvas>
+        <h5>方案 A：【同時視角重組】雙色正側面切面、立體髮絲與幾何淚痕肖像</h5>
+        <canvas id="presetCanvasA" width="460" height="380"></canvas>
       </div>
       <div class="preset-card">
-        <h5>方案 C：【粗重黑線網格】多邊形黑粗輪廓鎖定與咬手帕鋸齒背景網格</h5>
-        <canvas id="presetCanvasC" width="460" height="360"></canvas>
+        <h5>方案 C：【粗重黑線網格】粗邊塊面鎖定、咬手帕鋸齒與背景幾何網格</h5>
+        <canvas id="presetCanvasC" width="460" height="380"></canvas>
       </div>
     </div>
   </div>
@@ -391,8 +391,9 @@
       renderFacetsGrid('vectorFacetsContainer', vectorFacets);
     }
 
+    // 💡 解決問題一：重新寫死 5 種完全不同的畢卡索經典立體派幾何臉型底座
     function initFaceBases() {
-      if (faceBaseFacets.length > 0) return;
+      faceBaseFacets = [];
       var faceTypes = [
         { name: '1. 正面立體派幾何臉型', type: 'front_face' },
         { name: '2. 正面雙分割面幾何臉型', type: 'split_face' },
@@ -409,10 +410,43 @@
         ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
         ctx.strokeStyle = '#000000'; ctx.lineWidth = 10; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
 
-        ctx.beginPath();
-        ctx.moveTo(w*0.2, h*0.15); ctx.lineTo(w*0.8, h*0.15);
-        ctx.lineTo(w*0.88, h*0.65); ctx.lineTo(w*0.5, h*0.92);
-        ctx.lineTo(w*0.12, h*0.65); ctx.closePath(); ctx.stroke();
+        if (ft.type === 'front_face') {
+          // 1. 正面寬額頭、尖下巴幾何面
+          ctx.beginPath();
+          ctx.moveTo(w*0.15, h*0.15); ctx.lineTo(w*0.85, h*0.12);
+          ctx.lineTo(w*0.9, h*0.62); ctx.lineTo(w*0.5, h*0.92);
+          ctx.lineTo(w*0.1, h*0.65); ctx.closePath(); ctx.stroke();
+        } else if (ft.type === 'split_face') {
+          // 2. 正面中軸一分為二分割面
+          ctx.beginPath();
+          ctx.moveTo(w*0.18, h*0.12); ctx.lineTo(w*0.82, h*0.12);
+          ctx.lineTo(w*0.88, h*0.68); ctx.lineTo(w*0.5, h*0.92);
+          ctx.lineTo(w*0.12, h*0.68); ctx.closePath(); ctx.stroke();
+          ctx.lineWidth = 8;
+          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.12); ctx.lineTo(w*0.5, h*0.92); ctx.stroke();
+        } else if (ft.type === 'right_profile') {
+          // 3. 右側面（突出尖鼻樑與側面下巴）
+          ctx.beginPath();
+          ctx.moveTo(w*0.25, h*0.12); ctx.lineTo(w*0.6, h*0.12);
+          ctx.lineTo(w*0.88, h*0.38); ctx.lineTo(w*0.62, h*0.52);
+          ctx.lineTo(w*0.82, h*0.68); ctx.lineTo(w*0.55, h*0.9);
+          ctx.lineTo(w*0.25, h*0.82); ctx.closePath(); ctx.stroke();
+        } else if (ft.type === 'left_profile') {
+          // 4. 左側面（反向突出鼻樑與側面輪廓）
+          ctx.beginPath();
+          ctx.moveTo(w*0.75, h*0.12); ctx.lineTo(w*0.4, h*0.12);
+          ctx.lineTo(w*0.12, h*0.38); ctx.lineTo(w*0.38, h*0.52);
+          ctx.lineTo(w*0.18, h*0.68); ctx.lineTo(w*0.45, h*0.9);
+          ctx.lineTo(w*0.75, h*0.82); ctx.closePath(); ctx.stroke();
+        } else {
+          // 5. 三七面非對稱不規則多邊形
+          ctx.beginPath();
+          ctx.moveTo(w*0.12, h*0.22); ctx.lineTo(w*0.75, h*0.1);
+          ctx.lineTo(w*0.92, h*0.58); ctx.lineTo(w*0.6, h*0.92);
+          ctx.lineTo(w*0.1, h*0.75); ctx.closePath(); ctx.stroke();
+          ctx.lineWidth = 6;
+          ctx.beginPath(); ctx.moveTo(w*0.42, h*0.14); ctx.lineTo(w*0.6, h*0.92); ctx.stroke();
+        }
 
         faceBaseFacets.push({ canvas: cvs, title: ft.name, angle: 'front', w: 220, h: 280 });
       });
@@ -501,11 +535,10 @@
       selectedItemIndex = -1; var cvs = document.getElementById('collageCanvas'), ctx = cvs.getContext('2d');
       drawCollage(); ctx.lineWidth = 6; ctx.strokeStyle = '#000000'; ctx.lineJoin = 'miter';
       ctx.beginPath(); ctx.moveTo(180, 80); ctx.lineTo(520, 80); ctx.lineTo(560, 360); ctx.lineTo(350, 480); ctx.lineTo(140, 360); ctx.closePath(); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); stroke();
+      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); ctx.stroke();
       alert('✨ 已自動整合繪製粗重黑線網格！');
     }
 
-    // 💡 解決問題一：動態分析學生初稿，生成獨一無二的個人化評語！
     function runAIAnalysisAndGenerate() {
       var count = collageItems.length;
       var el1 = document.getElementById('advice1');
@@ -520,43 +553,40 @@
         return;
       }
 
-      // 1. 分析視角多樣性
       var anglesUsed = {};
       collageItems.forEach(function(it) { if (it.angle) anglesUsed[it.angle] = true; });
       var angleKeys = Object.keys(anglesUsed);
       
       if (angleKeys.length >= 3) {
-        el1.innerHTML = "<b>太棒了！</b>你使用了 " + angleKeys.length + " 種不同角度素材（" + angleKeys.map(function(k){return angleNames[k];}).join('、') + "），成功建構出立體派極具張力的同時視角！";
+        el1.innerHTML = "<b>非常優秀！</b>你使用了 " + angleKeys.length + " 種角度素材（" + angleKeys.map(function(k){return angleNames[k];}).join('、') + "），成功呈現立體主義多角度同時視角的衝突美感！";
       } else if (angleKeys.length === 2) {
-        el1.innerHTML = "你目前組合了 " + angleKeys.map(function(k){return angleNames[k];}).join('與') + " 視角。建議再加入一個俯視或仰視五官，強化同時視角的衝突感！";
+        el1.innerHTML = "你組合了 " + angleKeys.map(function(k){return angleNames[k];}).join('與') + " 視角。建議再加入一個仰視或三七面素材，強化同時視角效果！";
       } else {
-        el1.innerHTML = "你目前主要使用「" + (angleNames[angleKeys[0]] || "單一角度") + "」，建議多加入側面或三七面素材進行強烈重疊，呈現立體主義多角度交錯的特徵！";
+        el1.innerHTML = "目前主要為「" + (angleNames[angleKeys[0]] || "單一角度") + "」，建議多加入側面或三七面五官進行重疊，呈現立體主義多視角特徵！";
       }
 
-      // 2. 分析幾何圖形種類
       var shapesUsed = {};
       collageItems.forEach(function(it) { if (it.shape) shapesUsed[it.shape] = true; });
       var shapeKeys = Object.keys(shapesUsed);
 
       if (shapesUsed['triangle'] || shapesUsed['polygon'] || shapesUsed['trapezoid']) {
-        el1.parentElement.nextElementSibling.children[1].innerHTML = "作品成功運用了<b>破碎的幾何語言</b>（如" + shapeKeys.join('、') + "），面部線條銳利，非常符合《哭泣的女人》尖銳緊張的情感表達！";
+        el1.parentElement.nextElementSibling.children[1].innerHTML = "作品成功運用了<b>破碎幾何語言</b>（如" + shapeKeys.join('、') + "），符合《哭泣的女人》尖銳緊張的情感表達！";
       } else {
-        el1.parentElement.nextElementSibling.children[1].innerHTML = "目前素材的幾何形狀較圓潤，建議加入更多「三角形」或「不規則梯形」素材，讓作品視覺張力更強烈！";
+        el1.parentElement.nextElementSibling.children[1].innerHTML = "建議加入更多「三角形」或「梯形」素材，讓作品視覺張力更強烈！";
       }
 
-      // 3. 分析整體構圖與鎖定建議
-      el1.parentElement.nextElementSibling.nextElementSibling.children[1].innerHTML = "畫布共有 " + count + " 個幾何區塊。右側重構圖已為你加上<b>立體派雙色切面底座</b>與<b>咬手帕幾何網格</b>，將所有元件緊密鎖定成一體！";
+      el1.parentElement.nextElementSibling.nextElementSibling.children[1].innerHTML = "畫布共有 " + count + " 個區塊。右側參考圖已為你加上<b>立體派正側面雙色切面</b>與<b>咬手帕幾何網格</b>，鎖定成完整藝術作品！";
 
       generateTeacherPresetSuggestions();
     }
 
-    // 💡 解決問題二：高質感《哭泣的女人》幾何重構肖像（雙色切面 + 幾何淚痕 + 手帕鋸齒網格）
+    // 💡 解決問題二：真正模仿畢卡索風格的完整肖像參考圖（動態邊界分析與補繪）
     function generateTeacherPresetSuggestions() {
-      renderArtisticPicassoPortrait('presetCanvasA', 'A');
-      renderArtisticPicassoPortrait('presetCanvasC', 'C');
+      renderHighQualityPicassoPortrait('presetCanvasA', 'A');
+      renderHighQualityPicassoPortrait('presetCanvasC', 'C');
     }
 
-    function renderArtisticPicassoPortrait(canvasId, mode) {
+    function renderHighQualityPicassoPortrait(canvasId, mode) {
       var cvs = document.getElementById(canvasId); if(!cvs) return;
       var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
       ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
@@ -566,25 +596,46 @@
       var offsetX = (w - srcCvs.width * sc) / 2;
       var offsetY = (h - srcCvs.height * sc) / 2;
 
-      // 1. 繪製畢卡索經典「雙色/灰色底座切面」（分割正側面）
+      // 計算學生素材的整體中心與邊界
+      var minX = w, maxX = 0, minY = h, maxY = 0;
+      if (collageItems.length > 0) {
+        collageItems.forEach(function(item) {
+          var ix = offsetX + item.x * sc;
+          var iy = offsetY + item.y * sc;
+          var iw = item.w * sc;
+          var ih = item.h * sc;
+          if (ix < minX) minX = ix;
+          if (ix + iw > maxX) maxX = ix + iw;
+          if (iy < minY) minY = iy;
+          if (iy + ih > maxY) maxY = iy + ih;
+        });
+      } else {
+        minX = w*0.25; maxX = w*0.75; minY = h*0.2; maxY = h*0.8;
+      }
+
+      var cx = (minX + maxX) / 2;
+      var cy = (minY + maxY) / 2;
+      var bw = Math.max(180, maxX - minX + 40);
+      var bh = Math.max(220, maxY - minY + 60);
+
+      // 1. 繪製畢卡索經典「正側面雙色切面底座」
       if (mode === 'A') {
-        // 左半側淺灰色立體切面
-        ctx.fillStyle = '#f0f0f0';
+        // 左半側淺灰色切面
+        ctx.fillStyle = '#f2f2f2';
         ctx.beginPath();
-        ctx.moveTo(w*0.15, h*0.1);
-        ctx.lineTo(w*0.5, h*0.05);
-        ctx.lineTo(w*0.42, h*0.5);
-        ctx.lineTo(w*0.52, h*0.9);
-        ctx.lineTo(w*0.2, h*0.85);
+        ctx.moveTo(cx - bw/2 - 20, cy - bh/2);
+        ctx.lineTo(cx, cy - bh/2 - 10);
+        ctx.lineTo(cx - 15, cy + bh/2 + 20);
+        ctx.lineTo(cx - bw/2 - 30, cy + bh/2);
         ctx.closePath(); ctx.fill();
 
-        // 右半側極簡條紋切面底座
-        ctx.fillStyle = '#e8e8e8';
+        // 右半側暗灰色切面
+        ctx.fillStyle = '#e5e5e5';
         ctx.beginPath();
-        ctx.moveTo(w*0.5, h*0.05);
-        ctx.lineTo(w*0.85, h*0.12);
-        ctx.lineTo(w*0.8, h*0.88);
-        ctx.lineTo(w*0.52, h*0.9);
+        ctx.moveTo(cx, cy - bh/2 - 10);
+        ctx.lineTo(cx + bw/2 + 20, cy - bh/2 + 10);
+        ctx.lineTo(cx + bw/2 + 10, cy + bh/2 + 10);
+        ctx.lineTo(cx - 15, cy + bh/2 + 20);
         ctx.closePath(); ctx.fill();
       }
 
@@ -604,49 +655,45 @@
       ctx.strokeStyle = '#000000'; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
 
       if (mode === 'A') {
-        // 方案 A：貫穿正側面的鋸齒中軸 + 經典立體派幾何淚痕（Pointed Tears）
-        ctx.lineWidth = 7;
-        ctx.beginPath();
-        ctx.moveTo(w*0.5, 10);
-        ctx.lineTo(w*0.52, h*0.3);
-        ctx.lineTo(w*0.42, h*0.55);
-        ctx.lineTo(w*0.55, h*0.78);
-        ctx.lineTo(w*0.48, h - 10);
-        ctx.stroke();
-
-        // 幾何放射狀淚痕（《哭泣的女人》視覺核心標誌）
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(w*0.35, h*0.35); ctx.lineTo(w*0.28, h*0.58); ctx.lineTo(w*0.32, h*0.62); ctx.closePath(); ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(w*0.65, h*0.38); ctx.lineTo(w*0.72, h*0.6); ctx.lineTo(w*0.68, h*0.63); ctx.closePath(); ctx.stroke();
-
-      } else {
-        // 方案 C：多邊形黑粗邊輪廓 + 咬手帕鋸齒背景網格（Jagged Handkerchief & Grid）
-        ctx.lineWidth = 8;
-        // 學生元件外圍多邊形整體包覆
-        if (collageItems.length > 0) {
-          collageItems.forEach(function(item) {
-            var ix = offsetX + item.x * sc;
-            var iy = offsetY + item.y * sc;
-            var iw = item.w * sc;
-            var ih = item.h * sc;
-            ctx.strokeRect(ix - 4, iy - 4, iw + 8, ih + 8);
-          });
+        // 方案 A：畢卡索《哭泣的女人》頭髮條紋 + 正側面中軸 + 放射狀幾何淚痕
+        ctx.lineWidth = 6;
+        // 左側畢卡索經典垂直直條紋髮絲
+        for(var hx = cx - bw/2 - 40; hx < cx - bw/2 + 20; hx += 12) {
+          ctx.beginPath(); ctx.moveTo(hx, cy - bh/2 - 20); ctx.lineTo(hx - 15, cy + bh/2 + 30); ctx.stroke();
         }
 
-        // 下半部「咬手帕鋸齒折痕」（《哭泣的女人》代表元素）
-        ctx.lineWidth = 5;
+        // 正側面貫穿鋸齒中軸
+        ctx.lineWidth = 7;
         ctx.beginPath();
-        ctx.moveTo(w*0.25, h*0.7);
-        ctx.lineTo(w*0.35, h*0.62);
-        ctx.lineTo(w*0.45, h*0.72);
-        ctx.lineTo(w*0.55, h*0.61);
-        ctx.lineTo(w*0.65, h*0.73);
-        ctx.lineTo(w*0.75, h*0.65);
+        ctx.moveTo(cx, cy - bh/2 - 30);
+        ctx.lineTo(cx + 10, cy - bh/4);
+        ctx.lineTo(cx - 20, cy);
+        ctx.lineTo(cx + 15, cy + bh/3);
+        ctx.lineTo(cx - 10, cy + bh/2 + 30);
         ctx.stroke();
 
-        // 背景密集的縱橫幾何畫廊斜網格
+        // 幾何放射狀淚痕（Pointed Tears）
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(cx - 30, cy - 20); ctx.lineTo(cx - 60, cy + 30); ctx.lineTo(cx - 45, cy + 35); ctx.closePath(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 40, cy - 15); ctx.lineTo(cx + 70, cy + 35); ctx.lineTo(cx + 55, cy + 40); ctx.closePath(); ctx.stroke();
+
+      } else {
+        // 方案 C：多邊形黑粗邊輪廓 + 咬手帕鋸齒 + 背景幾何網格
+        ctx.lineWidth = 8;
+        // 包覆學生素材整體外圍的多邊形黑粗框
+        ctx.strokeRect(minX - 10, minY - 10, maxX - minX + 20, maxY - minY + 20);
+
+        // 下半部「咬手帕鋸齒折痕」（《哭泣的女人》代表元素）
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(cx - bw/2, cy + bh/4);
+        ctx.lineTo(cx - bw/4, cy + bh/4 - 20);
+        ctx.lineTo(cx, cy + bh/4 + 10);
+        ctx.lineTo(cx + bw/4, cy + bh/4 - 15);
+        ctx.lineTo(cx + bw/2, cy + bh/4 + 15);
+        ctx.stroke();
+
+        // 背景縱橫幾何畫廊斜線網格
         ctx.lineWidth = 3;
         for(var xP = 0.1; xP <= 0.9; xP += 0.2) {
           ctx.beginPath(); ctx.moveTo(w*xP, 0); ctx.lineTo(w*xP, h); ctx.stroke();
@@ -656,7 +703,7 @@
         }
       }
 
-      // 外邊框加強
+      // 畫布外框
       ctx.lineWidth = 8; ctx.strokeRect(0, 0, w, h);
     }
 
