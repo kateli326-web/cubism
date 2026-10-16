@@ -51,7 +51,7 @@
     <button class="step-btn" id="btn_step5" onclick="switchStage(5)">步驟 5: 自由拼合與整合作品</button>
   </div>
 
-  <!-- 步驟 1 -->
+  <!-- 步驟 1 面板 -->
   <div id="stage1" class="stage-panel active">
     <h3>步驟一：請上傳 6 個不同角度的照片：</h3>
     <div class="upload-grid">
@@ -65,10 +65,11 @@
     <br><button class="btn-success" onclick="switchStage(2)">已上傳完畢 ➔ 進入步驟二生成清晰線稿</button>
   </div>
 
-  <!-- 步驟 2 -->
+  <!-- 步驟 2 面板 -->
   <div id="stage2" class="stage-panel">
     <h3>步驟二：一鍵轉換為「清晰、無雜訊」的手繪線稿：</h3>
-    <div class="toolbar-group"><button class="btn-primary" style="font-size: 16px; padding: 10px 20px;" onclick="convertCleanLineArt()">✨ 一鍵生成無雜訊清晰線稿</button></div>
+    <p>自動優化邊緣檢測，完整保留眼睛、鼻子與嘴唇細節線條！</p>
+    <div class="toolbar-group"><button class="btn-primary" style="font-size: 16px; padding: 10px 20px;" onclick="convertCleanLineArt()">✨ 一鍵生成完整清晰線稿</button></div>
     <div class="upload-grid">
       <div class="upload-card"><h4>1. 正面線稿</h4><div class="img-preview-box"><img class="preview-img" id="line_img_front"></div></div>
       <div class="upload-card"><h4>2. 右側面線稿</h4><div class="img-preview-box"><img class="preview-img" id="line_img_right"></div></div>
@@ -80,7 +81,7 @@
     <br><button class="btn-success" onclick="switchStage(3)">線稿完成 ➔ 進入步驟三切割五官</button>
   </div>
 
-  <!-- 步驟 3 -->
+  <!-- 步驟 3 面板 -->
   <div id="stage3" class="stage-panel">
     <h3>步驟三：選擇角度與幾何圖形，手動切割五官線稿素材：</h3>
     <div class="toolbar-group">
@@ -108,16 +109,16 @@
     <br><button class="btn-success" onclick="switchStage(4)">切割完成 ➔ 進入步驟四轉換畢卡索素材</button>
   </div>
 
-  <!-- 步驟 4 -->
+  <!-- 步驟 4 面板 -->
   <div id="stage4" class="stage-panel">
     <h3>步驟四：一鍵轉換為畢卡索極簡幾何黑粗線素材（對標參考圖）：</h3>
-    <p>自動轉換為白底、極簡黑粗邊框與幾何風格向量五官線條！</p>
+    <p>保留切割五官完整的線條細節，結合白底與畢卡索粗黑幾何邊框！</p>
     <div class="toolbar-group"><button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="convertCleanPicassoStyleFacets()">✨ 一鍵生成畢卡索極簡幾何五官素材</button></div>
     <div id="picassoFacetsContainer" class="angle-grid"></div>
     <br><button class="btn-success" onclick="switchStage(5)">轉換完成 ➔ 進入步驟五進行自由拼合作品</button>
   </div>
 
-  <!-- 步驟 5 -->
+  <!-- 步驟 5 面板 -->
   <div id="stage5" class="stage-panel">
     <h3>步驟五：自由拼合五官，並自動整合為立體派自畫像作品：</h3>
     <div class="toolbar-group">
@@ -159,6 +160,7 @@
       if (num === 5) drawCollage();
     }
 
+    // 步驟二：優化細節提取閥值（閥值調整為 20，完美捕捉五官細節）
     function convertCleanLineArt() {
       var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'], count = 0;
       angles.forEach(function(key) {
@@ -178,7 +180,7 @@
               var avg = (d[idx] + d[idx+1] + d[idx+2]) / 3;
               var avgRight = (d[idx+4] + d[idx+5] + d[idx+6]) / 3;
               var avgDown = (d[idx+w*4] + d[idx+w*4+1] + d[idx+w*4+2]) / 3;
-              if (Math.abs(avg - avgRight) + Math.abs(avg - avgDown) > 35) {
+              if (Math.abs(avg - avgRight) + Math.abs(avg - avgDown) > 20) {
                 od[idx] = 0; od[idx+1] = 0; od[idx+2] = 0; od[idx+3] = 255;
               }
             }
@@ -190,7 +192,7 @@
         }
       });
       if (count === 0) alert('請先在上一步驟上傳照片！');
-      else alert('✨ 已成功生成無雜訊清晰線稿！');
+      else alert('✨ 已成功生成完整清晰線稿！');
     }
 
     function getShapePts(shape) {
@@ -261,53 +263,25 @@
       });
     }
 
-    // 重構：向量生成對標參考圖的畢卡索極簡粗線五官
+    // 步驟四：保留完整切割線稿細節，並疊加純黑幾何邊框與白底
     function convertCleanPicassoStyleFacets() {
       if (rawFacets.length === 0) return alert('請先在步驟三切割五官線稿素材！');
       picassoFacets = [];
-      rawFacets.forEach(function(item, idx) {
-        var cvs = document.createElement('canvas'); cvs.width = 240; cvs.height = 240;
+      rawFacets.forEach(function(item) {
+        var cvs = document.createElement('canvas'); cvs.width = item.canvas.width; cvs.height = item.canvas.height;
         var ctx = cvs.getContext('2d');
         ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cvs.width, cvs.height);
+        ctx.drawImage(item.canvas, 0, 0);
 
         var pts = getShapePts(item.shape || 'diamond');
-        var w = cvs.width, h = cvs.height;
-
-        // 1. 繪製黑粗線外框
-        ctx.beginPath();
-        ctx.moveTo(pts[0][0]*w, pts[0][1]*h);
-        for(var k=1; k<pts.length; k++) ctx.lineTo(pts[k][0]*w, pts[k][1]*h);
-        ctx.closePath();
-        ctx.strokeStyle = '#000000'; ctx.lineWidth = 10; ctx.stroke();
-
-        // 2. 依據切割形狀與角度繪製幾何立體派五官細節
-        ctx.lineWidth = 6; ctx.fillStyle = '#000000';
-        if (item.shape === 'triangle' || item.shape === 'diamond') {
-          // 幾何眼睛
-          ctx.beginPath(); ctx.arc(w*0.5, h*0.5, 22, 0, Math.PI*2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(w*0.5, h*0.5, 10, 0, Math.PI*2); ctx.fill();
-          // 幾何睫毛
-          ctx.beginPath(); ctx.moveTo(w*0.4, h*0.25); ctx.lineTo(w*0.35, h*0.1); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.23); ctx.lineTo(w*0.5, h*0.08); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(w*0.6, h*0.25); ctx.lineTo(w*0.65, h*0.1); ctx.stroke();
-        } else if (item.shape === 'trapezoid' || item.shape === 'polygon') {
-          // 幾何嘴唇與牙齒
-          ctx.beginPath(); ctx.moveTo(w*0.2, h*0.5); ctx.lineTo(w*0.8, h*0.5); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(w*0.2, h*0.35); ctx.lineTo(w*0.8, h*0.35); ctx.lineTo(w*0.5, h*0.7); ctx.closePath(); ctx.stroke();
-          for(var xPos = 0.35; xPos <= 0.65; xPos += 0.1) {
-            ctx.beginPath(); ctx.moveTo(w*xPos, h*0.35); ctx.lineTo(w*xPos, h*0.5); ctx.stroke();
-          }
-        } else {
-          // 幾何耳朵/鼻子內部分割線
-          ctx.beginPath(); ctx.arc(w*0.5, h*0.45, 30, 0.2*Math.PI, 1.2*Math.PI); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(w*0.3, h*0.7); ctx.lineTo(w*0.7, h*0.7); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.2); ctx.lineTo(w*0.5, h*0.8); ctx.stroke();
-        }
+        ctx.beginPath(); ctx.moveTo(pts[0][0]*cvs.width, pts[0][1]*cvs.height);
+        for(var k=1; k<pts.length; k++) ctx.lineTo(pts[k][0]*cvs.width, pts[k][1]*cvs.height);
+        ctx.closePath(); ctx.strokeStyle = '#000000'; ctx.lineWidth = Math.max(8, Math.round(cvs.width * 0.07)); ctx.stroke();
 
         picassoFacets.push({ canvas: cvs, angle: item.angle, w: item.w, h: item.h });
       });
       renderPicassoFacetsContainer();
-      alert('✨ 已成功生成對標參考圖風格的畢卡索極簡幾何五官素材！');
+      alert('✨ 已成功生成畢卡索幾何五官素材！');
     }
 
     var angleNames = { front:'1. 正面', right:'2. 右側面', left:'3. 左側面', up:'4. 仰視', down:'5. 俯視', threequarter:'6. 三七面' };
