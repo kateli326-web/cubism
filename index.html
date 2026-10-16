@@ -29,9 +29,9 @@
     .btn-dark { background: #343a40; color: white; }
     .btn-purple { background: #6f42c1; color: white; }
     canvas { border: 2px solid #222; background: #fff; border-radius: 4px; }
-    .facets-library { display: flex; gap: 12px; overflow-x: auto; padding: 12px; background: #f8f9fa; border: 2px dashed #007bff; border-radius: 8px; min-height: 110px; align-items: center; margin-top: 10px; }
+    .facets-library { display: flex; gap: 12px; overflow-x: auto; padding: 12px; background: #f8f9fa; border: 2px dashed #007bff; border-radius: 8px; min-height: 110px; align-items: center; margin-top: 8px; }
     .library-item-container { position: relative; display: inline-block; }
-    .library-item { height: 85px; border: 2px solid #333; border-radius: 6px; cursor: pointer; background: white; padding: 4px; transition: transform 0.1s; }
+    .library-item { height: 90px; border: 2px solid #333; border-radius: 6px; cursor: pointer; background: white; padding: 4px; transition: transform 0.1s; }
     .library-item:hover { transform: scale(1.08); border-color: #007bff; }
     .delete-item-btn { position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; cursor: pointer; font-weight: bold; border: none; padding: 0; }
     .angle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px; }
@@ -54,7 +54,7 @@
     <button class="step-btn" id="btn_step5" onclick="switchStage(5)">步驟 5: 自由拼合與整合作品</button>
   </div>
 
-  <!-- 步驟 1 面板（修正：補回左側面照片上傳按鈕） -->
+  <!-- 步驟 1 面板 -->
   <div id="stage1" class="stage-panel active">
     <h3>步驟一：請上傳 6 個不同角度的照片：</h3>
     <div class="upload-grid">
@@ -130,38 +130,42 @@
     <br><button class="btn-success" onclick="switchStage(5)">向量素材生成完成 ➔ 進入步驟五自由拼合作品</button>
   </div>
 
-  <!-- 步驟 5 面板（新增：素材選擇庫展示，可點擊加入畫布） -->
+  <!-- 步驟 5 面板（全新優化：新增「哭泣的女人」面型底板素材庫 + 五官素材庫） -->
   <div id="stage5" class="stage-panel">
-    <h3>步驟五：自由拼合五官，並自動整合為立體派自畫像作品：</h3>
+    <h3>步驟五：選擇幾何面型與五官，自由拼合畢卡索立體派自畫像作品：</h3>
 
     <div class="toolbar-group">
-      <button onclick="scaleItem(1.1)">放大選中五官</button>
-      <button onclick="scaleItem(0.9)">縮小選中五官</button>
+      <button onclick="scaleItem(1.1)">放大選中元件</button>
+      <button onclick="scaleItem(0.9)">縮小選中元件</button>
       <button onclick="rotateItem(15)">順旋轉</button>
       <button onclick="rotateItem(-15)">逆旋轉</button>
-      <button class="btn-danger" onclick="deleteItem()">刪除選中五官</button>
-      <button class="btn-warning" onclick="autoIntegratePicassoArt()">✨ 自動整合立體派自畫像作品</button>
+      <button class="btn-danger" onclick="deleteItem()">刪除選中元件</button>
+      <button class="btn-warning" onclick="autoIntegratePicassoArt()">✨ 自動繪製幾何分割連線</button>
       <button class="btn-dark" onclick="exportImage()">📥 下載作品</button>
     </div>
 
     <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
       <div>
-        <h5 style="margin: 0 0 8px 0; color: #333;">🖼️ 畢卡索立體派自畫像拼貼畫布（可任意拖曳擺位）</h5>
+        <h5 style="margin: 0 0 8px 0; color: #333;">🖼️ 畢卡索立體派自畫像拼貼畫布（點擊下方素材加入，可自由拖曳）</h5>
         <canvas id="collageCanvas" width="700" height="520"></canvas>
       </div>
     </div>
 
+    <!-- 素材選擇庫列表 -->
     <div style="margin-top: 20px; text-align: left;">
-      <h4 style="margin: 0 0 5px 0; color: #007bff;">📦 步驟 4 照片切割五官素材庫（點擊素材可加入畫布）：</h4>
-      <div id="stage5PhotoLibrary" class="facets-library"><span style="color:#888;">尚未生成照片素材</span></div>
+      <h4 style="margin: 0 0 5px 0; color: #28a745;">🎭 畢卡索《哭泣的女人》幾何粗線條面型素材庫（點擊加入畫布作為底座）：</h4>
+      <div id="stage5FaceLibrary" class="facets-library"></div>
 
-      <h4 style="margin: 15px 0 5px 0; color: #6f42c1;">🎨 步驟 4.5 畢卡索向量幾何五官素材庫（點擊素材可加入畫布）：</h4>
-      <div id="stage5VectorLibrary" class="facets-library"><span style="color:#888;">尚未生成向量素材</span></div>
+      <h4 style="margin: 15px 0 5px 0; color: #007bff;">📦 步驟 4 照片切割五官素材庫（點擊加入畫布）：</h4>
+      <div id="stage5PhotoLibrary" class="facets-library"><span style="color:#888;">尚未生成照片素材，請先完成步驟 4</span></div>
+
+      <h4 style="margin: 15px 0 5px 0; color: #6f42c1;">🎨 步驟 4.5 畢卡索向量幾何五官素材庫（點擊加入畫布）：</h4>
+      <div id="stage5VectorLibrary" class="facets-library"><span style="color:#888;">尚未生成向量素材，請先完成步驟 4.5</span></div>
     </div>
   </div>
 
   <script>
-    var photos = {}, lineArt = {}, rawFacets = [], photoFacets = [], vectorFacets = [], collageItems = [], selectedItemIndex = -1;
+    var photos = {}, lineArt = {}, rawFacets = [], photoFacets = [], vectorFacets = [], faceBaseFacets = [], collageItems = [], selectedItemIndex = -1;
     var cropBox = { x: 260, y: 140, w: 150, h: 110, rot: 0 }, isDraggingBox = false, isDraggingItem = false, startX = 0, startY = 0;
 
     function uploadDirectly(inputElem, angleKey) {
@@ -191,7 +195,7 @@
       if (num === 3) drawCrop();
       if (num === 4) generateBasicPhotoFacets();
       if (num === 4.5) convertPicassoVectorArt();
-      if (num === 5) { renderStage5Libraries(); drawCollage(); }
+      if (num === 5) { initFaceBases(); renderStage5Libraries(); drawCollage(); }
     }
 
     function convertCleanLineArt() {
@@ -355,6 +359,69 @@
       renderFacetsGrid('vectorFacetsContainer', vectorFacets);
     }
 
+    // 初始化《哭泣的女人》幾何粗線條面型素材（各種角度與切割分面底板）
+    function initFaceBases() {
+      if (faceBaseFacets.length > 0) return;
+      var faceTypes = [
+        { name: '1. 正面立體派幾何臉型', type: 'front_face' },
+        { name: '2. 正面雙分割面幾何臉型', type: 'split_face' },
+        { name: '3. 右側面粗線條幾何臉型', type: 'right_profile' },
+        { name: '4. 左側面粗線條幾何臉型', type: 'left_profile' },
+        { name: '5. 三七面多邊形幾何臉型', type: 'threequarter_face' }
+      ];
+
+      faceTypes.forEach(function(ft) {
+        var cvs = document.createElement('canvas'); cvs.width = 300; cvs.height = 380;
+        var ctx = cvs.getContext('2d');
+        var w = cvs.width, h = cvs.height;
+
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+        if (ft.type === 'front_face') {
+          // 正面經典畢卡索幾何臉型
+          ctx.beginPath();
+          ctx.moveTo(w*0.2, h*0.15); ctx.lineTo(w*0.8, h*0.15);
+          ctx.lineTo(w*0.88, h*0.65); ctx.lineTo(w*0.5, h*0.92);
+          ctx.lineTo(w*0.12, h*0.65); ctx.closePath(); ctx.stroke();
+        } else if (ft.type === 'split_face') {
+          // 經典分割臉型（中軸線切割）
+          ctx.beginPath();
+          ctx.moveTo(w*0.2, h*0.12); ctx.lineTo(w*0.8, h*0.12);
+          ctx.lineTo(w*0.85, h*0.68); ctx.lineTo(w*0.5, h*0.92);
+          ctx.lineTo(w*0.15, h*0.68); ctx.closePath(); ctx.stroke();
+          // 中軸分割線
+          ctx.lineWidth = 8;
+          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.12); ctx.lineTo(w*0.5, h*0.92); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(w*0.15, h*0.45); ctx.lineTo(w*0.85, h*0.45); ctx.stroke();
+        } else if (ft.type === 'right_profile') {
+          // 右側面幾何剪影臉型
+          ctx.beginPath();
+          ctx.moveTo(w*0.25, h*0.12); ctx.lineTo(w*0.65, h*0.12);
+          ctx.lineTo(w*0.82, h*0.35); ctx.lineTo(w*0.6, h*0.52);
+          ctx.lineTo(w*0.8, h*0.68); ctx.lineTo(w*0.5, h*0.9);
+          ctx.lineTo(w*0.25, h*0.82); ctx.closePath(); ctx.stroke();
+        } else if (ft.type === 'left_profile') {
+          // 左側面幾何剪影臉型
+          ctx.beginPath();
+          ctx.moveTo(w*0.75, h*0.12); ctx.lineTo(w*0.35, h*0.12);
+          ctx.lineTo(w*0.18, h*0.35); ctx.lineTo(w*0.4, h*0.52);
+          ctx.lineTo(w*0.2, h*0.68); ctx.lineTo(w*0.5, h*0.9);
+          ctx.lineTo(w*0.75, h*0.82); ctx.closePath(); ctx.stroke();
+        } else {
+          // 三七面幾何盾形臉型
+          ctx.beginPath();
+          ctx.moveTo(w*0.15, h*0.2); ctx.lineTo(w*0.7, h*0.1);
+          ctx.lineTo(w*0.9, h*0.6); ctx.lineTo(w*0.55, h*0.92);
+          ctx.lineTo(w*0.1, h*0.7); ctx.closePath(); ctx.stroke();
+          ctx.lineWidth = 6;
+          ctx.beginPath(); ctx.moveTo(w*0.4, h*0.14); ctx.lineTo(w*0.55, h*0.92); ctx.stroke();
+        }
+
+        faceBaseFacets.push({ canvas: cvs, title: ft.name, w: 220, h: 280 });
+      });
+    }
+
     var angleNames = { front:'1. 正面', right:'2. 右側面', left:'3. 左側面', up:'4. 仰視', down:'5. 俯視', threequarter:'6. 三七面' };
 
     function renderFacetsGrid(containerId, listData) {
@@ -377,11 +444,22 @@
       });
     }
 
-    // 渲染步驟五專屬素材庫（學生可自由選擇點擊）
+    // 渲染步驟五專屬的三大素材庫（包含臉型底座素材）
     function renderStage5Libraries() {
+      var fBox = document.getElementById('stage5FaceLibrary');
       var pBox = document.getElementById('stage5PhotoLibrary');
       var vBox = document.getElementById('stage5VectorLibrary');
 
+      // 1. 面型素材庫
+      fBox.innerHTML = '';
+      faceBaseFacets.forEach(function(facet) {
+        var img = document.createElement('img'); img.src = facet.canvas.toDataURL(); img.className = 'library-item';
+        img.title = facet.title + '（點擊加入畫布作為底板）';
+        img.onclick = function() { addToCollage(facet); };
+        fBox.appendChild(img);
+      });
+
+      // 2. 照片素材庫
       pBox.innerHTML = photoFacets.length === 0 ? '<span style="color:#888;">尚未生成照片素材，請先完成步驟 4</span>' : '';
       photoFacets.forEach(function(facet) {
         var img = document.createElement('img'); img.src = facet.canvas.toDataURL(); img.className = 'library-item';
@@ -390,6 +468,7 @@
         pBox.appendChild(img);
       });
 
+      // 3. 向量素材庫
       vBox.innerHTML = vectorFacets.length === 0 ? '<span style="color:#888;">尚未生成向量素材，請先完成步驟 4.5</span>' : '';
       vectorFacets.forEach(function(facet) {
         var img = document.createElement('img'); img.src = facet.canvas.toDataURL(); img.className = 'library-item';
@@ -400,8 +479,8 @@
     }
 
     function addToCollage(facet) {
-      collageItems.push({ canvas: facet.canvas, x: 250 + Math.random()*50, y: 150 + Math.random()*50, w: facet.w, h: facet.h, rot: 0 });
-      selectedItemIndex = collageItems.length - 1; drawCollage(); switchStage(5);
+      collageItems.push({ canvas: facet.canvas, x: 230 + Math.random()*40, y: 120 + Math.random()*40, w: facet.w, h: facet.h, rot: 0 });
+      selectedItemIndex = collageItems.length - 1; drawCollage();
     }
 
     function drawCollage() {
@@ -418,11 +497,11 @@
     function autoIntegratePicassoArt() {
       if (collageItems.length === 0) return alert('請先將素材加入畫布進行拼合！');
       selectedItemIndex = -1; var cvs = document.getElementById('collageCanvas'), ctx = cvs.getContext('2d');
-      drawCollage(); ctx.lineWidth = 6; ctx.strokeStyle = '#000000';
+      drawCollage(); ctx.lineWidth = 5; ctx.strokeStyle = '#000000';
       ctx.beginPath(); ctx.moveTo(180, 80); ctx.lineTo(520, 80); ctx.lineTo(560, 360); ctx.lineTo(350, 480); ctx.lineTo(140, 360); ctx.closePath(); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(140, 360); ctx.lineTo(560, 360); ctx.stroke();
-      alert('✨ 已自動整合生成畢卡索風格立體派自畫像作品！');
+      alert('✨ 已自動整合繪製立體派幾何分割線條！');
     }
 
     function scaleItem(v) { if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].w *= v; collageItems[selectedItemIndex].h *= v; drawCollage(); } }
