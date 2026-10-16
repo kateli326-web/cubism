@@ -732,6 +732,63 @@
         clCvs.onmouseup = function() { isDraggingItem = false; };
       }
     };
+    <!-- 這裡通常是 index.html 的頁面底部內容 -->
+    
+    <!-- 步驟 1 與 步驟 2 加好的按鈕列 -->
+    <div class="mb-3 d-flex flex-wrap gap-2 justify-content-center">
+        <!-- 其他按鈕... -->
+        <button class="btn btn-success btn-sm" onclick="downloadStep5CanvasJPEG()">
+            📥 下載拼貼作品 (JPEG)
+        </button>
+        <!-- 其他按鈕... -->
+    </div>
+
+    <!-- 步驟 3：找到頁面底部的 <script> 標籤 -->
+    <script>
+        // 這裡會有您網頁原本的 JavaScript 程式碼...
+        // ... (原本的代碼) ...
+
+        // ==========================================
+        // 🎯 將下方這段下載函數貼在 </script> 之前：
+        // ==========================================
+        function downloadStep5CanvasJPEG() {
+            // 取得步驟五的 Canvas 畫布
+            const mainCanvas = document.getElementById('collageCanvas') || document.querySelector('#step5 canvas') || document.querySelector('canvas');
+            
+            if (!mainCanvas) {
+                alert('找不到步驟五拼貼畫布！');
+                return;
+            }
+
+            // 1. 建立臨時 Canvas 用於填滿純白背景（避免背景變透明或變黑）
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = mainCanvas.width;
+            tempCanvas.height = mainCanvas.height;
+            const ctx = tempCanvas.getContext('2d');
+
+            // 2. 塗上純白背景
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+            // 3. 將原本畫布的內容繪製上臨時畫布
+            ctx.drawImage(mainCanvas, 0, 0);
+
+            // 4. 轉換為高畫質 JPEG Data URL
+            const imageURI = tempCanvas.toDataURL('image/jpeg', 0.95);
+
+            // 5. 觸發瀏覽器下載
+            const link = document.createElement('a');
+            link.download = `畢卡索立體派自畫像_步驟五拼貼原圖_${new Date().getTime()}.jpg`;
+            link.href = imageURI;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        // ==========================================
+
+    </script>
+</body>
+</html>
   </script>
 </body>
 </html>
