@@ -9,8 +9,8 @@
     body { font-family: 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif; text-align: center; background-color: #f0f2f5; margin: 0; padding: 15px; }
     h1 { color: #1a1a1a; margin-bottom: 5px; font-size: 24px; }
     p.subtitle { color: #666; margin-top: 0; margin-bottom: 15px; font-size: 14px; }
-    .step-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .step-btn { padding: 10px 16px; font-size: 14px; font-weight: bold; border: none; border-radius: 20px; background-color: #e0e0e0; color: #555; cursor: pointer; }
+    .step-nav { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .step-btn { padding: 9px 14px; font-size: 13px; font-weight: bold; border: none; border-radius: 20px; background-color: #e0e0e0; color: #555; cursor: pointer; }
     .step-btn.active { background-color: #007bff; color: white; box-shadow: 0 4px 8px rgba(0,123,255,0.3); }
     .stage-panel { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 1150px; margin: 0 auto; }
     .stage-panel.active { display: block; }
@@ -27,6 +27,7 @@
     .btn-success { background: #28a745; color: white; }
     .btn-danger { background: #dc3545; color: white; }
     .btn-dark { background: #343a40; color: white; }
+    .btn-purple { background: #6f42c1; color: white; }
     canvas { border: 2px solid #222; background: #fff; border-radius: 4px; }
     .facets-library { display: flex; gap: 12px; overflow-x: auto; padding: 12px; background: #f8f9fa; border: 2px dashed #007bff; border-radius: 8px; min-height: 110px; align-items: center; margin-top: 15px; }
     .library-item-container { position: relative; display: inline-block; }
@@ -41,13 +42,14 @@
 <body>
 
   <h1>畢卡索立體主義《哭泣的女人》自畫像創作工具</h1>
-  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換畢卡索極簡幾何黑粗線素材 ➔ 自由拼合立體派自畫像</p>
+  <p class="subtitle">照片線稿 ➔ 幾何切割 ➔ 轉換幾何素材 ➔ 畢卡索向量風格化 ➔ 自由拼合立體派自畫像</p>
 
   <div class="step-nav">
     <button class="step-btn active" id="btn_step1" onclick="switchStage(1)">步驟 1: 上傳照片</button>
     <button class="step-btn" id="btn_step2" onclick="switchStage(2)">步驟 2: 清晰無雜訊線稿</button>
     <button class="step-btn" id="btn_step3" onclick="switchStage(3)">步驟 3: 手動幾何切割五官</button>
-    <button class="step-btn" id="btn_step4" onclick="switchStage(4)">步驟 4: 轉畢卡索幾何素材</button>
+    <button class="step-btn" id="btn_step4" onclick="switchStage(4)">步驟 4: 照片切割素材</button>
+    <button class="step-btn" id="btn_step45" onclick="switchStage(4.5)">步驟 4.5: 畢卡索向量幾何素材</button>
     <button class="step-btn" id="btn_step5" onclick="switchStage(5)">步驟 5: 自由拼合與整合作品</button>
   </div>
 
@@ -57,7 +59,7 @@
     <div class="upload-grid">
       <div class="upload-card"><h4>1. 正面照片</h4><input type="file" accept="image/*" onchange="uploadDirectly(this, 'front')"><div class="img-preview-box"><img class="preview-img" id="img_preview_front"></div></div>
       <div class="upload-card"><h4>2. 右側面照片</h4><input type="file" accept="image/*" onchange="uploadDirectly(this, 'right')"><div class="img-preview-box"><img class="preview-img" id="img_preview_right"></div></div>
-      <div class="upload-card"><h4>3. 左側面照片</h4><input type="file" accept="image/*" onchange="uploadDirectly(this, 'left')"><div class="img-preview-box"><img class="preview-img" id="img_preview_left"></div></div>
+      <div class="upload-card"><h4>3. 左側面照片</h4><div class="img-preview-box"><img class="preview-img" id="img_preview_left"></div></div>
       <div class="upload-card"><h4>4. 仰視照片</h4><input type="file" accept="image/*" onchange="uploadDirectly(this, 'up')"><div class="img-preview-box"><img class="preview-img" id="img_preview_up"></div></div>
       <div class="upload-card"><h4>5. 俯視照片</h4><input type="file" accept="image/*" onchange="uploadDirectly(this, 'down')"><div class="img-preview-box"><img class="preview-img" id="img_preview_down"></div></div>
       <div class="upload-card"><h4>6. 三七面照片</h4><input type="file" accept="image/*" onchange="uploadDirectly(this, 'threequarter')"><div class="img-preview-box"><img class="preview-img" id="img_preview_threequarter"></div></div>
@@ -68,8 +70,8 @@
   <!-- 步驟 2 面板 -->
   <div id="stage2" class="stage-panel">
     <h3>步驟二：一鍵轉換為「清晰、無雜訊」的手繪線稿：</h3>
-    <p>自動優化邊緣檢測，完整保留眼睛、鼻子與嘴唇細節線條！</p>
-    <div class="toolbar-group"><button class="btn-primary" style="font-size: 16px; padding: 10px 20px;" onclick="convertCleanLineArt()">✨ 一鍵生成完整清晰線稿</button></div>
+    <p>自動清空陰影雜訊，提取流暢的五官與臉型輪廓線！</p>
+    <div class="toolbar-group"><button class="btn-primary" style="font-size: 16px; padding: 10px 20px;" onclick="convertCleanLineArt()">✨ 一鍵生成無雜訊清晰線稿</button></div>
     <div class="upload-grid">
       <div class="upload-card"><h4>1. 正面線稿</h4><div class="img-preview-box"><img class="preview-img" id="line_img_front"></div></div>
       <div class="upload-card"><h4>2. 右側面線稿</h4><div class="img-preview-box"><img class="preview-img" id="line_img_right"></div></div>
@@ -106,16 +108,25 @@
       <h4 style="margin: 0 0 5px 0; color: #333;">✨ 已切割的幾何五官線稿素材：</h4>
       <div id="stage3FacetsPreview" class="facets-library"><span style="color:#888;">按下「✂️ 切割選取五官線稿」後素材顯示於此</span></div>
     </div>
-    <br><button class="btn-success" onclick="switchStage(4)">切割完成 ➔ 進入步驟四轉換畢卡索素材</button>
+    <br><button class="btn-success" onclick="switchStage(4)">切割完成 ➔ 進入步驟四檢視照片切割素材</button>
   </div>
 
   <!-- 步驟 4 面板 -->
   <div id="stage4" class="stage-panel">
-    <h3>步驟四：一鍵轉換為畢卡索極簡幾何黑粗線素材（對標參考圖）：</h3>
-    <p>保留切割五官完整的線條細節，結合白底與畢卡索粗黑幾何邊框！</p>
-    <div class="toolbar-group"><button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="convertCleanPicassoStyleFacets()">✨ 一鍵生成畢卡索極簡幾何五官素材</button></div>
-    <div id="picassoFacetsContainer" class="angle-grid"></div>
-    <br><button class="btn-success" onclick="switchStage(5)">轉換完成 ➔ 進入步驟五進行自由拼合作品</button>
+    <h3>步驟四：照片切割素材預覽：</h3>
+    <p>以下為步驟三所切割的原圖線稿素材：</p>
+    <div class="toolbar-group"><button class="btn-primary" onclick="generateBasicPhotoFacets()">刷新照片素材</button></div>
+    <div id="photoFacetsContainer" class="angle-grid"></div>
+    <br><button class="btn-purple" style="font-size: 16px; padding: 10px 22px;" onclick="switchStage(4.5)">➔ 進入步驟 4.5 一鍵轉畢卡索向量風格素材</button>
+  </div>
+
+  <!-- 步驟 4.5 面板（全新新增：畢卡索極簡幾何向量風格轉換） -->
+  <div id="stage45" class="stage-panel">
+    <h3>步驟 4.5：一鍵轉換為畢卡索幾何向量極簡素材（對標參考圖）：</h3>
+    <p>自動將已切割的五官幾何形狀，繪製成白底、黑粗邊框與立體派極簡風格五官素材！</p>
+    <div class="toolbar-group"><button class="btn-purple" style="font-size: 16px; padding: 10px 24px;" onclick="convertPicassoVectorArt()">🎨 一鍵生成畢卡索極簡幾何向量五官</button></div>
+    <div id="vectorFacetsContainer" class="angle-grid"></div>
+    <br><button class="btn-success" onclick="switchStage(5)">向量素材生成完成 ➔ 進入步驟五自由拼合作品</button>
   </div>
 
   <!-- 步驟 5 面板 -->
@@ -132,7 +143,7 @@
   </div>
 
   <script>
-    var photos = {}, lineArt = {}, rawFacets = [], picassoFacets = [], collageItems = [], selectedItemIndex = -1;
+    var photos = {}, lineArt = {}, rawFacets = [], photoFacets = [], vectorFacets = [], collageItems = [], selectedItemIndex = -1;
     var cropBox = { x: 260, y: 140, w: 150, h: 110, rot: 0 }, isDraggingBox = false, isDraggingItem = false, startX = 0, startY = 0;
 
     function uploadDirectly(inputElem, angleKey) {
@@ -151,16 +162,20 @@
     }
 
     function switchStage(num) {
-      for (var i = 1; i <= 5; i++) {
-        var b = document.getElementById('btn_step' + i), p = document.getElementById('stage' + i);
-        if (b) b.classList.toggle('active', i === num);
-        if (p) p.classList.toggle('active', i === num);
-      }
+      var stages = [1, 2, 3, 4, 4.5, 5];
+      stages.forEach(function(s) {
+        var sKey = s === 4.5 ? '45' : s;
+        var b = document.getElementById('btn_step' + sKey);
+        var p = document.getElementById('stage' + sKey);
+        if (b) b.classList.toggle('active', s === num);
+        if (p) p.classList.toggle('active', s === num);
+      });
       if (num === 3) drawCrop();
+      if (num === 4) generateBasicPhotoFacets();
+      if (num === 4.5) convertPicassoVectorArt();
       if (num === 5) drawCollage();
     }
 
-    // 步驟二：優化細節提取閥值（閥值調整為 20，完美捕捉五官細節）
     function convertCleanLineArt() {
       var angles = ['front', 'right', 'left', 'up', 'down', 'threequarter'], count = 0;
       angles.forEach(function(key) {
@@ -192,7 +207,7 @@
         }
       });
       if (count === 0) alert('請先在上一步驟上傳照片！');
-      else alert('✨ 已成功生成完整清晰線稿！');
+      else alert('✨ 已成功生成清晰無雜訊線稿！');
     }
 
     function getShapePts(shape) {
@@ -263,40 +278,91 @@
       });
     }
 
-    // 步驟四：保留完整切割線稿細節，並疊加純黑幾何邊框與白底
-    function convertCleanPicassoStyleFacets() {
-      if (rawFacets.length === 0) return alert('請先在步驟三切割五官線稿素材！');
-      picassoFacets = [];
-      rawFacets.forEach(function(item) {
+    // 步驟 4：顯示基本照片切割素材
+    function generateBasicPhotoFacets() {
+      photoFacets = rawFacets.map(function(item) {
         var cvs = document.createElement('canvas'); cvs.width = item.canvas.width; cvs.height = item.canvas.height;
         var ctx = cvs.getContext('2d');
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cvs.width, cvs.height);
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,cvs.width,cvs.height);
         ctx.drawImage(item.canvas, 0, 0);
-
         var pts = getShapePts(item.shape || 'diamond');
         ctx.beginPath(); ctx.moveTo(pts[0][0]*cvs.width, pts[0][1]*cvs.height);
         for(var k=1; k<pts.length; k++) ctx.lineTo(pts[k][0]*cvs.width, pts[k][1]*cvs.height);
-        ctx.closePath(); ctx.strokeStyle = '#000000'; ctx.lineWidth = Math.max(8, Math.round(cvs.width * 0.07)); ctx.stroke();
-
-        picassoFacets.push({ canvas: cvs, angle: item.angle, w: item.w, h: item.h });
+        ctx.closePath(); ctx.strokeStyle = '#000000'; ctx.lineWidth = Math.max(6, Math.round(cvs.width * 0.05)); ctx.stroke();
+        return { canvas: cvs, angle: item.angle, w: item.w, h: item.h };
       });
-      renderPicassoFacetsContainer();
-      alert('✨ 已成功生成畢卡索幾何五官素材！');
+      renderFacetsGrid('photoFacetsContainer', photoFacets);
+    }
+
+    // 步驟 4.5 核心亮點：對標參考圖的【畢卡索極簡幾何向量向量圖案演算法】
+    function convertPicassoVectorArt() {
+      if (rawFacets.length === 0) return alert('請先在步驟三切割五官線稿素材！');
+      vectorFacets = [];
+      rawFacets.forEach(function(item, idx) {
+        var cvs = document.createElement('canvas'); cvs.width = 240; cvs.height = 240;
+        var ctx = cvs.getContext('2d');
+        var w = cvs.width, h = cvs.height;
+
+        // 1. 純白底色
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+
+        // 2. 畫上幾何外框（黑粗線）
+        var pts = getShapePts(item.shape || 'diamond');
+        ctx.beginPath(); ctx.moveTo(pts[0][0]*w, pts[0][1]*h);
+        for(var k=1; k<pts.length; k++) ctx.lineTo(pts[k][0]*w, pts[k][1]*h);
+        ctx.closePath();
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 10; ctx.stroke();
+
+        // 3. 根據幾何圖形與角度，精準渲染模仿參考圖風格的立體派向量五官
+        ctx.lineWidth = 6; ctx.fillStyle = '#000000'; ctx.strokeStyle = '#000000';
+
+        if (item.shape === 'triangle' || item.shape === 'diamond') {
+          // 幾何眼睛（參考圖風格）
+          ctx.beginPath(); ctx.arc(w*0.5, h*0.52, 26, 0, Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(w*0.5, h*0.52, 12, 0, Math.PI*2); ctx.fill();
+          // 幾何睫毛
+          ctx.beginPath(); ctx.moveTo(w*0.38, h*0.28); ctx.lineTo(w*0.32, h*0.12); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.25); ctx.lineTo(w*0.5, h*0.08); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(w*0.62, h*0.28); ctx.lineTo(w*0.68, h*0.12); ctx.stroke();
+          // 分割結構線
+          ctx.beginPath(); ctx.moveTo(pts[0][0]*w, pts[0][1]*h); ctx.lineTo(w*0.5, h*0.52); ctx.stroke();
+        } else if (item.shape === 'trapezoid' || item.shape === 'polygon') {
+          // 幾何嘴唇與立體派牙齒（參考圖風格）
+          ctx.beginPath(); ctx.moveTo(w*0.15, h*0.5); ctx.lineTo(w*0.85, h*0.5); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(w*0.15, h*0.35); ctx.lineTo(w*0.85, h*0.35); ctx.lineTo(w*0.5, h*0.75); ctx.closePath(); ctx.stroke();
+          for(var xP = 0.3; xP <= 0.7; xP += 0.12) {
+            ctx.beginPath(); ctx.moveTo(w*xP, h*0.35); ctx.lineTo(w*xP, h*0.5); ctx.stroke();
+          }
+        } else if (item.shape === 'shield' || item.shape === 'parallelogram') {
+          // 幾何鼻子（參考圖風格）
+          ctx.beginPath(); ctx.moveTo(w*0.5, h*0.15); ctx.lineTo(w*0.25, h*0.75); ctx.lineTo(w*0.75, h*0.75); ctx.closePath(); ctx.stroke();
+          ctx.beginPath(); ctx.arc(w*0.4, h*0.75, 8, 0, Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(w*0.6, h*0.75, 8, 0, Math.PI*2); ctx.stroke();
+        } else {
+          // 幾何耳朵（參考圖風格）
+          ctx.beginPath(); ctx.arc(w*0.5, h*0.45, 32, 0.2*Math.PI, 1.3*Math.PI); ctx.stroke();
+          ctx.beginPath(); ctx.arc(w*0.5, h*0.55, 16, 0.8*Math.PI, 1.8*Math.PI); ctx.stroke();
+        }
+
+        vectorFacets.push({ canvas: cvs, angle: item.angle, w: item.w, h: item.h });
+      });
+      renderFacetsGrid('vectorFacetsContainer', vectorFacets);
     }
 
     var angleNames = { front:'1. 正面', right:'2. 右側面', left:'3. 左側面', up:'4. 仰視', down:'5. 俯視', threequarter:'6. 三七面' };
 
-    function renderPicassoFacetsContainer() {
-      var box = document.getElementById('picassoFacetsContainer'); box.innerHTML = '';
+    function renderFacetsGrid(containerId, listData) {
+      var box = document.getElementById(containerId); if (!box) return; box.innerHTML = '';
       ['front','right','left','up','down','threequarter'].forEach(function(key) {
         var card = document.createElement('div'); card.className = 'angle-group-card';
         card.innerHTML = '<h5>' + angleNames[key] + '</h5>';
         var itemsDiv = document.createElement('div'); itemsDiv.className = 'angle-group-items';
-        var list = picassoFacets.filter(function(f){ return f.angle === key; });
+        var list = listData.filter(function(f){ return f.angle === key; });
         if (list.length === 0) { itemsDiv.innerHTML = '<span style="font-size:11px;color:#aaa;">無素材</span>'; }
         else {
           list.forEach(function(facet) {
             var img = document.createElement('img'); img.src = facet.canvas.toDataURL(); img.className = 'library-item';
+            img.title = '點擊加入拼貼畫布';
             img.onclick = function() { addToCollage(facet); };
             itemsDiv.appendChild(img);
           });
@@ -307,7 +373,7 @@
 
     function addToCollage(facet) {
       collageItems.push({ canvas: facet.canvas, x: 250 + Math.random()*50, y: 150 + Math.random()*50, w: facet.w, h: facet.h, rot: 0 });
-      selectedItemIndex = collageItems.length - 1; drawCollage();
+      selectedItemIndex = collageItems.length - 1; drawCollage(); switchStage(5);
     }
 
     function drawCollage() {
