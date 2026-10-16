@@ -45,7 +45,7 @@
     }
     .teacher-advice-card ul { margin: 8px 0 0 20px; padding: 0; line-height: 1.7; color: #222; }
     .teacher-advice-card li { margin-bottom: 8px; font-size: 14px; }
-    .preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 15px; }
+    .preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; margin-top: 15px; }
     .preset-card { background: #fdfdfd; border: 1px solid #ddd; border-radius: 8px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
     .preset-card h5 { margin: 0 0 8px 0; color: #333; font-size: 14px; }
   </style>
@@ -174,12 +174,12 @@
     </div>
   </div>
 
-  <!-- 步驟 6 面板：三大原則AI分析與重構生成 3 張完整畢卡索/哭泣的女人肖像完成圖 -->
+  <!-- 步驟 6 面板：方案 A 與 方案 C 肖像重構 -->
   <div id="stage6" class="stage-panel">
-    <h3>步驟六：AI 藝術評核與《哭泣的女人》進階修改建議：</h3>
+    <h3>步驟六：AI 藝術評核與《哭泣的女人》修改意見：</h3>
 
     <div class="teacher-advice-card">
-      <h4 style="margin:0 0 10px 0; color:#005ac8;">💡 修改意見：</h4>
+      <h4 style="margin:0 0 10px 0; color:#005ac8;">💡 AI 針對學生步驟五初稿的分析評語：</h4>
       <div id="aiAnalysisOutput">
         <ul>
           <li><b>1. 同時視角</b>：<span id="advice1">把不同角度的五官同時呈現出來。</span></li>
@@ -190,23 +190,19 @@
     </div>
 
     <div class="toolbar-group">
-      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="generateTeacherPresetSuggestions()">✨ 讀取步驟五初稿，生成 3 張畢卡索《哭泣的女人》重構肖像完成圖</button>
+      <button class="btn-primary" style="font-size: 16px; padding: 10px 22px;" onclick="generateTeacherPresetSuggestions()">✨ 讀取步驟五初稿，生成方案 A 與 方案 C 嵌入式幾何肖像圖</button>
       <button class="btn-dark" onclick="exportStage6Images()">📥 下載修改意見與肖像作品表</button>
     </div>
 
-    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 根據你在步驟五選擇的素材與擺位，依據三大原則與《哭泣的女人》藍圖重構生成的 3 張黑粗線肖像完成圖：</h4>
+    <h4 style="margin: 20px 0 10px 0; text-align: left; color: #333;">📐 直接基於你在步驟五的拼貼初稿（原尺寸原位置），依據三大原則嵌入重構的 2 張黑粗線肖像完成圖：</h4>
     <div class="preset-grid">
       <div class="preset-card">
-        <h5>完成圖 A：【同時視角重組】正面雙眼與側面斜鼻重疊肖像</h5>
-        <canvas id="presetCanvasA" width="340" height="380"></canvas>
+        <h5>方案 A：【同時視角重組】嵌入式多重角度幾何貫穿與交錯中軸</h5>
+        <canvas id="presetCanvasA" width="460" height="360"></canvas>
       </div>
       <div class="preset-card">
-        <h5>完成圖 B：【破碎幾何情緒】咬手帕鋸齒梯形與放射狀淚痕</h5>
-        <canvas id="presetCanvasB" width="340" height="380"></canvas>
-      </div>
-      <div class="preset-card">
-        <h5>完成圖 C：【粗重黑線網格】背景與面部幾何塊面鎖定肖像</h5>
-        <canvas id="presetCanvasC" width="340" height="380"></canvas>
+        <h5>方案 C：【粗重黑線網格】頂點幾何串聯與立體派背景鎖定肖像</h5>
+        <canvas id="presetCanvasC" width="460" height="360"></canvas>
       </div>
     </div>
   </div>
@@ -535,7 +531,7 @@
       selectedItemIndex = -1; var cvs = document.getElementById('collageCanvas'), ctx = cvs.getContext('2d');
       drawCollage(); ctx.lineWidth = 6; ctx.strokeStyle = '#000000'; ctx.lineJoin = 'miter';
       ctx.beginPath(); ctx.moveTo(180, 80); ctx.lineTo(520, 80); ctx.lineTo(560, 360); ctx.lineTo(350, 480); ctx.lineTo(140, 360); ctx.closePath(); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); stroke();
+      ctx.beginPath(); ctx.moveTo(350, 80); ctx.lineTo(350, 480); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(140, 360); ctx.lineTo(560, 360); ctx.stroke();
       alert('✨ 已自動整合繪製粗重黑線網格！');
     }
@@ -559,95 +555,98 @@
       generateTeacherPresetSuggestions();
     }
 
-    // 核心重構：將學生在步驟五擺放的元件進行語意重組，繪製出真正具備《哭泣的女人》肖像架構的完成圖
+    // 渲染方案 A 與 方案 C 肖像重構
     function generateTeacherPresetSuggestions() {
-      renderPicassoPortraitPreset('presetCanvasA', 'A');
-      renderPicassoPortraitPreset('presetCanvasB', 'B');
-      renderPicassoPortraitPreset('presetCanvasC', 'C');
+      renderEmbeddedPicassoPreset('presetCanvasA', 'A');
+      renderEmbeddedPicassoPreset('presetCanvasC', 'C');
     }
 
-    function renderPicassoPortraitPreset(canvasId, mode) {
+    function renderEmbeddedPicassoPreset(canvasId, mode) {
       var cvs = document.getElementById(canvasId); if(!cvs) return;
       var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
       ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
-      ctx.strokeStyle = '#000000'; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
-
-      // 1. 繪製畢卡索《哭泣的女人》背景幾何牆面與粗黑線網格框
-      ctx.lineWidth = 6;
-      ctx.beginPath(); ctx.moveTo(w*0.1, 0); ctx.lineTo(w*0.1, h); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(w*0.9, 0); ctx.lineTo(w*0.9, h); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, h*0.28); ctx.lineTo(w, h*0.28); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, h*0.75); ctx.lineTo(w, h*0.75); ctx.stroke();
-
-      // 2. 繪製頭飾帽子與幾何頭髮折線（《哭泣的女人》藍圖）
-      ctx.lineWidth = 7;
-      ctx.beginPath(); ctx.moveTo(w*0.2, h*0.12); ctx.lineTo(w*0.8, h*0.08); ctx.lineTo(w*0.88, h*0.18); ctx.lineTo(w*0.12, h*0.2); ctx.closePath(); ctx.stroke();
-      // 帽子上的朵花/多邊形裝飾
-      ctx.beginPath(); ctx.moveTo(w*0.42, h*0.04); ctx.lineTo(w*0.58, h*0.04); ctx.lineTo(w*0.65, h*0.14); ctx.lineTo(w*0.35, h*0.14); ctx.closePath(); ctx.stroke();
-
-      // 左側流線型頭髮塊面
-      ctx.lineWidth = 5;
-      for(var hairX = 0.12; hairX <= 0.24; hairX += 0.04) {
-        ctx.beginPath(); ctx.moveTo(w*hairX, h*0.2); ctx.lineTo(w*(hairX-0.03), h*0.65); ctx.lineTo(w*hairX, h*0.85); ctx.stroke();
-      }
-
-      // 3. 讀取並將學生在步驟五的擺位元件「立體派化嵌入」中央面型區域
-      ctx.save();
       var srcCvs = document.getElementById('collageCanvas');
-      var scale = 0.38;
-      ctx.translate(w*0.26, h*0.22);
-      ctx.scale(scale, scale);
+      var sc = Math.min(w / srcCvs.width, h / srcCvs.height);
+      var offsetX = (w - srcCvs.width * sc) / 2;
+      var offsetY = (h - srcCvs.height * sc) / 2;
+
+      // 1. 完全保留學生在步驟五創作的初稿尺寸與原位置
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(sc, sc);
       collageItems.forEach(function(item) {
         ctx.save();
-        ctx.translate(item.x * 0.5, item.y * 0.5);
+        ctx.translate(item.x + item.w/2, item.y + item.h/2);
         ctx.rotate(item.rot * Math.PI / 180);
-        ctx.drawImage(item.canvas, -item.w/4, -item.h/4, item.w*0.7, item.h*0.7);
+        ctx.drawImage(item.canvas, -item.w/2, -item.h/2, item.w, item.h);
         ctx.restore();
       });
       ctx.restore();
 
-      // 4. 根據三大原則，疊加《哭泣的女人》經典結構特徵線
-      ctx.lineWidth = 7;
-
-      if (mode === 'A') {
-        // 完成圖 A【同時視角】：強烈渲染正面雙眼 + 側面凸出尖角鼻樑
-        ctx.beginPath();
-        // 側面大鼻樑貫穿正面
-        ctx.moveTo(w*0.5, h*0.18); ctx.lineTo(w*0.32, h*0.48); ctx.lineTo(w*0.65, h*0.48); ctx.stroke();
-        // 正面立體派雙眼框
-        ctx.strokeRect(w*0.35, h*0.25, w*0.16, h*0.12);
-        ctx.strokeRect(w*0.62, h*0.28, w*0.16, h*0.12);
-        // 幾何面型分界線
-        ctx.beginPath(); ctx.moveTo(w*0.5, h*0.18); ctx.lineTo(w*0.5, h*0.88); ctx.stroke();
-      } else if (mode === 'B') {
-        // 完成圖 B【破碎幾何與手帕】：尖銳咬手帕梯形嘴部 + 放射狀鋸齒淚痕
-        ctx.lineWidth = 6;
-        // 咬手帕白塊面（梯形）
-        ctx.beginPath(); ctx.moveTo(w*0.35, h*0.48); ctx.lineTo(w*0.82, h*0.58); ctx.lineTo(w*0.45, h*0.78); ctx.lineTo(w*0.28, h*0.62); ctx.closePath(); ctx.stroke();
-        // 網格牙齒線條
-        for(var tooth = 0.42; tooth <= 0.72; tooth += 0.08) {
-          ctx.beginPath(); ctx.moveTo(w*tooth, h*0.52); ctx.lineTo(w*tooth, h*0.65); ctx.stroke();
-        }
-        // 放射狀幾何淚滴線
-        ctx.beginPath(); ctx.moveTo(w*0.42, h*0.35); ctx.lineTo(w*0.38, h*0.72); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w*0.48, h*0.35); ctx.lineTo(w*0.48, h*0.75); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w*0.68, h*0.38); ctx.lineTo(w*0.72, h*0.72); ctx.stroke();
-      } else {
-        // 完成圖 C【粗重黑線網格】：全面以黑粗線幾何網格將頭部、面型與頸部切割鎖定
-        ctx.lineWidth = 8;
-        // 頭面多邊形框架
-        ctx.beginPath();
-        ctx.moveTo(w*0.28, h*0.2); ctx.lineTo(w*0.8, h*0.18);
-        ctx.lineTo(w*0.88, h*0.65); ctx.lineTo(w*0.55, h*0.88);
-        ctx.lineTo(w*0.28, h*0.72); ctx.closePath(); ctx.stroke();
-        // 幾何頸部與肩部網格
-        ctx.beginPath(); ctx.moveTo(w*0.35, h*0.75); ctx.lineTo(w*0.35, h*0.98); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w*0.68, h*0.75); ctx.lineTo(w*0.68, h*0.98); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(w*0.2, h*0.88); ctx.lineTo(w*0.85, h*0.88); ctx.stroke();
+      // 動態分析學生畫布上的所有元件幾何頂點（Item Bounding Box Centroids & Extremes）
+      var itemBoxes = [];
+      if (collageItems.length > 0) {
+        collageItems.forEach(function(item) {
+          var ix = offsetX + item.x * sc;
+          var iy = offsetY + item.y * sc;
+          var iw = item.w * sc;
+          var ih = item.h * sc;
+          itemBoxes.push({
+            minX: ix, maxX: ix + iw, minY: iy, maxY: iy + ih,
+            cx: ix + iw/2, cy: iy + ih/2, w: iw, h: ih
+          });
+        });
       }
 
-      // 外外框線條強化
+      ctx.strokeStyle = '#000000'; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
+
+      if (mode === 'A') {
+        // 方案 A【同時視角重組】：從學生素材的中心點與邊界延伸出正側面貫穿分割線
+        ctx.lineWidth = 6;
+        if (itemBoxes.length > 0) {
+          // 針對每一個學生的素材，畫出內部幾何切割線與貫穿中軸
+          itemBoxes.forEach(function(b) {
+            ctx.beginPath(); ctx.moveTo(b.minX, b.cy); ctx.lineTo(b.maxX, b.cy); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(b.cx, b.minY); ctx.lineTo(b.cx, b.maxY); ctx.stroke();
+            // 斜向幾何對角線
+            ctx.beginPath(); ctx.moveTo(b.minX, b.minY); ctx.lineTo(b.maxX, b.maxY); ctx.stroke();
+          });
+
+          // 串聯各元件之間的中心（達成多角度同時視角重疊）
+          for(var i = 0; i < itemBoxes.length - 1; i++) {
+            ctx.lineWidth = 7;
+            ctx.beginPath();
+            ctx.moveTo(itemBoxes[i].cx, itemBoxes[i].cy);
+            ctx.lineTo(itemBoxes[i+1].cx, itemBoxes[i+1].cy);
+            ctx.stroke();
+          }
+        } else {
+          // 備用畫線
+          ctx.beginPath(); ctx.moveTo(w*0.5, 0); ctx.lineTo(w*0.5, h); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0, h*0.5); ctx.lineTo(w, h*0.5); ctx.stroke();
+        }
+      } else {
+        // 方案 C【粗重黑線網格】：直接抓取學生元件外圍頂點，用黑粗線包覆並延伸至背景
+        ctx.lineWidth = 8;
+        if (itemBoxes.length > 0) {
+          itemBoxes.forEach(function(b) {
+            // 包覆學生素材的外框黑粗線，進行塊面鎖定
+            ctx.strokeRect(b.minX - 5, b.minY - 5, b.w + 10, b.h + 10);
+
+            // 從素材四角向四週畫出幾何背景分割線
+            ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(b.minX - 5, b.minY - 5); ctx.lineTo(0, 0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(b.maxX + 5, b.minY - 5); ctx.lineTo(w, 0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(b.minX - 5, b.maxY + 5); ctx.lineTo(0, h); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(b.maxX + 5, b.maxY + 5); ctx.lineTo(w, h); ctx.stroke();
+          });
+        } else {
+          ctx.strokeRect(w*0.2, h*0.2, w*0.6, h*0.6);
+        }
+      }
+
+      // 畫布外邊框強化
       ctx.lineWidth = 8; ctx.strokeRect(0, 0, w, h);
     }
 
