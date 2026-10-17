@@ -153,7 +153,6 @@
       <button class="btn-danger" onclick="deleteItem()">刪除選中元件</button>
       <button class="btn-warning" onclick="autoIntegratePicassoArt()">✨ 自動繪製幾何分割連線</button>
       <button class="btn-purple" style="font-size: 15px; padding: 8px 18px;" onclick="switchStage(6)">🎓 完成初稿 ➔ 進入步驟六獲取 AI 評核與重構肖像</button>
-      <button class="btn btn-success btn-sm" onclick="downloadStep5CanvasJPEG()">📥 下載拼貼作品 (JPEG)</button>
     </div>
 
     <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
@@ -175,7 +174,7 @@
     </div>
   </div>
 
-  <!-- 步驟 6 面板 -->
+  <!-- 步驟 6 面板：集中優化面部樣貌，無背景雜線 -->
   <div id="stage6" class="stage-panel">
     <h3>步驟六：AI 藝術評核與《哭泣的女人》修改意見：</h3>
 
@@ -392,6 +391,7 @@
       renderFacetsGrid('vectorFacetsContainer', vectorFacets);
     }
 
+    // 5 種完全不同的畢卡索幾何臉型底座
     function initFaceBases() {
       faceBaseFacets = [];
       var faceTypes = [
@@ -525,10 +525,6 @@
       });
     }
 
-    function scaleItem(v) { if (selectedItemIndex >= 0) { collageItems[selectedItemIndex].w *= v; collageItems[selectedItemIndex].h *= v; drawCollage(); } }
-    function rotateItem(v) { if (selectedItemIndex >= 0) { collageItems[selectedItemIndex].rot += v; drawCollage(); } }
-    function deleteItem() { if (selectedItemIndex >= 0) { collageItems.splice(selectedItemIndex, 1); selectedItemIndex = -1; drawCollage(); } }
-
     function autoIntegratePicassoArt() {
       if (collageItems.length === 0) return alert('請先將素材加入畫布進行拼合！');
       selectedItemIndex = -1; var cvs = document.getElementById('collageCanvas'), ctx = cvs.getContext('2d');
@@ -557,80 +553,182 @@
       var angleKeys = Object.keys(anglesUsed);
       
       if (angleKeys.length >= 3) {
-        if(el1) el1.innerHTML = "<b>非常優秀！</b>你使用了 " + angleKeys.length + " 種角度素材，成功呈現立體主義多角度同時視角的美感！";
+        el1.innerHTML = "<b>非常優秀！</b>你使用了 " + angleKeys.length + " 種角度素材（" + angleKeys.map(function(k){return angleNames[k];}).join('、') + "），成功呈現立體主義多角度同時視角的衝突美感！";
       } else if (angleKeys.length === 2) {
-        if(el1) el1.innerHTML = "你使用了兩種視角組合。建議再加入一個仰視或三七面素材，強化同時視角效果！";
+        el1.innerHTML = "你組合了 " + angleKeys.map(function(k){return angleNames[k];}).join('與') + " 視角。建議再加入一個仰視或三七面素材，強化同時視角效果！";
       } else {
-        if(el1) el1.innerHTML = "目前素材角度較單一，建議多加入側面或三七面五官進行重疊，呈現立體主義多視角特徵！";
+        el1.innerHTML = "目前主要為「" + (angleNames[angleKeys[0]] || "單一角度") + "」，建議多加入側面或三七面五官進行重疊，呈現立體主義多視角特徵！";
       }
 
       var shapesUsed = {};
       collageItems.forEach(function(it) { if (it.shape) shapesUsed[it.shape] = true; });
+      var shapeKeys = Object.keys(shapesUsed);
 
-      if (el2) {
-        if (shapesUsed['triangle'] || shapesUsed['polygon'] || shapesUsed['trapezoid']) {
-          el2.innerHTML = "作品成功運用了<b>破碎幾何語言</b>，符合分析立體主義尖銳且富節奏感的空間切割！";
-        } else {
-          el2.innerHTML = "目前素材形狀較為單一，建議多嘗試不規則多邊形與梯形素材進行切割穿插。";
-        }
+      if (shapesUsed['triangle'] || shapesUsed['polygon'] || shapesUsed['trapezoid']) {
+        el1.parentElement.nextElementSibling.children[1].innerHTML = "作品成功運用了<b>破碎幾何語言</b>（如" + shapeKeys.join('、') + "），符合《哭泣的女人》尖銳緊張的情感表達！";
+      } else {
+        el1.parentElement.nextElementSibling.children[1].innerHTML = "建議加入更多「三角形」或「梯形」素材，讓作品視覺張力更強烈！";
       }
 
-      if (el3) {
-        el3.innerHTML = "建議運用下方生成的<b>粗黑多邊形輪廓</b>，將散落的五官素材緊密包覆鎖定為一體。";
-      }
+      el1.parentElement.nextElementSibling.nextElementSibling.children[1].innerHTML = "畫布共有 " + count + " 個區塊。右側參考圖已為你加上<b>立體派正側面雙色切面</b>與<b>咬手帕幾何網格</b>，鎖定成完整藝術作品！";
 
       generateTeacherPresetSuggestions();
     }
 
+    // 💡 集中優化「面部樣貌」，背景純白無雜線
     function generateTeacherPresetSuggestions() {
-      var cCanvasA = document.getElementById('presetCanvasA');
-      var cCanvasC = document.getElementById('presetCanvasC');
-      if (!cCanvasA || !cCanvasC) return;
-
-      var ctxA = cCanvasA.getContext('2d');
-      var ctxC = cCanvasC.getContext('2d');
-
-      ctxA.clearRect(0, 0, cCanvasA.width, cCanvasA.height);
-      ctxA.fillStyle = '#ffffff'; ctxA.fillRect(0, 0, cCanvasA.width, cCanvasA.height);
-      ctxA.drawImage(document.getElementById('collageCanvas'), 0, 0, cCanvasA.width, cCanvasA.height);
-      ctxA.strokeStyle = '#000000'; ctxA.lineWidth = 6;
-      ctxA.beginPath(); ctxA.moveTo(cCanvasA.width*0.5, 20); ctxA.lineTo(cCanvasA.width*0.5, cCanvasA.height-20); ctxA.stroke();
-
-      ctxC.clearRect(0, 0, cCanvasC.width, cCanvasC.height);
-      ctxC.fillStyle = '#ffffff'; ctxC.fillRect(0, 0, cCanvasC.width, cCanvasC.height);
-      ctxC.drawImage(document.getElementById('collageCanvas'), 0, 0, cCanvasC.width, cCanvasC.height);
-      ctxC.strokeStyle = '#000000'; ctxC.lineWidth = 10;
-      ctxC.strokeRect(20, 20, cCanvasC.width-40, cCanvasC.height-40);
+      renderFocusedFacePicassoPortrait('presetCanvasA', 'A');
+      renderFocusedFacePicassoPortrait('presetCanvasC', 'C');
     }
 
-    // 🎯 步驟五：下載拼貼畫布 JPEG 檔函數
-    function downloadStep5CanvasJPEG() {
-      const mainCanvas = document.getElementById('collageCanvas');
-      if (!mainCanvas) {
-        alert('找不到步驟五拼貼畫布！');
-        return;
+    function renderFocusedFacePicassoPortrait(canvasId, mode) {
+      var cvs = document.getElementById(canvasId); if(!cvs) return;
+      var ctx = cvs.getContext('2d'), w = cvs.width, h = cvs.height;
+      // 背景純白乾淨，無任何發絲條紋、斜線或九宮格
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+
+      var srcCvs = document.getElementById('collageCanvas');
+      var sc = Math.min(w / srcCvs.width, h / srcCvs.height);
+      var offsetX = (w - srcCvs.width * sc) / 2;
+      var offsetY = (h - srcCvs.height * sc) / 2;
+
+      // 計算學生素材的整體中心與動態面部邊界
+      var minX = w, maxX = 0, minY = h, maxY = 0;
+      if (collageItems.length > 0) {
+        collageItems.forEach(function(item) {
+          var ix = offsetX + item.x * sc;
+          var iy = offsetY + item.y * sc;
+          var iw = item.w * sc;
+          var ih = item.h * sc;
+          if (ix < minX) minX = ix;
+          if (ix + iw > maxX) maxX = ix + iw;
+          if (iy < minY) minY = iy;
+          if (iy + ih > maxY) maxY = iy + ih;
+        });
+      } else {
+        minX = w*0.25; maxX = w*0.75; minY = h*0.2; maxY = h*0.8;
       }
 
-      selectedItemIndex = -1;
-      drawCollage();
+      var cx = (minX + maxX) / 2;
+      var cy = (minY + maxY) / 2;
+      var bw = Math.max(180, maxX - minX + 30);
+      var bh = Math.max(220, maxY - minY + 50);
 
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = mainCanvas.width;
-      tempCanvas.height = mainCanvas.height;
-      const ctx = tempCanvas.getContext('2d');
+      // 1. 僅繪製面部區域的「畢卡索正側面雙色切面底座」（不超出面部）
+      if (mode === 'A') {
+        // 左半側面部淺灰底座
+        ctx.fillStyle = '#f4f4f4';
+        ctx.beginPath();
+        ctx.moveTo(cx - bw/2, cy - bh/2);
+        ctx.lineTo(cx, cy - bh/2 - 10);
+        ctx.lineTo(cx - 10, cy + bh/2 + 10);
+        ctx.lineTo(cx - bw/2 - 15, cy + bh/2 - 10);
+        ctx.closePath(); ctx.fill();
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-      ctx.drawImage(mainCanvas, 0, 0);
+        // 右半側面部暗灰底座
+        ctx.fillStyle = '#e8e8e8';
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - bh/2 - 10);
+        ctx.lineTo(cx + bw/2 + 15, cy - bh/2 + 10);
+        ctx.lineTo(cx + bw/2 + 5, cy + bh/2);
+        ctx.lineTo(cx - 10, cy + bh/2 + 10);
+        ctx.closePath(); ctx.fill();
+      }
 
-      const imageURI = tempCanvas.toDataURL('image/jpeg', 0.95);
-      const link = document.createElement('a');
-      link.download = `畢卡索立體派自畫像_步驟五拼貼原圖_${new Date().getTime()}.jpg`;
-      link.href = imageURI;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // 2. 100% 保留學生在步驟五創作的原尺寸與原位置元件
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(sc, sc);
+      collageItems.forEach(function(item) {
+        ctx.save();
+        ctx.translate(item.x + item.w/2, item.y + item.h/2);
+        ctx.rotate(item.rot * Math.PI / 180);
+        ctx.drawImage(item.canvas, -item.w/2, -item.h/2, item.w, item.h);
+        ctx.restore();
+      });
+      ctx.restore();
+
+      ctx.strokeStyle = '#000000'; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
+
+      if (mode === 'A') {
+        // 方案 A：集中面部的貫穿中軸 + 經典立體派面部幾何淚痕（完全限於面部）
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - bh/2 - 15);
+        ctx.lineTo(cx + 12, cy - bh/4);
+        ctx.lineTo(cx - 18, cy);
+        ctx.lineTo(cx + 15, cy + bh/3);
+        ctx.lineTo(cx - 8, cy + bh/2 + 15);
+        ctx.stroke();
+
+        // 緊貼面部的幾何淚痕（Pointed Tears）
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(cx - 25, cy - 25); ctx.lineTo(cx - 50, cy + 15); ctx.lineTo(cx - 38, cy + 20); ctx.closePath(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 30, cy - 20); ctx.lineTo(cx + 55, cy + 20); ctx.lineTo(cx + 42, cy + 25); ctx.closePath(); ctx.stroke();
+
+      } else {
+        // 方案 C：多邊形黑粗面型外框 + 緊貼下巴的咬手帕幾何折痕（無背景網格）
+        ctx.lineWidth = 8;
+        // 面部黑粗多邊形輪廓鎖定
+        ctx.beginPath();
+        ctx.moveTo(minX - 15, minY - 15);
+        ctx.lineTo(maxX + 15, minY - 15);
+        ctx.lineTo(maxX + 20, maxY + 15);
+        ctx.lineTo(cx, maxY + 35);
+        ctx.lineTo(minX - 20, maxY + 15);
+        ctx.closePath();
+        ctx.stroke();
+
+        // 面部下半部「咬手帕幾何折痕」
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(minX, cy + bh/4);
+        ctx.lineTo(cx - bw/4, cy + bh/4 - 15);
+        ctx.lineTo(cx, cy + bh/4 + 10);
+        ctx.lineTo(cx + bw/4, cy + bh/4 - 12);
+        ctx.lineTo(maxX, cy + bh/4 + 10);
+        ctx.stroke();
+      }
+
+      // 畫布極簡外框
+      ctx.lineWidth = 8; ctx.strokeRect(0, 0, w, h);
     }
+
+    function scaleItem(v) { if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].w *= v; collageItems[selectedItemIndex].h *= v; drawCollage(); } }
+    function rotateItem(v) { if (selectedItemIndex !== -1) { collageItems[selectedItemIndex].rot += v; drawCollage(); } }
+    function deleteItem() { if (selectedItemIndex !== -1) { collageItems.splice(selectedItemIndex,1); selectedItemIndex = -1; drawCollage(); } }
+    function exportImage() { var cvs = document.getElementById('collageCanvas'), a = document.createElement('a'); a.download = '畢卡索立體派自畫像作品.png'; a.href = cvs.toDataURL(); a.click(); }
+
+    function exportStage6Images() {
+      var cvs = document.getElementById('presetCanvasA');
+      var a = document.createElement('a');
+      a.download = '畢卡索哭泣的女人_AI修改意見與肖像圖.png'; a.href = cvs.toDataURL(); a.click();
+    }
+
+    window.onload = function() {
+      var cCvs = document.getElementById('cropCanvas');
+      if (cCvs) {
+        cCvs.onmousedown = function(e) {
+          var r = cCvs.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+          if (mx >= cropBox.x && mx <= cropBox.x+cropBox.w && my >= cropBox.y && my <= cropBox.y+cropBox.h) { isDraggingBox = true; startX = mx - cropBox.x; startY = my - cropBox.y; }
+        };
+        cCvs.onmousemove = function(e) { if (isDraggingBox) { var r = cCvs.getBoundingClientRect(); cropBox.x = e.clientX - r.left - startX; cropBox.y = e.clientY - r.top - startY; drawCrop(); } };
+        cCvs.onmouseup = function() { isDraggingBox = false; };
+      }
+      var clCvs = document.getElementById('collageCanvas');
+      if (clCvs) {
+        clCvs.onmousedown = function(e) {
+          var r = clCvs.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top; selectedItemIndex = -1;
+          for (var i = collageItems.length - 1; i >= 0; i--) {
+            var item = collageItems[i];
+            if (mx >= item.x && mx <= item.x + item.w && my >= item.y && my <= item.y + item.h) { selectedItemIndex = i; isDraggingItem = true; startX = mx - item.x; startY = my - item.y; break; }
+          }
+          drawCollage();
+        };
+        clCvs.onmousemove = function(e) { if (isDraggingItem && selectedItemIndex !== -1) { var r = clCvs.getBoundingClientRect(); var item = collageItems[selectedItemIndex]; item.x = e.clientX - r.left - startX; item.y = e.clientY - r.top - startY; drawCollage(); } };
+        clCvs.onmouseup = function() { isDraggingItem = false; };
+      }
+    };
   </script>
 </body>
 </html>
